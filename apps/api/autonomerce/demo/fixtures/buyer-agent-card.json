@@ -1,0 +1,28 @@
+{
+  "name": "Opted-In Store Operator",
+  "description": "Publishes explicit needs for bounded ecommerce launch services.",
+  "url": "https://buyer.example/a2a",
+  "version": "1.0.0",
+  "protocolVersion": "0.3.0",
+  "capabilities": {
+    "streaming": false
+  },
+  "defaultInputModes": [
+    "application/json"
+  ],
+  "defaultOutputModes": [
+    "application/json"
+  ],
+  "skills": [
+    {
+      "id": "procure-launch-brief",
+      "name": "Procure launch brief",
+      "description": "Request and accept a machine-readable ecommerce launch brief.",
+      "tags": [
+        "ecommerce",
+        "launch",
+        "brief"
+      ]
+    }
+  ]
+}

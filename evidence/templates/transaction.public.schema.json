@@ -1,0 +1,292 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://autonomerce.example/schemas/transaction.public.schema.json",
+  "title": "Autonomerce public transaction evidence",
+  "description": "A redacted settlement record linked to one proposal and order. Classification determines whether it may count as customer revenue.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "recordKind",
+    "synthetic",
+    "evidenceClassification",
+    "orderId",
+    "proposalId",
+    "paymentId",
+    "network",
+    "token",
+    "amountUsdc",
+    "movesFunds",
+    "externalCustomer",
+    "customerRelationship",
+    "countedAsRevenue",
+    "delivered",
+    "acceptanceVerdict",
+    "customerConsentToPublish",
+    "evidenceGeneratedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "autonomerce.transaction.public.v1"
+    },
+    "recordKind": {
+      "const": "transaction"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "evidenceClassification": {
+      "enum": [
+        "synthetic",
+        "offline_mock",
+        "testnet",
+        "mainnet_self",
+        "mainnet_founder_or_affiliate",
+        "mainnet_reimbursed_or_circular",
+        "mainnet_external_customer"
+      ]
+    },
+    "orderId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "proposalId": {
+      "type": "string",
+      "pattern": "^proposal_[a-f0-9]{24}$"
+    },
+    "paymentId": {
+      "type": "string",
+      "pattern": "^payment_[a-f0-9]{24}$"
+    },
+    "fulfillmentId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^fulfillment_[a-f0-9]{24}$"
+    },
+    "network": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "token": {
+      "const": "USDC"
+    },
+    "amountUsdc": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+    },
+    "movesFunds": {
+      "type": "boolean"
+    },
+    "transactionHash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^0x[a-fA-F0-9]{64}$"
+    },
+    "explorerUrl": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uri"
+    },
+    "payerWallet": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 160
+    },
+    "payeeWallet": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 160
+    },
+    "confirmedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "externalCustomer": {
+      "type": "boolean"
+    },
+    "customerRelationship": {
+      "enum": [
+        "none_synthetic",
+        "arms_length",
+        "self",
+        "founder",
+        "affiliate",
+        "reimbursed",
+        "circular",
+        "unknown"
+      ]
+    },
+    "countedAsRevenue": {
+      "type": "boolean"
+    },
+    "delivered": {
+      "type": "boolean"
+    },
+    "acceptanceVerdict": {
+      "enum": [
+        "accepted",
+        "rejected",
+        "pending"
+      ]
+    },
+    "customerConsentToPublish": {
+      "type": "boolean"
+    },
+    "consentRecordId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 160
+    },
+    "artifactHash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^(sha256:)?[a-f0-9]{64}$"
+    },
+    "repositoryCommit": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{7,40}$"
+    },
+    "deployedRevision": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 200
+    },
+    "evidenceGeneratedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      },
+      "maxItems": 20
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "synthetic": {
+            "const": true
+          }
+        },
+        "required": [
+          "synthetic"
+        ]
+      },
+      "then": {
+        "properties": {
+          "evidenceClassification": {
+            "const": "synthetic"
+          },
+          "movesFunds": {
+            "const": false
+          },
+          "externalCustomer": {
+            "const": false
+          },
+          "customerRelationship": {
+            "const": "none_synthetic"
+          },
+          "countedAsRevenue": {
+            "const": false
+          },
+          "customerConsentToPublish": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "evidenceClassification": {
+            "enum": [
+              "offline_mock",
+              "testnet",
+              "mainnet_self",
+              "mainnet_founder_or_affiliate",
+              "mainnet_reimbursed_or_circular"
+            ]
+          }
+        },
+        "required": [
+          "evidenceClassification"
+        ]
+      },
+      "then": {
+        "properties": {
+          "countedAsRevenue": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "countedAsRevenue": {
+            "const": true
+          }
+        },
+        "required": [
+          "countedAsRevenue"
+        ]
+      },
+      "then": {
+        "properties": {
+          "synthetic": {
+            "const": false
+          },
+          "evidenceClassification": {
+            "const": "mainnet_external_customer"
+          },
+          "movesFunds": {
+            "const": true
+          },
+          "externalCustomer": {
+            "const": true
+          },
+          "customerRelationship": {
+            "const": "arms_length"
+          },
+          "customerConsentToPublish": {
+            "const": true
+          }
+        },
+        "required": [
+          "transactionHash",
+          "explorerUrl",
+          "confirmedAt",
+          "consentRecordId"
+        ]
+      }
+    }
+  ]
+}

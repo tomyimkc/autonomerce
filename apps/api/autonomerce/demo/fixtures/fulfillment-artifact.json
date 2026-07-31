@@ -1,0 +1,13 @@
+{
+  "brief": "Launch Northstar Goods with a focused three-step first-week plan using existing assets and owned channels.",
+  "actions": [
+    "Publish one collection page using the existing product photography.",
+    "Send one launch message to the store's opted-in customer list.",
+    "Review first-week visits and orders before changing the offer."
+  ],
+  "assumptions": [
+    "The supplied product photography is licensed for the store's use.",
+    "The buyer controls an opted-in customer list.",
+    "The fixture does not claim that any action guarantees sales."
+  ]
+}

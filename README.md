@@ -1,0 +1,262 @@
+# Autonomerce
+
+**Give every AI agent a sales department.**
+
+Autonomerce is a portable A2A revenue operator. It turns an existing A2A, MCP,
+OpenAPI, or custom agent into an autonomous seller that can:
+
+1. productize capabilities into machine-readable offers;
+2. discover opted-in prospective buyers;
+3. pitch and negotiate within owner policy;
+4. receive USDC through Circle;
+5. route paid work to the seller agent;
+6. validate and deliver the result;
+7. produce auditable commercial receipts.
+
+`candidateOnly: true` · `canClaimAGI: false`
+
+## Why it exists
+
+Useful agents do not automatically have a business. Their owners still need to
+define an offer, find interested buyers, negotiate safe terms, collect payment,
+route work, judge delivery, and prove what happened.
+
+Autonomerce composes those steps into one policy-controlled commercial loop:
+
+```text
+seller Agent Card / MCP / OpenAPI capability
+-> Gemini-assisted service productization
+-> owner commercial policy
+-> opted-in buyer need
+-> machine-readable proposal
+-> bounded negotiation
+-> Circle USDC settlement
+-> seller fulfillment
+-> deterministic validation
+-> delivery and revenue receipt
+```
+
+The first demonstrated seller is a source-verification/evidence-pack agent. The
+architecture is intended to support other callable agents without giving a
+model authority over wallets or acceptance.
+
+## Contest target
+
+- Build with Gemini XPRIZE
+- Circle Agentic Economy Prize
+- Category: Entrepreneurship & Job Creation
+- Deadline: 2026-08-17 13:00 PDT / 2026-08-18 04:00 HKT
+
+## What is implemented
+
+- exact-money domain contracts and deterministic identifiers;
+- OfferRail catalog, proposal, policy, negotiation, idempotency, and
+  hash-chained receipt primitives;
+- structured Gemini provider plus a credential-free deterministic provider;
+- model-authority boundary: Gemini may recommend copy/relevance but cannot set
+  price, wallet, token, chain, capacity, latency, or acceptance criteria;
+- A2A Agent Card parsing, opted-in prospect registration, matching, and
+  rate-limited pitching;
+- Circle/x402 payment adapter with policy caps, durable idempotency, ambiguous
+  execution handling, and reconciliation primitives;
+- built-in verification seller and constrained HTTPS seller executor;
+- durable SQLite commerce and payment state for the supported single-host live
+  topology;
+- owner-authenticated FastAPI and Next.js LIVE flow;
+- explicit receipt publication and private-artifact hashing;
+- exact buyer-need/proposal binding so fulfillment uses the accepted order input;
+- immutable live payer selection from the owner-configured payment allowlist;
+- asset-preserving shared-SQLite crash recovery before a proposal becomes paid;
+- deterministic offline demo, adversarial tests, threat model, and deployment
+  preflight.
+
+## Quickstart: credential-free offline demo
+
+Prerequisites:
+
+- Python 3.11 or newer;
+- `uv`;
+- Node.js 20.9 or newer for the web application.
+
+From this standalone repository:
+
+```bash
+uv sync --frozen --extra api --extra gemini --extra test
+
+PYTHONPATH=apps/api:packages/offerrail:. \
+  python3 examples/run_offline_demo.py
+```
+
+From the parent Sophia repository:
+
+```bash
+cd projects/autonomerce
+uv sync --frozen --extra api --extra gemini --extra test
+
+PYTHONPATH=apps/api:packages/offerrail:. \
+  python3 examples/run_offline_demo.py
+```
+
+Expected properties of the offline output:
+
+- `diagnostics.offline` is `true`;
+- `diagnostics.networkCalls` is `0`;
+- `diagnostics.credentialsUsed` is `false`;
+- `diagnostics.realFundsMoved` is `false`;
+- one simulated payment executor call serves an idempotent replay;
+- four receipt-ledger entries verify as one hash chain.
+
+The fixture transaction hash and revenue amount are synthetic. They are not
+Circle transaction proof or customer revenue.
+
+## Run the API locally
+
+```bash
+export AUTONOMERCE_DEPLOYMENT_MODE=local-offline
+export AUTONOMERCE_MODE=offline
+export AUTONOMERCE_API_AUTH_MODE=local-only
+export AUTONOMERCE_API_OWNER_ID=autonomerce-owner
+export AUTONOMERCE_WEB_PUBLIC_ORIGIN=http://localhost:3000
+export AUTONOMERCE_API_PRIVATE_ORIGIN=http://127.0.0.1:8000
+export AUTONOMERCE_PAYMENT_MODE=offline
+export AUTONOMERCE_PAYMENT_STORE_DURABILITY=memory-offline
+export PORT=8000
+
+./infra/start_api.sh
+```
+
+`local-only` is for loopback or an otherwise isolated development machine. Do
+not publish it through a tunnel.
+
+## Run the web application
+
+```bash
+cd apps/web
+npm ci
+npm run dev
+```
+
+DEMO mode is the default and is deliberately synthetic. LIVE mode uses
+server-side proxy routes, a signed short-lived owner session, and a private API
+bearer that is never returned to browser code. See
+[`apps/web/README.md`](apps/web/README.md).
+
+## Test and verify
+
+```bash
+PYTHONPATH=apps/api:packages/offerrail:. \
+  python3 -m pytest -q tests
+
+cd apps/web
+npm run check
+cd ../..
+
+python3 scripts/scan_public_secrets.py
+```
+
+When this project is developed inside Sophia, also run:
+
+```bash
+python3 ../../tools/lint_claims.py
+```
+
+## Trust boundaries
+
+### Gemini may
+
+- interpret capability copy;
+- recommend display names and relevance;
+- assist buyer-fit, proposal, and bounded-negotiation decisions;
+- summarize delivery evidence.
+
+### Deterministic code must
+
+- authorize price, discount, expiry, buyer, capacity, token, chain, wallets,
+  payment amount, idempotency, and public disclosure;
+- independently confirm settlement;
+- validate seller output against the accepted contract;
+- keep payment confirmation distinct from delivery acceptance.
+
+### Circle executes
+
+- an owner-policy-constrained USDC settlement through the configured Agent
+  Wallet path.
+
+The repository never accepts OTPs, wallet recovery material, or unrestricted
+credentials through its API.
+
+## Runtime modes
+
+| Mode | Gemini | Payment | Intended use |
+|---|---|---|---|
+| Offline | deterministic provider | simulated | reproducible development and judging fallback |
+| Testnet | configured live provider | Circle testnet | integration proof, not revenue |
+| Mainnet | configured live provider | tightly capped Circle mainnet | owner-approved external paid pilot |
+
+Live payment modes require one owner, one API worker, strict wallet allowlists
+and caps, an explicit seller executor, and a single persistent SQLite database
+shared by commerce and payment state. Cloud Run is currently documented for the
+offline-payment API path; the supported live topology is a single Compute
+Engine host with persistent disk.
+
+## Repository map
+
+```text
+apps/api/autonomerce/agents/     Gemini and deterministic decisions
+apps/api/autonomerce/api/        authenticated FastAPI composition
+apps/api/autonomerce/payments/   Circle/x402, policy, storage, reconciliation
+apps/api/autonomerce/sales/      Agent Cards, prospects, proposals, fulfillment
+apps/web/                        Next.js product and LIVE backend-for-frontend
+packages/offerrail/              portable commercial protocol primitives
+examples/                        deterministic fixtures and offline demo
+security/                        controls and threat-model support
+tests/                           unit, integration, adversarial, persistence
+docs/submission/                 Devpost, video, evidence, and judge checklists
+infra/                           container, preflight, Cloud Run, Compute Engine
+```
+
+## Deployment
+
+Start with [`infra/README.md`](infra/README.md) and
+[`docs/DEPLOYMENT-SECURITY.md`](docs/DEPLOYMENT-SECURITY.md).
+
+The repository intentionally fails closed when required live settings are
+missing or contradictory. Do not weaken trusted hosts, durability checks,
+wallet allowlists, amount caps, or owner authentication to make a deployment
+start.
+
+## Evidence and claim boundary
+
+Active contest build. Credential-free offline mode and deterministic tests are
+implemented first. Live Gemini, Circle, Devpost, and Cloud Run operations require
+owner-authenticated sessions and strict wallet policies.
+
+At this repository snapshot:
+
+- no live Gemini order receipt is committed;
+- no Circle Agent Wallet transaction proof is committed;
+- no real funds have moved through this implementation;
+- no external customer, revenue, margin, or production-availability claim is
+  approved.
+
+Read [`docs/submission/KNOWN-LIMITATIONS.md`](docs/submission/KNOWN-LIMITATIONS.md)
+before using public copy or footage.
+
+## Contributing
+
+Read [`PROJECT-CONTRACT.md`](PROJECT-CONTRACT.md) before changing code.
+
+Every change must preserve:
+
+- exact decimal money;
+- deterministic authorization;
+- idempotent settlement;
+- opt-in outreach;
+- private artifact handling;
+- explicit testnet/mainnet labeling;
+- the no-overclaim boundary.
+
+## License
+
+Apache-2.0. See [`LICENSE`](LICENSE), [`NOTICE`](NOTICE), and
+[`PREEXISTING-ASSET-DISCLOSURE.md`](PREEXISTING-ASSET-DISCLOSURE.md).

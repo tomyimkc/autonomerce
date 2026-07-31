@@ -1,0 +1,80 @@
+{
+  "name": "Launch Brief Seller",
+  "description": "Turns a declared ecommerce goal into a concise launch brief.",
+  "url": "https://seller.example/a2a",
+  "version": "1.0.0",
+  "protocolVersion": "0.3.0",
+  "capabilities": {
+    "streaming": false
+  },
+  "defaultInputModes": [
+    "application/json"
+  ],
+  "defaultOutputModes": [
+    "application/json"
+  ],
+  "skills": [
+    {
+      "id": "create-launch-brief",
+      "name": "Create ecommerce launch brief",
+      "description": "Create a prioritized ecommerce launch brief with concrete actions for an opted-in buyer.",
+      "tags": [
+        "ecommerce",
+        "launch",
+        "brief"
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "storeName",
+          "goal",
+          "constraints"
+        ],
+        "properties": {
+          "storeName": {
+            "type": "string"
+          },
+          "goal": {
+            "type": "string"
+          },
+          "constraints": {
+            "type": "array"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "brief",
+          "actions",
+          "assumptions"
+        ],
+        "properties": {
+          "brief": {
+            "type": "string"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+[Unit]
+Description=Autonomerce private API
+After=network-online.target
+Wants=network-online.target
+RequiresMountsFor=/var/lib/autonomerce
+
+[Service]
+Type=simple
+User=autonomerce
+Group=autonomerce
+WorkingDirectory=/opt/autonomerce
+EnvironmentFile=/etc/autonomerce/autonomerce.env
+ExecStart=/opt/autonomerce/infra/start_api.sh
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=60
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/autonomerce
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+LockPersonality=true
+MemoryDenyWriteExecute=true
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

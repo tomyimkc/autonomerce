@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "autonomerce.revenue.public.v1",
+  "recordKind": "revenue_snapshot",
+  "synthetic": true,
+  "evidenceClassification": "synthetic",
+  "periodStart": "2026-07-31T12:00:00Z",
+  "periodEnd": "2026-07-31T12:01:00Z",
+  "currency": "USDC",
+  "customers": {
+    "problemInterviews": 0,
+    "externalDesignPartners": 0,
+    "payingExternalCustomers": 0,
+    "repeatExternalCustomers": 0,
+    "repeatPurchaseRate": null
+  },
+  "orders": {
+    "proposalsSent": 0,
+    "proposalsAccepted": 0,
+    "proposalAcceptanceRate": null,
+    "paidExternalTasks": 0,
+    "acceptedExternalDeliveries": 0
+  },
+  "transactions": {
+    "observed": 1,
+    "qualifyingExternalMainnet": 0,
+    "syntheticOrOffline": 1,
+    "testnet": 0,
+    "selfFounderAffiliate": 0,
+    "reimbursedOrCircular": 0,
+    "duplicateSettlements": 0
+  },
+  "amounts": {
+    "grossExternalRevenueUsdc": "0",
+    "refundsUsdc": "0",
+    "netExternalRevenueUsdc": "0",
+    "circleAndNetworkFeesUsdc": "0",
+    "geminiCostUsdc": "0",
+    "externalServiceCostUsdc": "0",
+    "sellerComputeCostUsdc": "0",
+    "allocatedVariableInfrastructureUsdc": "0",
+    "otherVariableCostUsdc": "0",
+    "variableCogsUsdc": "0",
+    "grossMarginUsdc": "0",
+    "grossMarginPercent": null,
+    "excludedSyntheticVolumeUsdc": "0.1",
+    "excludedTestnetVolumeUsdc": "0",
+    "excludedRelatedPartyVolumeUsdc": "0"
+  },
+  "exclusions": [
+    {
+      "classification": "synthetic",
+      "count": 1,
+      "amountUsdc": "0.1",
+      "reason": "Schema example and offline fixture only; no customer and no funds moved."
+    }
+  ],
+  "sourceTransactionRecordIds": [
+    "synthetic_order_example_001"
+  ],
+  "measurementMethod": "SYNTHETIC SCHEMA EXAMPLE ONLY. One simulated amount is recorded as excluded volume; all customer, revenue, cost, and margin metrics remain zero.",
+  "repositoryCommit": null,
+  "deployedRevision": null,
+  "generatedAt": "2026-07-31T12:01:01Z",
+  "knownGaps": [
+    "This example is not business evidence.",
+    "It contains no interviews, design partners, customers, live transactions, revenue, or measured costs."
+  ]
+}

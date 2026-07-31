@@ -1,0 +1,338 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://autonomerce.example/schemas/revenue.public.schema.json",
+  "title": "Autonomerce public revenue snapshot",
+  "description": "A reproducible UTC-window business snapshot with explicit exclusions and cost-based gross margin.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "recordKind",
+    "synthetic",
+    "evidenceClassification",
+    "periodStart",
+    "periodEnd",
+    "currency",
+    "customers",
+    "orders",
+    "transactions",
+    "amounts",
+    "exclusions",
+    "sourceTransactionRecordIds",
+    "measurementMethod",
+    "generatedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "autonomerce.revenue.public.v1"
+    },
+    "recordKind": {
+      "const": "revenue_snapshot"
+    },
+    "synthetic": {
+      "type": "boolean"
+    },
+    "evidenceClassification": {
+      "enum": [
+        "synthetic",
+        "measured_zero_revenue",
+        "measured_external_customer_revenue"
+      ]
+    },
+    "periodStart": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "periodEnd": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "currency": {
+      "const": "USDC"
+    },
+    "customers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "problemInterviews",
+        "externalDesignPartners",
+        "payingExternalCustomers",
+        "repeatExternalCustomers"
+      ],
+      "properties": {
+        "problemInterviews": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "externalDesignPartners": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "payingExternalCustomers": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "repeatExternalCustomers": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "repeatPurchaseRate": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^(0|1|0\\.[0-9]+)$"
+        }
+      }
+    },
+    "orders": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "proposalsSent",
+        "proposalsAccepted",
+        "paidExternalTasks",
+        "acceptedExternalDeliveries"
+      ],
+      "properties": {
+        "proposalsSent": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "proposalsAccepted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "proposalAcceptanceRate": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^(0|1|0\\.[0-9]+)$"
+        },
+        "paidExternalTasks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "acceptedExternalDeliveries": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "transactions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observed",
+        "qualifyingExternalMainnet",
+        "syntheticOrOffline",
+        "testnet",
+        "selfFounderAffiliate",
+        "reimbursedOrCircular",
+        "duplicateSettlements"
+      ],
+      "properties": {
+        "observed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "qualifyingExternalMainnet": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "syntheticOrOffline": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "testnet": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "selfFounderAffiliate": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reimbursedOrCircular": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "duplicateSettlements": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "amounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "grossExternalRevenueUsdc",
+        "refundsUsdc",
+        "netExternalRevenueUsdc",
+        "circleAndNetworkFeesUsdc",
+        "geminiCostUsdc",
+        "externalServiceCostUsdc",
+        "sellerComputeCostUsdc",
+        "allocatedVariableInfrastructureUsdc",
+        "otherVariableCostUsdc",
+        "variableCogsUsdc",
+        "grossMarginUsdc",
+        "grossMarginPercent",
+        "excludedSyntheticVolumeUsdc",
+        "excludedTestnetVolumeUsdc",
+        "excludedRelatedPartyVolumeUsdc"
+      ],
+      "properties": {
+        "grossExternalRevenueUsdc": {
+          "$ref": "#/$defs/usdc"
+        },
+        "refundsUsdc": {
+          "$ref": "#/$defs/usdc"
+        },
+        "netExternalRevenueUsdc": {
+          "$ref": "#/$defs/usdc"
+        },
+        "circleAndNetworkFeesUsdc": {
+          "$ref": "#/$defs/usdc"
+        },
+        "geminiCostUsdc": {
+          "$ref": "#/$defs/usdc"
+        },
+        "externalServiceCostUsdc": {
+          "$ref": "#/$defs/usdc"
+        },
+        "sellerComputeCostUsdc": {
+          "$ref": "#/$defs/usdc"
+        },
+        "allocatedVariableInfrastructureUsdc": {
+          "$ref": "#/$defs/usdc"
+        },
+        "otherVariableCostUsdc": {
+          "$ref": "#/$defs/usdc"
+        },
+        "variableCogsUsdc": {
+          "$ref": "#/$defs/usdc"
+        },
+        "grossMarginUsdc": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+        },
+        "grossMarginPercent": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+        },
+        "excludedSyntheticVolumeUsdc": {
+          "$ref": "#/$defs/usdc"
+        },
+        "excludedTestnetVolumeUsdc": {
+          "$ref": "#/$defs/usdc"
+        },
+        "excludedRelatedPartyVolumeUsdc": {
+          "$ref": "#/$defs/usdc"
+        }
+      }
+    },
+    "exclusions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "classification",
+          "count",
+          "amountUsdc",
+          "reason"
+        ],
+        "properties": {
+          "classification": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "amountUsdc": {
+            "$ref": "#/$defs/usdc"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        }
+      }
+    },
+    "sourceTransactionRecordIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "uniqueItems": true
+    },
+    "measurementMethod": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "repositoryCommit": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{7,40}$"
+    },
+    "deployedRevision": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 200
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "knownGaps": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      }
+    }
+  },
+  "$defs": {
+    "usdc": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "synthetic": {
+            "const": true
+          }
+        },
+        "required": [
+          "synthetic"
+        ]
+      },
+      "then": {
+        "properties": {
+          "evidenceClassification": {
+            "const": "synthetic"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+.next/
+node_modules/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+build/
+*.egg-info/
+evidence/private/
+evidence/*.secret.*
+coverage/
