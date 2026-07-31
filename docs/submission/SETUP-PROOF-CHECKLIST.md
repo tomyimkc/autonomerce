@@ -203,6 +203,9 @@ unrestricted API credentials.
 
 ## 11. Video and final submission
 
+- [ ] final written narrative is 500–1000 words;
+- [ ] narrative explains daily AI operation, human responsibilities, economic
+      opportunities enabled beyond the founder, and the build story;
 - [ ] final live run passes the demo runbook;
 - [ ] video runtime below 3:00 after upload;
 - [ ] captions complete;

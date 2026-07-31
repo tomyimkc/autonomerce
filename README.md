@@ -15,6 +15,12 @@ OpenAPI, or custom agent into an autonomous seller that can:
 
 `candidateOnly: true` · `canClaimAGI: false`
 
+**Judges and reviewers:** start with the
+[`30-second quickstart`](docs/submission/JUDGE-QUICKSTART.md), then inspect the
+[`claim-to-proof evidence index`](docs/submission/EVIDENCE-INDEX.md). Current
+offline evidence is synthetic and moves no funds; all live placeholders are
+explicitly marked.
+
 ## Why it exists
 
 Useful agents do not automatically have a business. Their owners still need to
@@ -142,6 +148,12 @@ bearer that is never returned to browser code. See
 [`apps/web/README.md`](apps/web/README.md).
 
 ## Test and verify
+
+```bash
+./scripts/release_preflight.sh
+```
+
+Or run the component checks:
 
 ```bash
 PYTHONPATH=apps/api:packages/offerrail:. \

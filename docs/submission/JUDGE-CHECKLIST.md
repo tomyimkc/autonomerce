@@ -10,6 +10,7 @@ claim.
 - [ ] Project created during the eligible contest period.
 - [ ] Main category is **Entrepreneurship & Job Creation**.
 - [ ] Public project summary matches the submitted build.
+- [ ] Written narrative is 500–1000 words and answers every live form prompt.
 - [ ] Video is shorter than three minutes.
 - [ ] Public app URL works in a clean browser session.
 - [ ] Public repository URL works and contains a license, setup instructions,

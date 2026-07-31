@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release-preflight:
+    name: Release preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: "true"
+      UV_NO_PROGRESS: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.22"
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Run deterministic release preflight
+        run: bash scripts/release_preflight.sh
