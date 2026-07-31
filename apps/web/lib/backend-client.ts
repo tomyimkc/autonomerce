@@ -3,6 +3,7 @@ import "server-only";
 import {
   BackendClient,
   BackendRequestError,
+  resolveBackendIamAuth,
   resolveBackendBaseUrl,
 } from "./backend-core";
 
@@ -23,7 +24,13 @@ export function getBackendClient(): BackendClient {
     );
   }
 
-  return new BackendClient({ baseUrl, bearerToken });
+  const iamAuth = resolveBackendIamAuth(
+    process.env.AUTONOMERCE_API_IAM_AUTH,
+    process.env.AUTONOMERCE_API_IAM_AUDIENCE,
+    baseUrl,
+  );
+
+  return new BackendClient({ baseUrl, bearerToken, iamAuth });
 }
 
 export function fundMovingMutationsAllowed(): boolean {

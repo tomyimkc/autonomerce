@@ -53,6 +53,7 @@ then configure:
 export GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
 export GOOGLE_CLOUD_REGION=us-central1
 export AUTONOMERCE_API_IMAGE='us-central1-docker.pkg.dev/PROJECT/REPO/autonomerce-api@sha256:...'
+export AUTONOMERCE_API_BEARER_TOKEN_SECRET_REF='autonomerce-api-bearer:1'
 export AUTONOMERCE_RUNTIME_SERVICE_ACCOUNT='autonomerce-api@PROJECT.iam.gserviceaccount.com'
 export AUTONOMERCE_ALLOWED_INVOKER='serviceAccount:trusted-caller@PROJECT.iam.gserviceaccount.com'
 export AUTONOMERCE_API_AUTH_MODE=service-to-service
@@ -66,6 +67,8 @@ export AUTONOMERCE_TRUSTED_HOSTS='autonomerce-api-HASH-uc.a.run.app'
 `infra/deploy_cloud_run_api.sh`:
 
 - accepts only an image digest, never a mutable tag;
+- injects the application bearer only from an explicit numeric Secret Manager
+  version and rejects a direct token value;
 - pins `AUTONOMERCE_PAYMENT_MODE=offline`;
 - deploys with `--no-allow-unauthenticated`;
 - selects ingress from the declared auth mode;
@@ -78,6 +81,27 @@ helper requires and propagates an explicit host list, rejects wildcards and URLs
 and requires the private API origin host to be included. Do not weaken the
 application to a wildcard host as a workaround.
 
+### Private Gemini productization mode
+
+The same private API helper can run real Vertex AI Gemini productization while
+keeping payment and fulfillment offline:
+
+```bash
+export AUTONOMERCE_DEPLOYMENT_MODE=cloud-run-private-gemini
+export AUTONOMERCE_GEMINI_MODEL=gemini-2.5-flash
+export GOOGLE_CLOUD_LOCATION=global
+
+./infra/deploy_cloud_run_api.sh
+```
+
+This mode sets `AUTONOMERCE_MODE=gemini`,
+`AUTONOMERCE_PRODUCTIZER_MODE=gemini`, and
+`GOOGLE_GENAI_USE_VERTEXAI=true`. It rejects payment, seller-executor,
+fulfillment, and transaction-lookup factories. The runtime service account needs
+only the Google permissions required for the chosen Vertex AI model plus Secret
+Manager access to the application bearer. A successful deployment proves neither
+Circle settlement nor seller fulfillment.
+
 Choose one auth mode:
 
 | Mode | Intended caller | Ingress |
@@ -89,6 +113,70 @@ Choose one auth mode:
 IAP and service-to-service still require a least-privilege
 `AUTONOMERCE_ALLOWED_INVOKER`. Never use a wallet address, API idempotency key, or
 browser CORS policy as caller authentication.
+
+## Public Cloud Run web
+
+`infra/Dockerfile.web` builds the standalone Next.js server with a digest-pinned
+Node base and a non-root runtime. Build the application image in CI, resolve the
+pushed image digest, then select one explicit deployment mode.
+
+Safe public judging fallback:
+
+```bash
+export GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
+export GOOGLE_CLOUD_REGION=us-central1
+export AUTONOMERCE_WEB_IMAGE='us-central1-docker.pkg.dev/PROJECT/REPO/autonomerce-web@sha256:...'
+export AUTONOMERCE_WEB_RUNTIME_SERVICE_ACCOUNT='autonomerce-web@PROJECT.iam.gserviceaccount.com'
+export AUTONOMERCE_WEB_PUBLIC_ORIGIN='https://autonomerce-web-HASH-uc.a.run.app'
+export AUTONOMERCE_WEB_MODE=DEMO
+
+./infra/deploy_cloud_run_web.sh
+```
+
+DEMO rejects all private-backend and secret configuration, clears revision
+secrets, labels the experience synthetic-only, and cannot enable funds movement.
+
+LIVE is an owner-session-protected backend-for-frontend. It requires:
+
+- a distinct private API origin;
+- an explicit `AUTONOMERCE_API_IAM_AUTH=true|false` choice;
+- for the recommended Cloud Run-to-Cloud Run path, an IAM audience exactly
+  equal to the private API origin; the web runtime acquires a short-lived ID
+  token from the metadata server and sends it in
+  `X-Serverless-Authorization`, leaving `Authorization` available for the
+  application bearer;
+- the API bearer, owner token, and session signing secret as three distinct,
+  numerically version-pinned Secret Manager references;
+- the web service account as an authorized private API caller;
+- concurrency one and one maximum instance; and
+- an exact, explicit `AUTONOMERCE_ALLOW_MOVES_FUNDS=true` before the web can
+  expose a payment mutation.
+
+Example secret boundary:
+
+```bash
+export AUTONOMERCE_WEB_MODE=LIVE
+export AUTONOMERCE_API_PRIVATE_ORIGIN='https://autonomerce-api-HASH-uc.a.run.app'
+export AUTONOMERCE_API_IAM_AUTH=true
+export AUTONOMERCE_API_IAM_AUDIENCE="$AUTONOMERCE_API_PRIVATE_ORIGIN"
+export AUTONOMERCE_API_BEARER_TOKEN_SECRET_REF='autonomerce-api-bearer:1'
+export AUTONOMERCE_WEB_OWNER_TOKEN_SECRET_REF='autonomerce-web-owner-token:1'
+export AUTONOMERCE_WEB_SESSION_SECRET_REF='autonomerce-web-session-secret:1'
+export AUTONOMERCE_ALLOW_MOVES_FUNDS=false
+
+./infra/deploy_cloud_run_web.sh
+```
+
+Keep funds movement false for the Gemini-only judging deployment. A later
+testnet proof must use the documented private single-host topology rather than
+turning the Cloud Run API into a payment worker.
+
+For this topology, deploy the API with
+`AUTONOMERCE_API_AUTH_MODE=cloud-run-iam` and grant
+`roles/run.invoker` to the web runtime service account. The API remains
+unauthenticated-public **disabled** even though its ingress is reachable for IAM
+validation. Do not set `AUTONOMERCE_API_IAM_AUTH=false` merely to make a failed
+private call appear connected.
 
 ## Live payment modes
 

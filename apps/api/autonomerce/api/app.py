@@ -1146,6 +1146,13 @@ def create_app(
     adapters = adapters if adapters is not None else load_optional_adapters()
     configured_mode = _configured_payment_mode(adapters, payment_mode)
     non_offline = configured_mode != "offline"
+    deployment_mode = os.getenv(
+        "AUTONOMERCE_DEPLOYMENT_MODE", ""
+    ).strip().lower()
+    protected_api = non_offline or deployment_mode not in {
+        "",
+        "local-offline",
+    }
     configured_token = (
         os.getenv("AUTONOMERCE_API_BEARER_TOKEN")
         if bearer_token is None
@@ -1160,9 +1167,9 @@ def create_app(
         token=configured_token,
         owner_id=configured_owner,
     )
-    if non_offline and not authenticator.enabled:
+    if protected_api and not authenticator.enabled:
         raise RuntimeError(
-            "non-offline startup requires AUTONOMERCE_API_BEARER_TOKEN"
+            "protected API startup requires AUTONOMERCE_API_BEARER_TOKEN"
         )
     if non_offline and (
         isinstance(repository, InMemoryRepository)
@@ -1188,7 +1195,7 @@ def create_app(
             "non-offline startup requires independent transaction verification"
         )
     configured_trusted_hosts = _configured_trusted_hosts(
-        non_offline=non_offline,
+        non_offline=protected_api,
         explicit_hosts=trusted_hosts,
     )
     configured_verification_hooks = tuple(transaction_verification_hooks)
@@ -1215,9 +1222,9 @@ def create_app(
         title="Autonomerce API",
         version="0.1.0",
         description="Authenticated, contract-bound API composition for agent commerce.",
-        openapi_url=None if non_offline else "/openapi.json",
-        docs_url=None if non_offline else "/docs",
-        redoc_url=None if non_offline else "/redoc",
+        openapi_url=None if protected_api else "/openapi.json",
+        docs_url=None if protected_api else "/docs",
+        redoc_url=None if protected_api else "/redoc",
     )
     app.add_middleware(
         TrustedHostMiddleware,
@@ -1244,7 +1251,7 @@ def create_app(
         try:
             public_paths = (
                 _NON_OFFLINE_PUBLIC_PATHS
-                if non_offline
+                if protected_api
                 else _OFFLINE_PUBLIC_PATHS
             )
             public_request = request.url.path in public_paths or (
@@ -1361,7 +1368,7 @@ def create_app(
             if lease is not None:
                 await lease.release()
         for header, value in _security_headers(
-            non_offline=non_offline
+            non_offline=protected_api
         ).items():
             response.headers[header] = value
         return response

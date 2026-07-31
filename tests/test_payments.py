@@ -56,6 +56,7 @@ from autonomerce.payments.api_adapter import (  # noqa: E402
 PAYER = "0x1111111111111111111111111111111111111111"
 PAYEE = "0x2222222222222222222222222222222222222222"
 OTHER_PAYEE = "0x3333333333333333333333333333333333333333"
+ARC_TESTNET_USDC = "0x3600000000000000000000000000000000000000"
 BASE_USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
 BASE_SEPOLIA_USDC = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
 TX_HASH = "0x" + ("a" * 64)
@@ -382,6 +383,7 @@ def test_live_adapter_confirms_only_after_independent_asset_lookup(tmp_path):
     def runner(argv, **kwargs):
         payload = {
             "data": {
+                "idempotencyKey": "live-independent-lookup",
                 "id": "circle-transfer-verified",
                 "state": "CONFIRMED",
                 "blockchain": "ARC-TESTNET",
@@ -389,6 +391,7 @@ def test_live_adapter_confirms_only_after_independent_asset_lookup(tmp_path):
                 "sourceAddress": PAYER,
                 "destinationAddress": PAYEE,
                 "txHash": TX_HASH,
+                "contractAddress": ARC_TESTNET_USDC,
                 "updateDate": "2026-07-31T12:00:00Z",
             }
         }
@@ -404,7 +407,7 @@ def test_live_adapter_confirms_only_after_independent_asset_lookup(tmp_path):
             "payeeWallet": PAYEE,
             "transactionHash": transaction_hash,
             "token": "USDC",
-            "asset": "0x3600000000000000000000000000000000000000",
+            "asset": ARC_TESTNET_USDC,
         }
 
     adapter = APIPaymentAdapter(
@@ -429,10 +432,7 @@ def test_live_adapter_confirms_only_after_independent_asset_lookup(tmp_path):
     )
 
     assert execution.receipt.state is PaymentState.CONFIRMED
-    assert (
-        execution.receipt.asset
-        == "0x3600000000000000000000000000000000000000"
-    )
+    assert execution.receipt.asset == ARC_TESTNET_USDC
     assert lookup_calls == [TX_HASH]
 
 
@@ -646,6 +646,7 @@ def test_circle_cli_adapter_uses_argv_no_shell_and_validates_response():
         calls.append((argv, kwargs))
         payload = {
             "data": {
+                "idempotencyKey": "idem;echo-unsafe",
                 "id": "circle-transfer-1",
                 "state": "CONFIRMED",
                 "blockchain": "ARC-TESTNET",
@@ -653,6 +654,7 @@ def test_circle_cli_adapter_uses_argv_no_shell_and_validates_response():
                 "sourceAddress": PAYER,
                 "destinationAddress": PAYEE,
                 "txHash": TX_HASH,
+                "contractAddress": ARC_TESTNET_USDC,
                 "updateDate": "2026-07-31T12:00:00Z",
             }
         }
@@ -674,10 +676,14 @@ def test_circle_cli_adapter_uses_argv_no_shell_and_validates_response():
         PAYEE,
         "--amount",
         "1",
+        "--token",
+        ARC_TESTNET_USDC,
         "--address",
         PAYER,
         "--chain",
         "ARC-TESTNET",
+        "--idempotency-key",
+        "idem;echo-unsafe",
         "--output",
         "json",
     ]
@@ -691,12 +697,14 @@ def test_circle_cli_adapter_rejects_mismatched_confirmation():
     def fake_runner(argv, **kwargs):
         payload = {
             "data": {
+                "idempotencyKey": "idem-1",
                 "state": "CONFIRMED",
                 "blockchain": "ARC-TESTNET",
                 "amounts": ["1"],
                 "sourceAddress": PAYER,
                 "destinationAddress": OTHER_PAYEE,
                 "txHash": TX_HASH,
+                "contractAddress": ARC_TESTNET_USDC,
             }
         }
         return subprocess.CompletedProcess(argv, 0, json.dumps(payload), "")
@@ -706,18 +714,18 @@ def test_circle_cli_adapter_rejects_mismatched_confirmation():
         executor.execute(intent())
 
 
-def test_circle_cli_rejects_explicit_non_usdc_asset_descriptors():
+def test_circle_cli_rejects_current_contract_address_mismatch():
     def fake_runner(argv, **kwargs):
         payload = {
             "data": {
+                "idempotencyKey": "idem-1",
                 "state": "CONFIRMED",
                 "blockchain": "ARC-TESTNET",
                 "amounts": ["1"],
                 "sourceAddress": PAYER,
                 "destinationAddress": PAYEE,
                 "txHash": TX_HASH,
-                "token": "NOT-USDC",
-                "asset": OTHER_PAYEE,
+                "contractAddress": OTHER_PAYEE,
             }
         }
         return subprocess.CompletedProcess(argv, 0, json.dumps(payload), "")
@@ -728,9 +736,57 @@ def test_circle_cli_rejects_explicit_non_usdc_asset_descriptors():
     )
     with pytest.raises(
         CircleExecutionError,
-        match="unexpected token|unexpected asset",
+        match="unexpected asset",
     ):
         executor.execute(intent())
+
+
+def test_circle_cli_rejects_legacy_bare_json_success_shape():
+    def fake_runner(argv, **kwargs):
+        payload = {
+            "idempotencyKey": "idem-1",
+            "state": "CONFIRMED",
+            "blockchain": "ARC-TESTNET",
+            "amounts": ["1"],
+            "sourceAddress": PAYER,
+            "destinationAddress": PAYEE,
+            "txHash": TX_HASH,
+            "contractAddress": ARC_TESTNET_USDC,
+        }
+        return subprocess.CompletedProcess(argv, 0, json.dumps(payload), "")
+
+    executor = CircleCLIExecutor(mode=PaymentMode.TESTNET, runner=fake_runner)
+    with pytest.raises(
+        CircleExecutionError,
+        match="current data envelope",
+    ) as failure:
+        executor.execute(intent())
+    assert failure.value.reason_code == "circle_cli_malformed_response"
+
+
+def test_circle_cli_rejects_mismatched_order_idempotency_evidence():
+    def fake_runner(argv, **kwargs):
+        payload = {
+            "data": {
+                "idempotencyKey": "different-order",
+                "state": "CONFIRMED",
+                "blockchain": "ARC-TESTNET",
+                "amounts": ["1"],
+                "sourceAddress": PAYER,
+                "destinationAddress": PAYEE,
+                "txHash": TX_HASH,
+                "contractAddress": ARC_TESTNET_USDC,
+            }
+        }
+        return subprocess.CompletedProcess(argv, 0, json.dumps(payload), "")
+
+    executor = CircleCLIExecutor(mode=PaymentMode.TESTNET, runner=fake_runner)
+    with pytest.raises(
+        CircleExecutionError,
+        match="unexpected idempotency key",
+    ) as failure:
+        executor.execute(intent())
+    assert failure.value.reason_code == "circle_cli_idempotency_mismatch"
 
 
 def _x402_header(payload: dict) -> str:

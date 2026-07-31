@@ -349,6 +349,18 @@ def _structured_rejection(
             payload = json.loads(raw)
         except (TypeError, json.JSONDecodeError):
             continue
+        current_error: Mapping[str, Any] | None = None
+        if (
+            isinstance(payload, Mapping)
+            and set(payload) == {"error"}
+            and isinstance(payload["error"], Mapping)
+            and set(payload["error"]).issubset(
+                {"code", "message", "hint", "feedbackHint"}
+            )
+            and isinstance(payload["error"].get("code"), str)
+            and isinstance(payload["error"].get("message"), str)
+        ):
+            current_error = payload["error"]
         queue: list[tuple[Any, int]] = [(payload, 0)]
         codes: list[str] = []
         explicitly_not_submitted = False
@@ -413,8 +425,10 @@ def _structured_rejection(
                         SubmissionStatus.NOT_SUBMITTED,
                     )
             return "circle_cli_not_submitted", SubmissionStatus.NOT_SUBMITTED
-        for code in codes:
-            mapped = _PRE_SUBMISSION_CODES.get(code)
+        if current_error is not None:
+            mapped = _PRE_SUBMISSION_CODES.get(
+                _normalized_code(current_error["code"])
+            )
             if mapped:
                 return f"circle_cli_{mapped}", SubmissionStatus.NOT_SUBMITTED
     return None
@@ -490,9 +504,10 @@ class OfflineCircleExecutor:
 class CircleCLIExecutor:
     """Execute one pre-authorized USDC transfer via safe subprocess argv.
 
-    The adapter never invokes a shell, never accepts arbitrary extra arguments, omits
-    `--token` so Circle's USDC default is used, and requires an exact confirmed JSON
-    response whose amount/chain/source/destination match the authorized intent.
+    The adapter never invokes a shell, never accepts arbitrary extra arguments,
+    explicitly selects the configured canonical USDC contract, forwards the
+    order-bound idempotency key, and requires the current Circle JSON envelope to
+    confirm the exact authorized intent.
     """
 
     def __init__(
@@ -591,10 +606,14 @@ class CircleCLIExecutor:
             intent.payee_wallet,
             "--amount",
             usdc_text(intent.amount_usdc),
+            "--token",
+            expected_asset,
             "--address",
             intent.payer_wallet,
             "--chain",
             intent.chain,
+            "--idempotency-key",
+            intent.idempotency_key,
             "--output",
             "json",
         ]
@@ -679,7 +698,12 @@ class CircleCLIExecutor:
                 "Circle CLI response must be a JSON object",
                 reason_code="circle_cli_malformed_response",
             )
-        data = payload.get("data", payload)
+        if set(payload) != {"data"}:
+            raise CircleExecutionError(
+                "Circle CLI response must use the current data envelope",
+                reason_code="circle_cli_malformed_response",
+            )
+        data = payload["data"]
         if not isinstance(data, dict):
             raise CircleExecutionError(
                 "Circle CLI response data must be an object",
@@ -687,49 +711,64 @@ class CircleCLIExecutor:
             )
 
         try:
-            state = str(data.get("state", "")).strip().upper()
+            required_fields = (
+                "idempotencyKey",
+                "state",
+                "blockchain",
+                "sourceAddress",
+                "destinationAddress",
+                "amounts",
+                "txHash",
+            )
+            missing = tuple(field for field in required_fields if field not in data)
+            if missing:
+                raise ValueError(
+                    "missing current Circle CLI fields: " + ", ".join(missing)
+                )
+            response_idempotency_key = data["idempotencyKey"]
+            if (
+                not isinstance(response_idempotency_key, str)
+                or response_idempotency_key != intent.idempotency_key
+            ):
+                raise CircleExecutionError(
+                    "Circle CLI confirmed an unexpected idempotency key",
+                    reason_code="circle_cli_idempotency_mismatch",
+                )
+            state = str(data["state"]).strip().upper()
             if state != "CONFIRMED":
                 raise CircleExecutionError(
                     f"Circle CLI did not prove confirmation (state={state or 'missing'})",
                     reason_code="circle_cli_unconfirmed_state",
                 )
-            chain = canonical_chain(data.get("blockchain") or data.get("chain") or "")
+            chain = canonical_chain(data["blockchain"])
             source = normalize_wallet_address(
-                data.get("sourceAddress") or data.get("from") or "", chain
+                data["sourceAddress"], chain
             )
             destination = normalize_wallet_address(
-                data.get("destinationAddress") or data.get("to") or "", chain
+                data["destinationAddress"], chain
             )
-            amounts = data.get("amounts")
-            raw_amount: Any
-            amount_entry: Mapping[str, Any] | None = None
-            if isinstance(amounts, list) and len(amounts) == 1:
-                if isinstance(amounts[0], Mapping):
-                    amount_entry = amounts[0]
-                    raw_amount = (
-                        amount_entry.get("amount")
-                        or amount_entry.get("value")
-                        or amount_entry.get("amountUsdc")
-                    )
-                else:
-                    raw_amount = amounts[0]
-            else:
-                raw_amount = data.get("amount")
-            amount = usdc(raw_amount)
+            amounts = data["amounts"]
+            if (
+                not isinstance(amounts, list)
+                or len(amounts) != 1
+                or isinstance(amounts[0], (Mapping, list, tuple))
+            ):
+                raise ValueError(
+                    "current Circle CLI amounts must contain one scalar value"
+                )
+            amount = usdc(amounts[0])
             _verify_optional_asset_descriptors(
                 token_values=_evidence_values(
-                    data, amount_entry, _TOKEN_OUTPUT_KEYS
+                    data, None, _TOKEN_OUTPUT_KEYS
                 ),
                 asset_values=_evidence_values(
-                    data, amount_entry, _ASSET_OUTPUT_KEYS
+                    data, None, _ASSET_OUTPUT_KEYS
                 ),
                 chain=chain,
                 expected_token=intent.token,
                 expected_asset=expected_asset,
             )
-            transaction_hash = normalize_transaction_hash(
-                data.get("txHash") or data.get("transactionHash") or ""
-            )
+            transaction_hash = normalize_transaction_hash(data["txHash"])
         except CircleExecutionError:
             raise
         except (TypeError, ValueError) as exc:
@@ -745,8 +784,10 @@ class CircleCLIExecutor:
             raise CircleExecutionError("Circle CLI confirmed an unexpected payee wallet")
         if amount != intent.amount_usdc:
             raise CircleExecutionError("Circle CLI confirmed an unexpected amount")
-        confirmed_at = data.get("confirmedAt") or data.get("updateDate") or _timestamp(
-            self.clock
+        confirmed_at = (
+            data.get("firstConfirmDate")
+            or data.get("updateDate")
+            or _timestamp(self.clock)
         )
         return ExecutionResult(
             state="CONFIRMED",

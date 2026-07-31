@@ -630,6 +630,43 @@ def test_non_offline_startup_requires_token_and_durable_repository():
         )
 
 
+def test_protected_gemini_api_requires_bearer_and_hides_docs(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    protected_token = "protected-gemini-test-token"
+    monkeypatch.setenv(
+        "AUTONOMERCE_DEPLOYMENT_MODE",
+        "cloud-run-private-gemini",
+    )
+    with pytest.raises(RuntimeError, match="protected API startup"):
+        create_app(
+            bearer_token="",
+            payment_mode="offline",
+            trusted_hosts=("testserver",),
+        )
+
+    with TestClient(
+        create_app(
+            bearer_token=protected_token,
+            payment_mode="offline",
+            trusted_hosts=("testserver",),
+        )
+    ) as client:
+        assert client.get("/health").status_code == 200
+        assert client.get("/docs").status_code == 401
+        assert client.post(
+            "/sellers",
+            json={"name": "x", "agentUrl": "https://x.example"},
+        ).status_code == 401
+        assert client.post(
+            "/sellers",
+            headers={
+                "Authorization": f"Bearer {protected_token}",
+            },
+            json={"name": "x", "agentUrl": "https://x.example"},
+        ).status_code == 201
+
+
 def test_scope_and_acceptance_contract_mutations_are_rejected():
     with _client() as client:
         ids = _onboard_flow(client)

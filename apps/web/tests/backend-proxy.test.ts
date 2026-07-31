@@ -8,10 +8,12 @@ import {
 import {
   BACKEND_DEFAULT_TIMEOUT_MS,
   BACKEND_FULFILL_TIMEOUT_MS,
+  BACKEND_IAM_TOKEN_TIMEOUT_MS,
   BACKEND_MAX_TIMEOUT_MS,
   BACKEND_PAY_TIMEOUT_MS,
   BackendClient,
   BackendRequestError,
+  resolveBackendIamAuth,
   resolveBackendBaseUrl,
   type BackendRequestOptions,
 } from "../lib/backend-core";
@@ -26,17 +28,41 @@ function json(value: unknown, status = 200): Response {
   });
 }
 
-test("backend client attaches bearer server-side and never puts it in the URL", async () => {
+function googleIdToken(
+  audience: string,
+  claims: Record<string, unknown> = {},
+): string {
+  const encode = (value: unknown) =>
+    Buffer.from(JSON.stringify(value), "utf8").toString("base64url");
+  return [
+    encode({ alg: "RS256", typ: "JWT" }),
+    encode({
+      iss: "https://accounts.google.com",
+      aud: audience,
+      exp: Math.floor(Date.now() / 1_000) + 3_600,
+      sub: "1234567890",
+      ...claims,
+    }),
+    "google-signature",
+  ].join(".");
+}
+
+test("disabled IAM auth attaches only the application bearer server-side", async () => {
   let observedUrl = "";
   let observedAuthorization = "";
+  let observedServerlessAuthorization: string | null = null;
   const client = new BackendClient(
     {
       baseUrl: "https://private-api.example",
       bearerToken: TOKEN,
+      iamAuth: { enabled: false },
     },
     async (input, init) => {
       observedUrl = String(input);
       observedAuthorization = new Headers(init?.headers).get("authorization") ?? "";
+      observedServerlessAuthorization = new Headers(init?.headers).get(
+        "x-serverless-authorization",
+      );
       return json({
         status: "ok",
         service: "autonomerce-api",
@@ -50,7 +76,60 @@ test("backend client attaches bearer server-side and never puts it in the URL", 
   await client.get("/health");
   assert.equal(observedUrl, "https://private-api.example/health");
   assert.equal(observedAuthorization, `Bearer ${TOKEN}`);
+  assert.equal(observedServerlessAuthorization, null);
   assert.equal(observedUrl.includes(TOKEN), false);
+});
+
+test("enabled IAM auth gets a metadata ID token and preserves both auth layers", async () => {
+  const audience = "https://private-api.example";
+  const idToken = googleIdToken(audience);
+  const calls: string[] = [];
+  const client = new BackendClient(
+    {
+      baseUrl: audience,
+      bearerToken: TOKEN,
+      iamAuth: { enabled: true, audience: `${audience}/` },
+    },
+    async (input, init) => {
+      const url = new URL(String(input));
+      calls.push(url.href);
+      const headers = new Headers(init?.headers);
+      assert.equal(init?.redirect, "error");
+      assert.equal(init?.cache, "no-store");
+
+      if (url.hostname === "metadata.google.internal") {
+        assert.equal(init?.method, "GET");
+        assert.equal(headers.get("metadata-flavor"), "Google");
+        assert.equal(headers.get("authorization"), null);
+        assert.equal(headers.get("x-serverless-authorization"), null);
+        assert.equal(url.searchParams.get("audience"), audience);
+        assert.equal(url.searchParams.get("format"), null);
+        return new Response(idToken, {
+          status: 200,
+          headers: { "Content-Type": "text/plain" },
+        });
+      }
+
+      assert.equal(url.href, `${audience}/health`);
+      assert.equal(headers.get("authorization"), `Bearer ${TOKEN}`);
+      assert.equal(
+        headers.get("x-serverless-authorization"),
+        `Bearer ${idToken}`,
+      );
+      assert.equal(url.href.includes(TOKEN), false);
+      assert.equal(url.href.includes(idToken), false);
+      return json({ status: "ok" });
+    },
+  );
+
+  await client.get("/health");
+  assert.equal(calls.length, 2);
+  assert.equal(
+    calls[0].startsWith(
+      "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/identity?",
+    ),
+    true,
+  );
 });
 
 test("backend URL supports the private-origin fallback and rejects inconsistent dual configuration", () => {
@@ -80,6 +159,118 @@ test("backend URL supports the private-origin fallback and rejects inconsistent 
   );
 });
 
+test("IAM auth configuration is explicit and pins the audience to the private origin", () => {
+  assert.deepEqual(
+    resolveBackendIamAuth(
+      "false",
+      undefined,
+      "https://private-api.example",
+    ),
+    { enabled: false },
+  );
+  assert.deepEqual(
+    resolveBackendIamAuth(
+      "true",
+      "https://private-api.example/",
+      "https://private-api.example",
+    ),
+    {
+      enabled: true,
+      audience: "https://private-api.example",
+    },
+  );
+
+  for (const resolve of [
+    () =>
+      resolveBackendIamAuth(
+        undefined,
+        undefined,
+        "https://private-api.example",
+      ),
+    () =>
+      resolveBackendIamAuth(
+        "false",
+        "https://private-api.example",
+        "https://private-api.example",
+      ),
+    () =>
+      resolveBackendIamAuth(
+        "true",
+        undefined,
+        "https://private-api.example",
+      ),
+    () =>
+      resolveBackendIamAuth(
+        "true",
+        "https://other-api.example",
+        "https://private-api.example",
+      ),
+    () =>
+      resolveBackendIamAuth(
+        "true",
+        "http://private-api.example",
+        "https://private-api.example",
+      ),
+  ]) {
+    assert.throws(resolve, BackendRequestError);
+  }
+});
+
+test("IAM token acquisition fails closed without leaking metadata responses", async () => {
+  const leakedValue = "metadata-response-must-not-leak";
+  const client = new BackendClient(
+    {
+      baseUrl: "https://private-api.example",
+      bearerToken: TOKEN,
+      iamAuth: {
+        enabled: true,
+        audience: "https://private-api.example",
+      },
+    },
+    async (input) => {
+      const url = new URL(String(input));
+      assert.equal(url.hostname, "metadata.google.internal");
+      return new Response(leakedValue, { status: 500 });
+    },
+  );
+
+  await assert.rejects(
+    client.get("/health"),
+    (error: unknown) =>
+      error instanceof BackendRequestError &&
+      error.code === "backend_iam_token_unavailable" &&
+      !error.message.includes(leakedValue) &&
+      !error.message.includes(TOKEN),
+  );
+});
+
+test("IAM token acquisition rejects wrong-audience and oversized tokens", async () => {
+  assert.ok(BACKEND_IAM_TOKEN_TIMEOUT_MS < BACKEND_DEFAULT_TIMEOUT_MS);
+  const audience = "https://private-api.example";
+
+  for (const metadataResponse of [
+    new Response(googleIdToken("https://wrong-api.example")),
+    new Response("oversized", {
+      headers: { "Content-Length": "20000" },
+    }),
+  ]) {
+    const client = new BackendClient(
+      {
+        baseUrl: audience,
+        bearerToken: TOKEN,
+        iamAuth: { enabled: true, audience },
+      },
+      async () => metadataResponse.clone(),
+    );
+    await assert.rejects(
+      client.get("/health"),
+      (error: unknown) =>
+        error instanceof BackendRequestError &&
+        error.code === "backend_iam_token_unavailable",
+    );
+  }
+});
+
 test("backend client enforces finite request timeout bounds", async () => {
   assert.ok(BACKEND_PAY_TIMEOUT_MS > BACKEND_DEFAULT_TIMEOUT_MS);
   assert.ok(BACKEND_FULFILL_TIMEOUT_MS > BACKEND_DEFAULT_TIMEOUT_MS);
@@ -91,6 +282,7 @@ test("backend client enforces finite request timeout bounds", async () => {
       new BackendClient({
         baseUrl: "https://private-api.example",
         bearerToken: TOKEN,
+        iamAuth: { enabled: false },
         timeoutMs: Number.POSITIVE_INFINITY,
       }),
     (error: unknown) =>
@@ -102,6 +294,7 @@ test("backend client enforces finite request timeout bounds", async () => {
     {
       baseUrl: "https://private-api.example",
       bearerToken: TOKEN,
+      iamAuth: { enabled: false },
     },
     async (_input, init) =>
       new Promise<Response>((_resolve, reject) => {
@@ -137,6 +330,7 @@ test("health without explicit movesFunds fails closed", async () => {
     {
       baseUrl: "https://private-api.example",
       bearerToken: TOKEN,
+      iamAuth: { enabled: false },
     },
     async () =>
       json({
@@ -200,6 +394,7 @@ test("mocked backend workflow returns backend receipt and metrics IDs", async ()
     {
       baseUrl: "https://private-api.example",
       bearerToken: TOKEN,
+      iamAuth: { enabled: false },
     },
     async (input, init) => {
       const url = new URL(String(input));
@@ -494,6 +689,7 @@ test("resumed workflow rejects changed immutable pricing inputs", async () => {
     {
       baseUrl: "https://private-api.example",
       bearerToken: TOKEN,
+      iamAuth: { enabled: false },
     },
     async (input, init) => {
       const url = new URL(String(input));
@@ -597,6 +793,7 @@ test("resumed workflow rejects a changed seller before creating or paying", asyn
     {
       baseUrl: "https://private-api.example",
       bearerToken: TOKEN,
+      iamAuth: { enabled: false },
     },
     async (input, init) => {
       const url = new URL(String(input));

@@ -218,6 +218,53 @@ def test_proven_circle_rejection_becomes_retryable_without_auto_resubmit(
     assert len(calls) == 1
 
 
+@pytest.mark.parametrize(
+    ("payload", "expected_reason", "expected_submission"),
+    [
+        (
+            {
+                "error": {
+                    "code": "INVALID_ARGUMENT",
+                    "message": "Invalid transfer argument.",
+                }
+            },
+            "circle_cli_invalid_request",
+            SubmissionStatus.NOT_SUBMITTED,
+        ),
+        (
+            {
+                "legacy": {
+                    "code": "INVALID_ARGUMENT",
+                    "message": "Unrecognized JSON envelope.",
+                }
+            },
+            "circle_cli_rejection_ambiguous",
+            SubmissionStatus.AMBIGUOUS,
+        ),
+    ],
+)
+def test_circle_cli_json_error_contract_fails_closed(
+    payload, expected_reason, expected_submission
+):
+    def runner(argv, **kwargs):
+        return subprocess.CompletedProcess(
+            argv,
+            2,
+            json.dumps(payload),
+            "Error: transfer rejected",
+        )
+
+    executor = CircleCLIExecutor(
+        mode=PaymentMode.TESTNET,
+        runner=runner,
+    )
+    with pytest.raises(CircleExecutionError) as failure:
+        executor.execute(intent())
+
+    assert failure.value.reason_code == expected_reason
+    assert failure.value.submission_status is expected_submission
+
+
 def test_timeout_stays_ambiguous_durable_and_blocked_from_replay(tmp_path):
     database = tmp_path / "timeout.sqlite3"
     processor, calls = timeout_processor(database)
@@ -484,6 +531,7 @@ def test_circle_cli_uses_sanitized_environment_and_fixed_cwd(
     executable = tmp_path / "circle-fixture"
     payload = {
         "data": {
+            "idempotencyKey": "reconcile-1",
             "id": "circle-transfer-1",
             "state": "CONFIRMED",
             "blockchain": "ARC-TESTNET",

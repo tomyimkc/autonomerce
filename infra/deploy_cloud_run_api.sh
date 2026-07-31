@@ -5,6 +5,7 @@ required=(
   GOOGLE_CLOUD_PROJECT
   GOOGLE_CLOUD_REGION
   AUTONOMERCE_API_IMAGE
+  AUTONOMERCE_API_BEARER_TOKEN_SECRET_REF
   AUTONOMERCE_RUNTIME_SERVICE_ACCOUNT
   AUTONOMERCE_ALLOWED_INVOKER
   AUTONOMERCE_API_AUTH_MODE
@@ -27,6 +28,16 @@ fi
 
 if [[ ! "$AUTONOMERCE_API_IMAGE" =~ @sha256:[0-9a-fA-F]{64}$ ]]; then
   echo "BLOCKED: AUTONOMERCE_API_IMAGE must be an immutable image digest." >&2
+  exit 2
+fi
+
+if [[ -n "${AUTONOMERCE_API_BEARER_TOKEN:-}" ]]; then
+  echo "BLOCKED: AUTONOMERCE_API_BEARER_TOKEN must not be passed directly; use AUTONOMERCE_API_BEARER_TOKEN_SECRET_REF." >&2
+  exit 2
+fi
+
+if [[ ! "$AUTONOMERCE_API_BEARER_TOKEN_SECRET_REF" =~ ^([A-Za-z0-9_-]+|projects/[A-Za-z0-9._:-]+/secrets/[A-Za-z0-9_-]+):[1-9][0-9]*$ ]]; then
+  echo "BLOCKED: AUTONOMERCE_API_BEARER_TOKEN_SECRET_REF must name an explicit numeric Secret Manager version." >&2
   exit 2
 fi
 
@@ -65,6 +76,39 @@ if [[ "${AUTONOMERCE_PAYMENT_MODE:-offline}" != "offline" ]]; then
   exit 2
 fi
 
+deployment_mode="${AUTONOMERCE_DEPLOYMENT_MODE:-cloud-run-private-offline}"
+case "$deployment_mode" in
+  cloud-run-private-offline)
+    runtime_mode="offline"
+    labels="autonomerce-exposure=private,autonomerce-payment=offline"
+    completion_message="DEPLOYMENT COMPLETE: private offline API only."
+    ;;
+  cloud-run-private-gemini)
+    runtime_mode="gemini"
+    labels="autonomerce-exposure=private,autonomerce-payment=offline,autonomerce-gemini=vertex"
+    completion_message="DEPLOYMENT COMPLETE: private Gemini API with offline payment and fulfillment."
+    if [[ -z "${AUTONOMERCE_GEMINI_MODEL:-}" ]]; then
+      echo "BLOCKED: cloud-run-private-gemini requires AUTONOMERCE_GEMINI_MODEL." >&2
+      exit 2
+    fi
+    for name in \
+      AUTONOMERCE_FULFILLMENT_ADAPTER_FACTORY \
+      AUTONOMERCE_PAYMENT_ADAPTER_FACTORY \
+      AUTONOMERCE_SELLER_EXECUTOR_FACTORY \
+      AUTONOMERCE_TRANSACTION_LOOKUP_FACTORY
+    do
+      if [[ -n "${!name:-}" ]]; then
+        echo "BLOCKED: cloud-run-private-gemini keeps payment and fulfillment offline; unset ${name}." >&2
+        exit 2
+      fi
+    done
+    ;;
+  *)
+    echo "BLOCKED: AUTONOMERCE_DEPLOYMENT_MODE must be cloud-run-private-offline or cloud-run-private-gemini." >&2
+    exit 2
+    ;;
+esac
+
 if [[ "$AUTONOMERCE_ALLOWED_INVOKER" == "allUsers" ||
       "$AUTONOMERCE_ALLOWED_INVOKER" == "allAuthenticatedUsers" ]]; then
   echo "BLOCKED: public invoker principals are forbidden." >&2
@@ -99,8 +143,8 @@ location="${GOOGLE_CLOUD_LOCATION:-global}"
 model="${AUTONOMERCE_GEMINI_MODEL:-}"
 
 env_vars=(
-  "AUTONOMERCE_DEPLOYMENT_MODE=cloud-run-private-offline"
-  "AUTONOMERCE_MODE=offline"
+  "AUTONOMERCE_DEPLOYMENT_MODE=${deployment_mode}"
+  "AUTONOMERCE_MODE=${runtime_mode}"
   "AUTONOMERCE_API_AUTH_MODE=${AUTONOMERCE_API_AUTH_MODE}"
   "AUTONOMERCE_API_OWNER_ID=${AUTONOMERCE_API_OWNER_ID:-autonomerce-owner}"
   "AUTONOMERCE_WEB_PUBLIC_ORIGIN=${AUTONOMERCE_WEB_PUBLIC_ORIGIN}"
@@ -112,6 +156,9 @@ env_vars=(
   "GOOGLE_CLOUD_LOCATION=${location}"
   "GOOGLE_GENAI_USE_VERTEXAI=true"
 )
+if [[ "$runtime_mode" == "gemini" ]]; then
+  env_vars+=("AUTONOMERCE_PRODUCTIZER_MODE=gemini")
+fi
 if [[ -n "$model" ]]; then
   env_vars+=("AUTONOMERCE_GEMINI_MODEL=${model}")
 fi
@@ -133,7 +180,8 @@ gcloud run deploy "$service" \
   --no-allow-unauthenticated \
   "$iap_flag" \
   --set-env-vars "$env_csv" \
-  --labels "autonomerce-exposure=private,autonomerce-payment=offline"
+  --set-secrets "AUTONOMERCE_API_BEARER_TOKEN=${AUTONOMERCE_API_BEARER_TOKEN_SECRET_REF}" \
+  --labels "$labels"
 
 gcloud run services add-iam-policy-binding "$service" \
   --project "$GOOGLE_CLOUD_PROJECT" \
@@ -170,5 +218,5 @@ if expected not in members:
 print("CLOUD RUN IAM CHECK: PASS (no public invoker binding)")
 '
 
-echo "DEPLOYMENT COMPLETE: private offline API only."
+echo "$completion_message"
 echo "Do not enable testnet/mainnet until shared durable storage and application authorization land."

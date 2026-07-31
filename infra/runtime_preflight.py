@@ -23,6 +23,7 @@ MAINNET_CONFIRMATION = "ENABLE_REAL_MAINNET_PAYMENTS"
 
 MODE_PAYMENT = {
     "local-offline": "offline",
+    "cloud-run-private-gemini": "offline",
     "cloud-run-private-offline": "offline",
     "private-single-host-testnet": "testnet",
     "private-single-host-mainnet": "mainnet",
@@ -30,6 +31,7 @@ MODE_PAYMENT = {
 
 MODE_RUNTIME = {
     "local-offline": "offline",
+    "cloud-run-private-gemini": "gemini",
     "cloud-run-private-offline": "offline",
     "private-single-host-testnet": "live",
     "private-single-host-mainnet": "live",
@@ -49,6 +51,13 @@ LEGACY_PAYMENT_ENV = {
     "AUTONOMERCE_CIRCLE_WALLET_ADDRESS",
     "AUTONOMERCE_CIRCLE_MAX_PER_TX_USDC",
     "AUTONOMERCE_CIRCLE_MAX_DAILY_USDC",
+}
+
+GEMINI_OFFLINE_FORBIDDEN_FACTORIES = {
+    "AUTONOMERCE_FULFILLMENT_ADAPTER_FACTORY",
+    "AUTONOMERCE_PAYMENT_ADAPTER_FACTORY",
+    "AUTONOMERCE_SELLER_EXECUTOR_FACTORY",
+    "AUTONOMERCE_TRANSACTION_LOOKUP_FACTORY",
 }
 
 FORBIDDEN_DURABLE_ROOTS = tuple(
@@ -216,6 +225,38 @@ def validate_live_store() -> None:
         blocked("durable payment mount marker has unexpected content")
 
 
+def validate_cloud_run_gemini() -> None:
+    if required("GOOGLE_GENAI_USE_VERTEXAI").lower() != "true":
+        blocked(
+            "cloud-run-private-gemini requires "
+            "GOOGLE_GENAI_USE_VERTEXAI=true"
+        )
+    required("GOOGLE_CLOUD_PROJECT")
+    required("GOOGLE_CLOUD_LOCATION")
+    required("AUTONOMERCE_GEMINI_MODEL")
+
+    productizer_mode = os.environ.get(
+        "AUTONOMERCE_PRODUCTIZER_MODE", ""
+    ).strip().lower()
+    if productizer_mode and productizer_mode != "gemini":
+        blocked(
+            "cloud-run-private-gemini requires "
+            "AUTONOMERCE_PRODUCTIZER_MODE=gemini when it is set"
+        )
+
+    configured_factories = sorted(
+        name
+        for name in GEMINI_OFFLINE_FORBIDDEN_FACTORIES
+        if os.environ.get(name, "").strip()
+    )
+    if configured_factories:
+        blocked(
+            "cloud-run-private-gemini keeps payment and fulfillment offline; "
+            "unset live adapter factories: "
+            + ", ".join(configured_factories)
+        )
+
+
 def validate_live_payment(mode: str, *, on_cloud_run: bool) -> None:
     if not required("AUTONOMERCE_API_OWNER_ID"):
         blocked("non-offline mode requires an explicit API owner ID")
@@ -357,6 +398,11 @@ def main() -> int:
     protected = deployment_mode != "local-offline"
     if protected and auth_mode not in PROTECTED_AUTH_MODES:
         blocked("private API modes require an external authenticated access mode")
+    if protected and not required("AUTONOMERCE_API_BEARER_TOKEN"):
+        blocked(
+            "private API modes require an application bearer token in addition "
+            "to the external authenticated access mode"
+        )
     if not protected and auth_mode != "local-only":
         blocked("local-offline mode requires AUTONOMERCE_API_AUTH_MODE=local-only")
     if cloud_run_mode and auth_mode not in CLOUD_RUN_AUTH_MODES:
@@ -376,6 +422,8 @@ def main() -> int:
     if payment_mode == "offline":
         if required("AUTONOMERCE_PAYMENT_STORE_DURABILITY") != "memory-offline":
             blocked("offline mode requires payment-store durability=memory-offline")
+        if deployment_mode == "cloud-run-private-gemini":
+            validate_cloud_run_gemini()
     else:
         validate_live_payment(payment_mode, on_cloud_run=on_cloud_run)
 

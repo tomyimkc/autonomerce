@@ -27,6 +27,7 @@ receipts, fulfillment artifacts, OpenAPI, or arbitrary API paths.
 |---|---|---|---|
 | `local-offline` | `offline` | `offline` | Loopback/isolated developer machine only |
 | `cloud-run-private-offline` | `offline` | `offline` | Cloud Run IAM, IAP, or service-to-service |
+| `cloud-run-private-gemini` | `gemini` | `offline` | Real Vertex AI productization behind the private Cloud Run API; no live payment or fulfillment |
 | `private-single-host-testnet` | `live` | `testnet` | Supported private pilot shape on one persistent Compute Engine host |
 | `private-single-host-mainnet` | `live` | `mainnet` | Configuration shape only; release no-go |
 
@@ -73,6 +74,22 @@ onboarding and workflow routes reject missing, forged, or expired owner sessions
 unauthenticated web-deputy condition, but it does not create federated identity,
 multi-role authorization, or verified buyer consent.
 
+All private deployment modes, including Gemini with offline payment, require the
+application bearer in addition to the outer Cloud Run/IAP/service identity
+boundary. The Cloud Run API helper accepts only
+`AUTONOMERCE_API_BEARER_TOKEN_SECRET_REF` pointing to an explicit numeric Secret
+Manager version. The public web service uses a different owner token and session
+signing secret; all three values must remain distinct.
+
+For the public Cloud Run web BFF calling a Cloud Run IAM-protected API, set
+`AUTONOMERCE_API_IAM_AUTH=true` and pin
+`AUTONOMERCE_API_IAM_AUDIENCE` to the exact private API origin. The web server
+acquires a short-lived identity token from the Cloud Run metadata server and
+sends it in `X-Serverless-Authorization`; the separate application bearer stays
+in `Authorization`. The metadata request is server-only, bounded, and
+fail-closed. Never inject an IAM ID token as a deployment secret or expose it
+through a `NEXT_PUBLIC_*` variable.
+
 Forwarding headers are ignored unless
 `AUTONOMERCE_WEB_TRUST_PROXY_HEADERS=true`. Enable that switch only behind a
 trusted edge that strips or overwrites client-supplied forwarding headers. Login
@@ -80,9 +97,10 @@ and public-status limits include both bounded per-address state and a
 process-global budget. A multi-instance deployment still needs an edge or shared
 distributed limiter.
 
-The provided deployment script supports only the private offline Cloud Run mode and
-checks the resulting invoker policy. Live payment on Cloud Run remains blocked by
-the unsupported storage topology. The helper requires and propagates
+The provided API deployment script supports private deterministic-offline and
+private Vertex AI Gemini modes, both with offline payment, and checks the resulting
+invoker policy. Live payment on Cloud Run remains blocked by the unsupported
+storage topology. The helper requires and propagates
 `AUTONOMERCE_TRUSTED_HOSTS`, rejects wildcard and URL values, and requires the
 configured private API origin host to be included.
 
@@ -95,6 +113,7 @@ The API container starts through `infra/start_api.sh`, which runs
   payment-adapter names;
 - deployment mode, `AUTONOMERCE_MODE`, and `AUTONOMERCE_PAYMENT_MODE` disagree;
 - a private mode lacks an accepted external authentication mode;
+- a private mode lacks the application bearer token;
 - a non-offline mode lacks the application owner ID or bearer token;
 - Cloud Run lacks the expected `K_SERVICE` runtime marker;
 - the public web and private API origins are equal, malformed, or non-HTTPS;
@@ -171,6 +190,9 @@ Offline mode retains the documentation routes for local development.
 
 - Use the Cloud Run runtime service account and Application Default Credentials for
   Google APIs. Do not mount a service-account JSON key.
+- Inject the API bearer, web owner token, and web session secret from three
+  different Secret Manager secrets pinned to explicit numeric versions. Never
+  pass them as direct deploy-script environment values.
 - Do not put Circle OTPs, recovery material, private keys, wallet session state, or
   bearer tokens in committed `.env` files. Inject the application bearer token from
   an approved secret store when non-offline mode is eventually enabled.
