@@ -17,9 +17,13 @@ OpenAPI, or custom agent into an autonomous seller that can:
 
 **Judges and reviewers:** start with the
 [`30-second quickstart`](docs/submission/JUDGE-QUICKSTART.md), then inspect the
-[`claim-to-proof evidence index`](docs/submission/EVIDENCE-INDEX.md). Current
-offline evidence is synthetic and moves no funds; all live placeholders are
-explicitly marked.
+[`claim-to-proof evidence index`](docs/submission/EVIDENCE-INDEX.md). The public
+Cloud Run application now uses live Vertex AI Gemini productization behind a
+private IAM-protected API. Payment and fulfillment remain synthetic/offline and
+move no funds.
+
+**Public application:**
+`https://autonomerce-web-6dnob6ekdq-uc.a.run.app`
 
 ## Why it exists
 
@@ -232,6 +236,10 @@ infra/                           container, preflight, Cloud Run, Compute Engine
 Start with [`infra/README.md`](infra/README.md) and
 [`docs/DEPLOYMENT-SECURITY.md`](docs/DEPLOYMENT-SECURITY.md).
 
+The judging deployment is split into a public owner-session-protected Next.js
+BFF and a private Cloud Run IAM API. Its redacted build identity and one deployed
+Gemini productization receipt are in [`evidence/public/`](evidence/public/).
+
 The repository intentionally fails closed when required live settings are
 missing or contradictory. Do not weaken trusted hosts, durability checks,
 wallet allowlists, amount caps, or owner authentication to make a deployment
@@ -239,13 +247,15 @@ start.
 
 ## Evidence and claim boundary
 
-Active contest build. Credential-free offline mode and deterministic tests are
-implemented first. Live Gemini, Circle, Devpost, and Cloud Run operations require
-owner-authenticated sessions and strict wallet policies.
+Active contest build. Credential-free offline mode and deterministic tests remain
+the reproducible fallback. A deployed Cloud Run order has now verified the
+Gemini productization lane with a private API, synthetic buyer/seller data, mock
+payment, and deterministic offline fulfillment.
 
 At this repository snapshot:
 
-- no live Gemini order receipt is committed;
+- one redacted deployed Gemini productization receipt is committed;
+- the public web deployment is connected to the private IAM-protected API;
 - no Circle Agent Wallet transaction proof is committed;
 - no real funds have moved through this implementation;
 - no external customer, revenue, margin, or production-availability claim is

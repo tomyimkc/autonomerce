@@ -130,6 +130,15 @@ test("DEMO deploy is explicit, synthetic, public, and clears backend secrets", a
   assert.ok(result.args.includes("--allow-unauthenticated"));
   assert.ok(result.args.includes("--invoker-iam-check"));
   assert.ok(result.args.includes("--clear-secrets"));
+  assert.equal(
+    argumentValue(result.args, "--labels"),
+    [
+      "autonomerce-exposure=public",
+      "autonomerce-web-mode=demo",
+      "autonomerce-mode=demo",
+      "autonomerce-payment=offline",
+    ].join(","),
+  );
   const env = argumentValue(result.args, "--set-env-vars");
   assert.match(env, /AUTONOMERCE_WEB_MODE=DEMO/);
   assert.match(env, /AUTONOMERCE_DEMO_SYNTHETIC_ONLY=true/);
@@ -158,6 +167,15 @@ test("LIVE deploy enables IAM with a pinned private-origin audience and one inst
   assert.equal(argumentValue(result.args, "--max"), "1");
   assert.equal(argumentValue(result.args, "--max-instances"), "1");
   assert.equal(argumentValue(result.args, "--concurrency"), "1");
+  assert.equal(
+    argumentValue(result.args, "--labels"),
+    [
+      "autonomerce-exposure=public",
+      "autonomerce-web-mode=live",
+      "autonomerce-mode=live-bff",
+      "autonomerce-payment=offline",
+    ].join(","),
+  );
   const env = argumentValue(result.args, "--set-env-vars");
   assert.match(env, /AUTONOMERCE_WEB_MODE=LIVE/);
   assert.match(

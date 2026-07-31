@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "autonomerce.build.public.v1",
+  "recordKind": "build_identity",
+  "evidenceClassification": "live_verified_offline_payment",
+  "source": {
+    "publicRepository": "https://github.com/tomyimkc/autonomerce",
+    "sophiaPullRequest": 1781,
+    "sophiaMergeCommit": "626bba7ff8a55c037ab0ffe183b7617b43907864",
+    "sophiaFastCiRun": "https://github.com/tomyimkc/sophia-agi/actions/runs/30635229283"
+  },
+  "cloud": {
+    "projectId": "gen-lang-client-0791755511",
+    "region": "us-central1",
+    "publicWebUrl": "https://autonomerce-web-6dnob6ekdq-uc.a.run.app",
+    "publicWebNumericUrl": "https://autonomerce-web-908139148745.us-central1.run.app",
+    "privateApiUrl": "https://autonomerce-api-908139148745.us-central1.run.app",
+    "apiRevision": "autonomerce-api-00002-n8h",
+    "apiRevisionCreatedAt": "2026-07-31T15:28:17.166848Z",
+    "apiImage": "us-central1-docker.pkg.dev/gen-lang-client-0791755511/autonomerce/api@sha256:e210879da41ae2920f04211db5ffb5860eca8e8bd5d8cf3b44ba9e15600ac664",
+    "webRevision": "autonomerce-web-00004-r5p",
+    "webRevisionCreatedAt": "2026-07-31T15:47:01.258858Z",
+    "webImage": "us-central1-docker.pkg.dev/gen-lang-client-0791755511/autonomerce/web@sha256:a961a3b26da27ef4c198d7f77bd4f4305c01a9c362a5742c6b0284fe0b96a2d0",
+    "containerBuildReceipts": [
+      {
+        "component": "api",
+        "id": "a8641436-633a-4bf1-aff1-d61563998a2b"
+      },
+      {
+        "component": "web",
+        "id": "0e71d99e-ee22-45ca-a90f-3fff9b85eb4a"
+      }
+    ]
+  },
+  "runtime": {
+    "runtimeMode": "gemini",
+    "productizer": "google:gemini-2.5-flash",
+    "paymentMode": "offline",
+    "paymentAdapter": "offline:mock",
+    "fulfillmentAdapter": "offline:deterministic",
+    "movesFunds": false,
+    "storage": "memory",
+    "webToApiAuthentication": [
+      "Cloud Run IAM identity token",
+      "application bearer"
+    ],
+    "apiPublicInvokerBindings": [],
+    "apiAllowedInvoker": "autonomerce-web runtime service account"
+  },
+  "verification": {
+    "publicStatusHttp": 200,
+    "publicStatusConnected": true,
+    "ownerLoginHttp": 200,
+    "onboardingHttp": 201,
+    "workflowHttp": 201,
+    "idempotentReplayHttp": 201,
+    "idempotentReplaySameProposal": true,
+    "idempotentReplaySamePayment": true
+  },
+  "claimBoundary": [
+    "The public web service is connected to a private IAM-protected API.",
+    "The deployed API uses Vertex AI Gemini for productization.",
+    "Payment and fulfillment are offline and synthetic.",
+    "No real funds moved and no revenue is claimed."
+  ],
+  "evidenceGeneratedAt": "2026-07-31T15:32:52.202804Z"
+}

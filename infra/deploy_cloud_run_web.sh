@@ -180,6 +180,7 @@ env_vars=(
 )
 deploy_shape_args=()
 secret_args=()
+web_labels=""
 
 case "$mode" in
   DEMO)
@@ -212,6 +213,7 @@ case "$mode" in
       --max-instances 3
     )
     secret_args=(--clear-secrets)
+    web_labels="autonomerce-exposure=public,autonomerce-web-mode=demo,autonomerce-mode=demo,autonomerce-payment=offline"
     ;;
   LIVE)
     [[ -n "${AUTONOMERCE_API_PRIVATE_ORIGIN:-}" ]] ||
@@ -303,6 +305,7 @@ case "$mode" in
       --set-secrets
       "AUTONOMERCE_API_BEARER_TOKEN=${secret_refs[0]},AUTONOMERCE_WEB_OWNER_TOKEN=${secret_refs[1]},AUTONOMERCE_WEB_SESSION_SECRET=${secret_refs[2]}"
     )
+    web_labels="autonomerce-exposure=public,autonomerce-web-mode=live,autonomerce-mode=live-bff,autonomerce-payment=offline"
     ;;
 esac
 
@@ -328,7 +331,7 @@ gcloud run deploy "$service" \
   "${deploy_shape_args[@]}" \
   --set-env-vars "$env_csv" \
   "${secret_args[@]}" \
-  --labels "autonomerce-exposure=public,autonomerce-web-mode=$(printf '%s' "$mode" | tr '[:upper:]' '[:lower:]')"
+  --labels "$web_labels"
 
 echo "DEPLOYMENT COMPLETE: public web mode=${mode}, origin=${public_origin}."
 if [[ "$mode" == "DEMO" ]]; then

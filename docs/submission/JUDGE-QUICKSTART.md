@@ -1,11 +1,13 @@
 # Autonomerce / OfferRail — judge quickstart
 
-`submission draft: 2026-07-31` · `candidateOnly: true` · `current demo: synthetic/offline`
+`submission draft: 2026-07-31` · `candidateOnly: true` ·
+`Gemini: live_verified` · `payment: synthetic/offline`
 
-> **Evidence boundary:** the repository contains an integrated, credential-free
-> OfferRail workflow and live-adapter code, but the approved public evidence does
-> **not** yet contain a real Gemini call, Circle Agent Wallet transaction,
-> external customer, revenue, public deployment, or production result.
+> **Evidence boundary:** the public Cloud Run application is connected to a
+> private IAM-protected API and one deployed `gemini-2.5-flash` productization
+> call is recorded in [`../../evidence/public/`](../../evidence/public/).
+> Payment and fulfillment remain synthetic/offline. There is still no Circle
+> Agent Wallet transaction, external customer, revenue, or production result.
 
 ## If you have 30 seconds
 
@@ -33,14 +35,15 @@ cannot widen price, scope, capacity, wallet, token, chain, settlement, or
 acceptance authority. Payment confirmation and delivery acceptance are separate,
 and one accepted proposal is bound to at most one settlement.
 
-**What can be verified now:** a reproducible offline workflow, typed contracts,
-policy denials, idempotent payment replay, fulfillment validation, redaction,
-and evidence schemas. The offline provider and simulated Circle executor make
-zero network calls and move zero real funds.
+**What can be verified now:** a deployed Gemini productization call, a public
+owner-session-protected BFF connected to a private API, a reproducible offline
+workflow, typed contracts, policy denials, idempotent payment replay,
+fulfillment validation, redaction, and evidence schemas. The deployed judged
+trace used synthetic buyer/seller data, mock payment, and zero real funds.
 
-**What still needs real proof:** `[LIVE_GEMINI_ORDER]`,
-`[CIRCLE_AGENT_WALLET]`, `[VERIFIABLE_USDC_TRANSACTION]`,
-`[PUBLIC_DEPLOYMENT]`, and `[EXTERNAL_CUSTOMER_AND_UNIT_ECONOMICS]`.
+**What still needs real proof:** `[CIRCLE_AGENT_WALLET]`,
+`[VERIFIABLE_USDC_TRANSACTION]`, and
+`[EXTERNAL_CUSTOMER_AND_UNIT_ECONOMICS]`.
 
 Start here:
 
@@ -134,7 +137,7 @@ these gates: `[PUBLIC_CI_RUN_URL]`.
 | Target | Judge-first case | Current repository evidence | Evidence still required |
 |---|---|---|---|
 | Build — Business Viability | Converts an existing callable agent into a metered seller with a fee/revenue-share path and defined unit economics. | business model, portable adapter architecture, pricing/cost definitions, evidence schemas, and strict revenue exclusions | `[REAL_USERS]`, `[ARMS_LENGTH_REVENUE]`, `[DELIVERED_PAID_ORDERS]`, `[ALL_EXPENSES]`, `[MARKETING_SPEND]`, and `[MARGIN_SNAPSHOT]` |
-| Build — AI-Native Operations | Gemini is intended to make structured productization, fit, proposal, negotiation, or delivery-summary decisions inside deterministic authority. | Gemini provider and typed decision services; tests for structured output and policy non-expansion | `[DEPLOYED_GEMINI_CALL]` materially used by the recorded order plus production execution evidence |
+| Build — AI-Native Operations | Gemini makes structured productization decisions inside deterministic authority. | deployed `gemini-2.5-flash` productization receipt, resulting SKU, Cloud Run revision, request latency, provider code, and policy non-expansion tests | token/cost capture, served-model metadata if exposed, and broader production execution evidence |
 | Build — Category Impact | Gives owners of useful agents a reusable path to activate a seller in Entrepreneurship & Job Creation rather than build a bespoke sales stack. | onboarding and OfferRail lifecycle implemented; seller activation metric defined | `[EXTERNAL_INTERVIEWS]`, `[EXTERNAL_SELLER_ACTIVATION]`, `[PAYING_CUSTOMERS]`, `[CUSTOMER_FEEDBACK]`, and no unsupported job-count claim |
 | Circle — Creativeness & Innovation | Binds an agent-native commercial contract to settlement and delivery evidence, rather than adding a generic checkout button. | proposal/payment/fulfillment contracts and receipts | working public comparison/demo and `[REAL_TRANSACTION_PROOF]` |
 | Circle — Centrality to Business | The commercial loop cannot complete without settlement bound to the accepted proposal. | strict payment authorization, receipt verification hooks, and separate delivery state | `[CIRCLE_AGENT_WALLET]` plus one order-linked USDC settlement |
@@ -175,12 +178,8 @@ Never collapse these states into “real,” “live,” “customer,” “reve
 
 ## Blocking placeholders before final submission
 
-- `[PUBLIC_REPOSITORY_URL]`
-- `[PUBLIC_APP_URL]`
 - `[UNDER_3_MINUTE_VIDEO_URL]`
 - `[PUBLIC_EVIDENCE_INDEX_URL]`
-- `[DEPLOYED_REVISION_AND_COMMIT]`
-- `[LIVE_GEMINI_CALL_EVIDENCE_URL]`
 - `[CIRCLE_AGENT_WALLET_ADDRESS]`
 - `[WALLET_POLICY_EVIDENCE_URL]`
 - `[VERIFIED_TRANSACTION_EXPLORER_URL]`
@@ -191,3 +190,13 @@ Never collapse these states into “real,” “live,” “customer,” “reve
 
 If a blocking artifact is absent, leave the corresponding public claim absent
 or state the gap explicitly.
+
+Current resolved links:
+
+- public repository: `https://github.com/tomyimkc/autonomerce`
+- public application:
+  `https://autonomerce-web-6dnob6ekdq-uc.a.run.app`
+- deployed build:
+  [`../../evidence/public/build-identity.json`](../../evidence/public/build-identity.json)
+- deployed Gemini call:
+  [`../../evidence/public/gemini-call.redacted.json`](../../evidence/public/gemini-call.redacted.json)

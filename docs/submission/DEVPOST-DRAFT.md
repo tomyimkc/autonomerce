@@ -13,11 +13,12 @@ assemble one 500–1000 word version, record its word count, and retain the
 human-versus-AI operations, economic-opportunity, build-story, revenue,
 expense, customer, and evidence statements required by the live form.
 
-**Current evidence boundary:** the integrated demo is deterministic and
-offline. It calls no external service, uses no credentials, and moves no real
-funds. There is not yet approved public proof of a live Gemini order, Circle
-Agent Wallet transaction, external customer, revenue, public deployment, or
-production result.
+**Current evidence boundary:** the public Cloud Run application is connected to
+a private IAM-protected API, and one deployed `gemini-2.5-flash`
+productization call is recorded with its revision, latency, output hash, and
+resulting SKU. The linked payment and fulfillment remain synthetic/offline and
+move no funds. There is not yet approved proof of a Circle Agent Wallet
+transaction, external customer, revenue, or production result.
 
 Official criteria were reviewed on 2026-07-31. Recheck immediately before
 recording and again before submission:
@@ -33,13 +34,14 @@ recording and again before submission:
 - **Main category:** Entrepreneurship & Job Creation
 - **Sponsor target:** Circle Agentic Economy Prize
 - **Entrant:** individual owner
-- **Repository:** `[PUBLIC_REPOSITORY_URL — REQUIRED FOR CIRCLE]`
-- **Application:** `[PUBLIC_APP_URL]`
+- **Repository:** `https://github.com/tomyimkc/autonomerce`
+- **Application:** `https://autonomerce-web-6dnob6ekdq-uc.a.run.app`
 - **Video:** `[UNDER_3_MINUTE_VIDEO_URL]`
-- **Evidence:** `[PUBLIC_EVIDENCE_INDEX_URL]`
+- **Evidence:** `evidence/public/` plus this repository evidence index
 - **Circle Agent Wallet:** `[PUBLIC_WALLET_ADDRESS]`
 - **Transaction:** `[VERIFIED_TRANSACTION_EXPLORER_URL]`
-- **Submission commit/deployment:** `[COMMIT]` / `[DEPLOYED_REVISION]`
+- **Submission commit/deployment:** `626bba7ff8a55c037ab0ffe183b7617b43907864` /
+  API `autonomerce-api-00002-n8h` / web `autonomerce-web-00004-r5p`
 - **Final narrative word count:** `[500_TO_1000]`
 
 ## Judge-first 30-second read
@@ -77,15 +79,18 @@ and delivery acceptance. Circle is intended to execute the accepted USDC
 settlement inside a standing owner policy, not as a disconnected checkout
 button. Payment confirmation never marks delivery successful.
 
-### What the repository proves today
+### What the repository and deployment prove today
 
 The repository contains a credential-free integrated offline workflow, typed
 contracts, model-authority boundaries, opt-in enforcement, bounded negotiation,
 simulated idempotent payment, fulfillment validation, redaction, persistence and
 reconciliation primitives, public-evidence schemas, and adversarial test targets.
 
-It does **not** yet prove live Gemini use, Circle Agent Wallet eligibility, a
-real transaction, a customer, revenue, deployment, or production readiness.
+The public deployment additionally proves that the owner-session-protected BFF
+can call the private API through Cloud Run IAM and that Gemini can productize
+the synthetic seller capability into the SKU used by the recorded order. It
+does **not** prove Circle Agent Wallet eligibility, a real transaction, a
+customer, revenue, or production readiness.
 
 ## One-line summary
 
@@ -172,11 +177,15 @@ not remove the controls: deterministic code remains authoritative for price,
 scope, capacity, buyer eligibility, token, chain, wallets, payment, idempotency,
 and delivery acceptance.
 
-**Current Gemini evidence:** `GeminiDecisionProvider` and typed decision services
-are implemented. The integrated offline demo deliberately uses a deterministic
-provider. Final copy may state that Gemini was used by the judged order only
-after `[LIVE_GEMINI_CALL_EVIDENCE_URL]` records the model/config, UTC timestamp,
-structured output or hash, resulting order object, and deployed revision.
+**Current Gemini evidence:** the private Cloud Run API revision
+`autonomerce-api-00002-n8h` executed a `gemini-2.5-flash` productization request
+on July 31, 2026 at `15:32:42Z`. The `/skus/preview` request completed in
+`8863.405802 ms`, returned SKU
+`sku_22c7fbe3d7c9bc675c292e36`, and is linked to the synthetic order in
+[`../../evidence/public/gemini-call.redacted.json`](../../evidence/public/gemini-call.redacted.json).
+The served-model identifier, token usage, and cost were not exposed and are not
+inferred. The credential-free offline demo separately retains its deterministic
+provider.
 
 ## How Circle is central
 
@@ -320,14 +329,12 @@ These are implementation statements. The final submission revision should link
 
 The approved public evidence does not yet contain:
 
-1. a deployed Gemini-in-the-loop judged order;
-2. Circle Agent Wallet product/policy proof;
-3. a real, independently verifiable USDC transaction;
-4. footage proving no per-payment approval inside standing policy;
-5. a public deployment receipt and stable public URL;
-6. an external customer, paid delivery, customer quote, revenue, repeat
+1. Circle Agent Wallet product/policy proof;
+2. a real, independently verifiable USDC transaction;
+3. footage proving no per-payment approval inside standing policy;
+4. an external customer, paid delivery, customer quote, revenue, repeat
    purchase, measured variable costs, or margin;
-7. an external security audit or broad production-scale proof.
+5. an external security audit or broad production-scale proof.
 
 See [`KNOWN-LIMITATIONS.md`](KNOWN-LIMITATIONS.md). These are blocking evidence
 gaps, not implied private accomplishments.

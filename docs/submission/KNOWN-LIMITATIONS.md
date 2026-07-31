@@ -8,17 +8,16 @@ before publishing.
 
 ## Contest-critical open gaps
 
-1. **No live Gemini judged-order proof is committed here.** A structured Gemini
-   provider and typed decision services exist, but the integrated demo uses the
-   deterministic offline provider.
+1. **The deployed Gemini proof covers productization only.** It uses synthetic
+   seller data and records no external customer, served-model metadata, token
+   usage, or cost.
 2. **No Circle Agent Wallet proof is committed here.** The payment lane includes
    guarded Circle CLI execution and an API adapter, but offline mode is the
    default.
 3. **No real verifiable USDC transaction is approved in public evidence.**
-4. **No public Cloud Run deployment receipt or live URL is approved here.**
-5. **No external customer, design-partner, revenue, repeat-purchase, customer
+4. **No external customer, design-partner, revenue, repeat-purchase, customer
    quote, or measured margin record is approved here.**
-6. **Circle sponsor eligibility is therefore not yet evidenced.**
+5. **Circle sponsor eligibility is therefore not yet evidenced.**
 
 These are blocking evidence gaps, not permission to imply that setup happened
 privately.
@@ -57,11 +56,12 @@ privately.
 
 - The Gemini provider is optional and depends on owner-authenticated Google
   configuration.
-- No live token usage, cost, latency, requested/served model record, or deployed
-  call receipt is present in this evidence lane.
+- A deployed productization call records the requested model, Cloud Run revision,
+  latency, structured result, and output hash. The served model identifier,
+  token usage, and cost were not exposed and are not inferred.
 - The default model string in code may not be the final pinned submission model.
-- The deployed application must explicitly select and evidence a stable Gemini
-  model; offline mode reports the deterministic provider instead.
+- The public judging deployment explicitly selects `gemini-2.5-flash`; the
+  credential-free local demo still reports the deterministic provider instead.
 - Model output controls advisory display copy and relevance only. Price,
   latency, capacity, schemas, acceptance criteria, wallets, token, chain, and
   settlement remain deterministic. This deliberately limits model authority.
@@ -92,10 +92,11 @@ privately.
 
 ## Web limitations
 
-- DEMO mode is a local synthetic replay.
+- DEMO mode is a synthetic replay.
 - LIVE mode uses a server-side backend-for-frontend, a signed short-lived owner
-  session, and the private FastAPI bearer. A real-backend offline integration
-  test covers onboarding through receipt publication and metrics.
+  session, a Cloud Run IAM identity token, and the private FastAPI bearer. The
+  public deployment completed onboarding and one workflow against the private
+  Gemini API with funds movement disabled.
 - The named seller, buyer agents, orders, transaction hash, revenue amounts,
   conversion rate, trends, deltas, and autonomy report shown in DEMO mode are
   synthetic fixtures.
@@ -111,8 +112,8 @@ privately.
   operation/payment key. It is not a distributed workflow engine.
 - Proposal identity includes the exact buyer-need ID, and fulfillment resolves
   that need rather than selecting the first prospect sharing a buyer URL.
-- The integration test uses the deterministic offline backend; it is not proof
-  of deployed Gemini or Circle operation.
+- The deployed trace proves Gemini productization only. Its payment and
+  fulfillment adapters remain offline and do not prove Circle operation.
 - Any presentation-only control must be removed or clearly labeled before final
   contest footage.
 

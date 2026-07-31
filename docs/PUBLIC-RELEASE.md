@@ -24,8 +24,11 @@ live payment success, or security certification.
 
 Run the helper from the Sophia monorepo with the complete history of
 `projects/autonomerce`. A shallow monorepo is accepted only when the project is
-absent at every shallow boundary, proving that the available history includes
-the project's introduction. The following commands must already be available:
+absent at every actual shallow boundary commit recorded by Git, proving that
+the available history includes the project's introduction. Path-limited
+`git rev-list --boundary` traversal markers are not repository shallow
+boundaries and do not block publication. The following commands must already be
+available:
 
 - `git`, including `git subtree`;
 - `gh`;

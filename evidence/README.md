@@ -2,14 +2,12 @@
 
 Public evidence belongs here only after redaction and owner consent.
 
-## Required public artifacts
+## Current public artifacts
 
-- `architecture.md`
-- `demo-script.md`
-- `metrics-definition.md`
-- `customer-evidence.public.json`
-- `transactions.public.json`
-- `limitations.md`
+- [`public/build-identity.json`](public/build-identity.json)
+- [`public/gemini-call.redacted.json`](public/gemini-call.redacted.json)
+- [`public/transactions.public.json`](public/transactions.public.json)
+- [`public/README.md`](public/README.md)
 
 ## Private, untracked artifacts
 
@@ -38,5 +36,6 @@ Keep under `evidence/private/`:
 }
 ```
 
-Never count a wallet-to-self transfer, founder transfer, testnet transfer, or unpaid demo
-as customer revenue.
+Never count a wallet-to-self transfer, founder transfer, testnet transfer, or
+unpaid demo as customer revenue. The current deployed order used live Gemini but
+an offline mock payment and therefore reports zero qualifying revenue.

@@ -161,18 +161,26 @@ if [[ -n "$PROJECT_STATUS" ]]; then
 fi
 
 if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
-  TRUNCATED_PROJECT_BOUNDARY=""
-  while IFS= read -r boundary_commit; do
-    if git cat-file -e "$boundary_commit:$PREFIX" 2>/dev/null; then
-      TRUNCATED_PROJECT_BOUNDARY="$boundary_commit"
-      break
-    fi
-  done < <(
-    git rev-list --boundary HEAD -- "$PREFIX" |
-      sed -n 's/^-//p'
-  )
-  [[ -z "$TRUNCATED_PROJECT_BOUNDARY" ]] ||
-    blocked "the shallow boundary $TRUNCATED_PROJECT_BOUNDARY contains $PREFIX; fetch the missing project history before publication"
+  SHALLOW_FILE="$(git rev-parse --git-path shallow 2>/dev/null)" ||
+    blocked "could not locate the repository shallow-boundary file"
+  [[ -n "$SHALLOW_FILE" && -r "$SHALLOW_FILE" ]] ||
+    blocked "the repository is shallow but its shallow-boundary file is unavailable"
+
+  SHALLOW_BOUNDARY_COUNT=0
+  while IFS= read -r boundary_commit || [[ -n "$boundary_commit" ]]; do
+    [[ "$boundary_commit" =~ ^([0-9a-fA-F]{40}|[0-9a-fA-F]{64})$ ]] ||
+      blocked "the repository shallow-boundary file contains an invalid commit id"
+    SHALLOW_BOUNDARY_COUNT=$((SHALLOW_BOUNDARY_COUNT + 1))
+
+    BOUNDARY_PROJECT_ENTRY="$(
+      git ls-tree "$boundary_commit" -- "$PREFIX"
+    )" || blocked "could not inspect shallow boundary $boundary_commit"
+    [[ -z "$BOUNDARY_PROJECT_ENTRY" ]] ||
+      blocked "the shallow boundary $boundary_commit contains $PREFIX; fetch the missing project history before publication"
+  done <"$SHALLOW_FILE"
+
+  [[ "$SHALLOW_BOUNDARY_COUNT" -gt 0 ]] ||
+    blocked "the repository is shallow but has no recorded shallow boundaries"
 fi
 
 case "$VISIBILITY" in

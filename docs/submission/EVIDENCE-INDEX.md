@@ -12,15 +12,17 @@ passed, that an external service was used, or that a business result occurred.
 | Area | Current approved state | Safe public wording |
 |---|---|---|
 | OfferRail lifecycle | implemented; reproducible offline demo available | “Integrated credential-free offline workflow; fixtures only.” |
-| Gemini | provider and typed decision boundaries implemented | “Gemini integration code exists; live judged-order proof is pending.” |
+| Gemini | deployed Vertex AI productization call recorded on the private Cloud Run API | “One deployed `gemini-2.5-flash` call productized the synthetic source-verification seller; payment remained offline.” |
 | Circle | guarded payment, policy, persistence, x402, verification, and reconciliation code implemented | “Circle payment lane exists; Agent Wallet and real-transaction proof are pending.” |
-| Web/API | local synthetic replay and runnable API code exist | “Local demo/API available; public deployment proof is pending.” |
+| Web/API | public Cloud Run LIVE BFF connected to a private IAM-protected API | “Public application is deployed; funds movement is disabled.” |
 | Customers and revenue | no approved public evidence | “Not yet evidenced.” |
 | Circle prize eligibility | required live evidence is incomplete | “Targeting the prize; eligibility proof is pending.” |
 
-The current offline demo is synthetic: it makes zero network calls, uses no
-credentials, moves no real funds, and does not establish Gemini, Circle,
-customer, revenue, deployment, or production claims.
+The credential-free offline demo remains synthetic. Separately, the public
+Cloud Run trace establishes deployed Gemini productization and the private API
+boundary. Its buyer, seller, payment, and fulfillment evidence is synthetic;
+it moves no real funds and does not establish Circle, customer, revenue, or
+production claims.
 
 ## Evidence status key
 
@@ -55,13 +57,13 @@ below. Do not assemble one apparent order from unrelated runs.
 
 | Step | Required public fields | Current artifact | Final evidence placeholder |
 |---|---|---|---|
-| Build identity | repository commit, deployed revision, UTC timestamp, public app URL | deployment and preflight scripts exist | `[BUILD_IDENTITY_EVIDENCE_URL]` |
+| Build identity | repository commit, deployed revision, UTC timestamp, public app URL | [`../../evidence/public/build-identity.json`](../../evidence/public/build-identity.json) | available |
 | Seller capability | manifest/card type, capability ID, safe public fields | [`../../examples/fixtures/seller-agent-card.json`](../../examples/fixtures/seller-agent-card.json) is synthetic | `[REDACTED_REAL_SELLER_CAPABILITY_URL]` |
-| Gemini decision | operation, requested model, served model if available, config version, UTC time, latency, token/cost record, structured output hash, resulting SKU/proposal ID | implementation listed in G-01 through G-05 below | `[LIVE_GEMINI_CALL_EVIDENCE_URL]` |
+| Gemini decision | operation, requested model, served model if available, config version, UTC time, latency, token/cost record, structured output hash, resulting SKU/proposal ID | [`../../evidence/public/gemini-call.redacted.json`](../../evidence/public/gemini-call.redacted.json); served model and token/cost fields remain unavailable | available with stated gaps |
 | Owner policy | policy ID/version, price/capacity bounds, network/token, wallet/recipient constraints, unattended setting | policy implementation listed in O-03 and C-02 | `[PUBLIC_COMMERCIAL_AND_WALLET_POLICY_URL]` |
 | Buyer opt-in | anonymized buyer/need ID, active consent reference, scope, UTC time | synthetic fixture and enforcement code listed in S-01 through S-03 | `[PUBLIC_OPT_IN_EVIDENCE_URL]` |
 | Proposal/negotiation | proposal ID, revisions, exact amount/scope, expiry, deterministic reason code | OfferRail and sales artifacts listed below | `[PUBLIC_PROPOSAL_EVIDENCE_URL]` |
-| Circle settlement | Agent Wallet address, network, canonical USDC, exact amount, payer/payee, transaction hash, explorer URL, confirmation time, idempotency result | payment implementation listed in C-01 through C-09 | `[VERIFIED_CIRCLE_TRANSACTION_URL]` |
+| Circle settlement | Agent Wallet address, network, canonical USDC, exact amount, payer/payee, transaction hash, explorer URL, confirmation time, idempotency result | [`../../evidence/public/transactions.public.json`](../../evidence/public/transactions.public.json) is synthetic/offline only; payment implementation listed in C-01 through C-09 | `[VERIFIED_CIRCLE_TRANSACTION_URL]` |
 | Fulfillment | seller endpoint class, payment ID, artifact hash, validator, per-criterion results, delivery time | implementation and tests listed in F-01 through F-04 | `[PUBLIC_FULFILLMENT_EVIDENCE_URL]` |
 | Receipt publication | order/proposal/payment/fulfillment IDs, evidence classification, redacted fields, publication consent reference | implementation listed in R-01 through R-05 | `[PUBLIC_REDACTED_RECEIPT_URL]` |
 | Business snapshot | fixed UTC window, external-customer classification, exclusions, refunds, costs, revenue, margin, repeat denominator | templates and definitions listed in B-01 through B-05 | `[PUBLIC_REVENUE_AND_UNIT_ECONOMICS_URL]` |
@@ -83,9 +85,9 @@ below. Do not assemble one apparent order from unrelated runs.
 
 | Claim or judge question | Current proof | Classification | Missing proof |
 |---|---|---|---|
-| Is Gemini part of operational logic? | `GeminiDecisionProvider`, productizer, fit, proposal, negotiation, and delivery decision boundaries | implementation only | `[DEPLOYED_GEMINI_ORDER_URL]` |
+| Is Gemini part of operational logic? | deployed productization call plus `GeminiDecisionProvider`, productizer, fit, proposal, negotiation, and delivery decision boundaries | `live_verified` for productization only | broader deployed-order evidence for other decision stages |
 | Is the output structured? | typed request/response models and provider tests | code/test target | `[REDACTED_LIVE_STRUCTURED_OUTPUT_URL]` |
-| Is Gemini materially used? | architecture makes adaptive productization/sales recommendations replaceable by provider | offline integrated demo uses deterministic provider | recorded order in which Gemini output changes or creates the shown SKU/proposal/action |
+| Is Gemini materially used? | the deployed call produced the SKU used by the recorded synthetic order | productization is live; settlement remains offline | external-customer proof and broader decision-stage evidence |
 | Can the model authorize money or broaden scope? | deterministic clamps and security tests | reproducible offline | `[PUBLIC_CI_RUN_URL]` for final revision |
 | Is model identity known? | provider supports configured model metadata | no approved live receipt | requested/served model, timestamp, latency, config, usage, and cost record |
 
@@ -141,7 +143,7 @@ four bonus-prize criteria above without published weights.
 | G-03 | Buyer fit requires opt-in and policy compatibility. | [`../../apps/api/autonomerce/agents/prospects.py`](../../apps/api/autonomerce/agents/prospects.py) | `tests/test_agents.py` | `REPRODUCIBLE` |
 | G-04 | Proposal and negotiation recommendations remain advisory. | [`../../apps/api/autonomerce/agents/proposals.py`](../../apps/api/autonomerce/agents/proposals.py), [`../../apps/api/autonomerce/agents/negotiation.py`](../../apps/api/autonomerce/agents/negotiation.py) | `tests/test_agents.py` | `REPRODUCIBLE` |
 | G-05 | Delivery summaries cannot self-approve an artifact. | [`../../apps/api/autonomerce/agents/delivery.py`](../../apps/api/autonomerce/agents/delivery.py) | `tests/test_agents.py` | `REPRODUCIBLE` |
-| G-LIVE | A Gemini call materially affected the submitted order. | `[LIVE_GEMINI_CALL_EVIDENCE_URL]` | model/config/order linkage inspection | `BLOCKING PLACEHOLDER` |
+| G-LIVE | A deployed Gemini call productized the SKU used by the recorded synthetic order. | [`../../evidence/public/gemini-call.redacted.json`](../../evidence/public/gemini-call.redacted.json) | Cloud Run revision, request latency, output hash, and SKU/order linkage inspection | `AVAILABLE`; productization only |
 
 ### S — Opted-in sales workflow
 
@@ -205,9 +207,9 @@ associated claim must be removed.
 
 | ID | Artifact | Minimum contents | Claim unlocked | Status |
 |---|---|---|---|---|
-| L-01 | `[PUBLIC_REPOSITORY_URL]` | final tagged commit, license, disclosure, setup, security, limitations | public-source eligibility and reproducibility | `BLOCKING` |
-| L-02 | `[PUBLIC_APP_URL]` | clean-session access, HTTPS, health/status, matching deployed revision | deployed-demo claim | `BLOCKING` for live demo |
-| L-03 | `[LIVE_GEMINI_CALL_EVIDENCE_URL]` | model/config/time/latency/usage, structured output/hash, resulting order object | Gemini used operationally | `BLOCKING` |
+| L-01 | `https://github.com/tomyimkc/autonomerce` | final tagged commit, license, disclosure, setup, security, limitations | public-source eligibility and reproducibility | `AVAILABLE`; final contest tag pending |
+| L-02 | `https://autonomerce-web-6dnob6ekdq-uc.a.run.app` | clean-session access, HTTPS, health/status, matching deployed revision | deployed-demo claim | `AVAILABLE` |
+| L-03 | [`../../evidence/public/gemini-call.redacted.json`](../../evidence/public/gemini-call.redacted.json) | model/config/time/latency, structured output hash, resulting SKU/order linkage | Gemini used operationally for productization | `AVAILABLE`; served-model and usage/cost fields unavailable |
 | L-04 | `[CIRCLE_AGENT_WALLET_EVIDENCE_URL]` | public address, network, product/wallet evidence, policy/version, safe caps/allowlists | required Circle wallet surface used | `BLOCKING` |
 | L-05 | `[VERIFIED_TRANSACTION_EXPLORER_URL]` | independently inspectable exact USDC transfer | real transaction exists | `BLOCKING` |
 | L-06 | `[REDACTED_ORDER_TRANSACTION_DELIVERY_RECORD_URL]` | one-order linkage across proposal, payment, fulfillment, and verdict | Circle is central to the commercial loop | `BLOCKING` |
