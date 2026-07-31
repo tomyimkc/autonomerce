@@ -16,9 +16,11 @@ expense, customer, and evidence statements required by the live form.
 **Current evidence boundary:** the public Cloud Run application is connected to
 a private IAM-protected API, and one deployed `gemini-2.5-flash`
 productization call is recorded with its revision, latency, output hash, and
-resulting SKU. The linked payment and fulfillment remain synthetic/offline and
-move no funds. There is not yet approved proof of a Circle Agent Wallet
-transaction, external customer, revenue, or production result.
+resulting SKU. Separately, a bounded Circle Agent Wallet runner completed one
+independently verified 0.10 USDC Arc testnet transfer and a durable idempotent
+replay. The deployed Gemini order still uses offline payment, and the testnet
+settlement is not an external customer, revenue, accepted delivery, mainnet, or
+production result.
 
 Official criteria were reviewed on 2026-07-31. Recheck immediately before
 recording and again before submission:
@@ -38,8 +40,8 @@ recording and again before submission:
 - **Application:** `https://autonomerce-web-6dnob6ekdq-uc.a.run.app`
 - **Video:** `[UNDER_3_MINUTE_VIDEO_URL]`
 - **Evidence:** `evidence/public/` plus this repository evidence index
-- **Circle Agent Wallet:** `[PUBLIC_WALLET_ADDRESS]`
-- **Transaction:** `[VERIFIED_TRANSACTION_EXPLORER_URL]`
+- **Circle Agent Wallet:** `0xd5eaf79637decd656e3adb52985cf0afb6cc29d8`
+- **Transaction:** `https://testnet.arcscan.app/tx/0xb3a036d46b71e93d37b69ddf1046ff1d708d1c4b33db73b863a4fa3d4a2f7d56`
 - **Submission commit/deployment:** `626bba7ff8a55c037ab0ffe183b7617b43907864` /
   API `autonomerce-api-00002-n8h` / web `autonomerce-web-00004-r5p`
 - **Final narrative word count:** `[500_TO_1000]`
@@ -88,9 +90,11 @@ reconciliation primitives, public-evidence schemas, and adversarial test targets
 
 The public deployment additionally proves that the owner-session-protected BFF
 can call the private API through Cloud Run IAM and that Gemini can productize
-the synthetic seller capability into the SKU used by the recorded order. It
-does **not** prove Circle Agent Wallet eligibility, a real transaction, a
-customer, revenue, or production readiness.
+the synthetic seller capability into the SKU used by the recorded order. A
+separate testnet runner proves bounded Circle Agent Wallet execution, canonical
+USDC verification, and idempotent replay. The two traces are not yet one
+deployed commercial order and do **not** prove a customer, revenue, mainnet
+settlement, accepted delivery, or production readiness.
 
 ## One-line summary
 
@@ -206,11 +210,20 @@ guarded Circle CLI execution, an API payment adapter, x402
 `PAYMENT-REQUIRED` parsing, receipt verification hooks, and explicit mainnet
 enablement controls.
 
-**Current Circle evidence:** offline mode is the default and moves no funds.
-Do not claim that a Circle Agent Wallet was used, a real transaction occurred,
-the prize eligibility bar was met, or customer revenue exists until the public
-wallet, wallet product/policy evidence, transaction hash, explorer link, order
-linkage, no-per-payment-approval footage, and publication consent are present.
+**Current Circle evidence:** the default deployed Cloud Run path remains
+offline-payment. Separately, the bounded testnet runner used two Circle Agent
+Wallets on `ARC-TESTNET` to transfer exactly `0.10` canonical USDC. Arc RPC,
+Circle history, and before/after balances independently match transaction
+`0xb3a036d46b71e93d37b69ddf1046ff1d708d1c4b33db73b863a4fa3d4a2f7d56`.
+The same durable order was replayed with the same proposal, payment, and
+transaction identifiers and no second transfer. Two earlier attempts were
+honestly recorded as not submitted: a missing Node interpreter and a
+non-UUID Circle wire idempotency key. This is founder-owned testnet integration
+evidence, not customer revenue. The sponsor page says “real, verifiable USDC”
+without explicitly confirming that Arc testnet satisfies that requirement, so
+the draft does not treat this transfer as a final eligibility determination.
+Final deployed-order linkage, fulfillment, video proof, external customer
+evidence, and any mainnet decision remain open.
 
 ## Autonomy and safety
 
@@ -382,7 +395,8 @@ to validated delivery to measured cost.
 2. run a Gemini-backed productization/proposal decision used by the recorded
    order;
 3. connect an owner-policy-bound Circle Agent Wallet;
-4. complete testnet proof, then a tightly capped real USDC proof if approved;
+4. retain the completed testnet proof, then consider a tightly capped mainnet
+   proof only with fresh owner approval;
 5. onboard external design partners and one arms-length buyer;
 6. publish consented, redacted order/transaction/delivery evidence;
 7. measure all variable costs and generate the public revenue snapshot;
@@ -398,8 +412,10 @@ Wallets, USDC, x402, A2A, FastAPI, Pydantic, Python, Next.js, React, TypeScript,
 SQLite, Docker, and pytest.
 
 Retain a technology in the submitted list only if the public submission build
-actually uses it. For the current repository snapshot, live Gemini, Google Cloud,
-Circle Agent Wallet, and real USDC usage remain pending evidence.
+actually uses it. For the current repository snapshot, live Gemini and Google
+Cloud are evidenced in the deployment trace, while Circle Agent Wallet and USDC
+are evidenced by a separate Arc testnet transaction. The combined deployed
+commercial order remains pending.
 
 ## Judging-criteria map
 

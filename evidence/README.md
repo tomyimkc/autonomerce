@@ -7,6 +7,8 @@ Public evidence belongs here only after redaction and owner consent.
 - [`public/build-identity.json`](public/build-identity.json)
 - [`public/gemini-call.redacted.json`](public/gemini-call.redacted.json)
 - [`public/transactions.public.json`](public/transactions.public.json)
+- [`public/wallet-policy.redacted.json`](public/wallet-policy.redacted.json)
+- [`public/circle-arc-testnet-transaction.public.json`](public/circle-arc-testnet-transaction.public.json)
 - [`public/README.md`](public/README.md)
 
 ## Private, untracked artifacts
@@ -37,5 +39,6 @@ Keep under `evidence/private/`:
 ```
 
 Never count a wallet-to-self transfer, founder transfer, testnet transfer, or
-unpaid demo as customer revenue. The current deployed order used live Gemini but
-an offline mock payment and therefore reports zero qualifying revenue.
+unpaid demo as customer revenue. The deployed Gemini order used an offline mock
+payment. The separate Arc testnet transfer moved test-value USDC between
+founder-owned Agent Wallets and also reports zero qualifying revenue.

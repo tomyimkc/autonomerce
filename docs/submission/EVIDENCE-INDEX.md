@@ -13,16 +13,17 @@ passed, that an external service was used, or that a business result occurred.
 |---|---|---|
 | OfferRail lifecycle | implemented; reproducible offline demo available | “Integrated credential-free offline workflow; fixtures only.” |
 | Gemini | deployed Vertex AI productization call recorded on the private Cloud Run API | “One deployed `gemini-2.5-flash` call productized the synthetic source-verification seller; payment remained offline.” |
-| Circle | guarded payment, policy, persistence, x402, verification, and reconciliation code implemented | “Circle payment lane exists; Agent Wallet and real-transaction proof are pending.” |
+| Circle | one bounded Circle Agent Wallet Arc testnet transfer independently verified; deployed Gemini order still uses offline payment | “0.10 USDC Arc testnet integration and idempotent replay verified; not revenue or a deployed end-to-end order.” |
 | Web/API | public Cloud Run LIVE BFF connected to a private IAM-protected API | “Public application is deployed; funds movement is disabled.” |
 | Customers and revenue | no approved public evidence | “Not yet evidenced.” |
-| Circle prize eligibility | required live evidence is incomplete | “Targeting the prize; eligibility proof is pending.” |
+| Circle prize eligibility | wallet and transaction proof available; testnet sufficiency is not assumed; final video and deployed order linkage incomplete | “Targeting the prize with testnet evidence; final eligibility proof is still pending.” |
 
 The credential-free offline demo remains synthetic. Separately, the public
 Cloud Run trace establishes deployed Gemini productization and the private API
-boundary. Its buyer, seller, payment, and fulfillment evidence is synthetic;
-it moves no real funds and does not establish Circle, customer, revenue, or
-production claims.
+boundary. Its buyer, seller, payment, and fulfillment evidence is synthetic.
+The separate Circle trace establishes one testnet settlement only. Neither
+trace establishes a customer, revenue, accepted external delivery, mainnet, or
+production claim.
 
 ## Evidence status key
 
@@ -42,7 +43,8 @@ Evidence classifications remain separate:
 | ID | Purpose | Artifact | Status |
 |---|---|---|---|
 | J-01 | 30-second product and evidence orientation | [`JUDGE-QUICKSTART.md`](JUDGE-QUICKSTART.md) | `AVAILABLE` |
-| J-02 | Full submission copy and replacement rules | [`DEVPOST-DRAFT.md`](DEVPOST-DRAFT.md) | `AVAILABLE` |
+| J-02 | Full submission source library and replacement rules | [`DEVPOST-DRAFT.md`](DEVPOST-DRAFT.md) | `AVAILABLE` |
+| J-02A | Paste-ready 500–1000 word narrative candidate | [`DEVPOST-FINAL-CANDIDATE.md`](DEVPOST-FINAL-CANDIDATE.md) | `AVAILABLE`; owner review required |
 | J-03 | Final live/offline operating sequence | [`DEMO-RUNBOOK.md`](DEMO-RUNBOOK.md) | `AVAILABLE` |
 | J-04 | Detailed three-minute shot plan | [`VIDEO-STORYBOARD.md`](VIDEO-STORYBOARD.md) | `AVAILABLE` |
 | J-05 | Current gaps and non-goals | [`KNOWN-LIMITATIONS.md`](KNOWN-LIMITATIONS.md) | `AVAILABLE` |
@@ -63,7 +65,7 @@ below. Do not assemble one apparent order from unrelated runs.
 | Owner policy | policy ID/version, price/capacity bounds, network/token, wallet/recipient constraints, unattended setting | policy implementation listed in O-03 and C-02 | `[PUBLIC_COMMERCIAL_AND_WALLET_POLICY_URL]` |
 | Buyer opt-in | anonymized buyer/need ID, active consent reference, scope, UTC time | synthetic fixture and enforcement code listed in S-01 through S-03 | `[PUBLIC_OPT_IN_EVIDENCE_URL]` |
 | Proposal/negotiation | proposal ID, revisions, exact amount/scope, expiry, deterministic reason code | OfferRail and sales artifacts listed below | `[PUBLIC_PROPOSAL_EVIDENCE_URL]` |
-| Circle settlement | Agent Wallet address, network, canonical USDC, exact amount, payer/payee, transaction hash, explorer URL, confirmation time, idempotency result | [`../../evidence/public/transactions.public.json`](../../evidence/public/transactions.public.json) is synthetic/offline only; payment implementation listed in C-01 through C-09 | `[VERIFIED_CIRCLE_TRANSACTION_URL]` |
+| Circle settlement | Agent Wallet address, network, canonical USDC, exact amount, payer/payee, transaction hash, explorer URL, confirmation time, idempotency result | [`../../evidence/public/circle-arc-testnet-transaction.public.json`](../../evidence/public/circle-arc-testnet-transaction.public.json) and [`../../evidence/public/wallet-policy.redacted.json`](../../evidence/public/wallet-policy.redacted.json) | testnet settlement available; deployed-order linkage pending |
 | Fulfillment | seller endpoint class, payment ID, artifact hash, validator, per-criterion results, delivery time | implementation and tests listed in F-01 through F-04 | `[PUBLIC_FULFILLMENT_EVIDENCE_URL]` |
 | Receipt publication | order/proposal/payment/fulfillment IDs, evidence classification, redacted fields, publication consent reference | implementation listed in R-01 through R-05 | `[PUBLIC_REDACTED_RECEIPT_URL]` |
 | Business snapshot | fixed UTC window, external-customer classification, exclusions, refunds, costs, revenue, margin, repeat denominator | templates and definitions listed in B-01 through B-05 | `[PUBLIC_REVENUE_AND_UNIT_ECONOMICS_URL]` |
@@ -110,8 +112,8 @@ section. Implementation alone is not a substitute.
 | Criterion | Current proof | Blocking live proof |
 |---|---|---|
 | Required Gemini usage | provider and decision integration code | `[LIVE_GEMINI_CALL_EVIDENCE_URL]` |
-| Required Circle Agent Stack / Agent Wallet usage | guarded payment lane and adapter architecture | `[CIRCLE_AGENT_WALLET_PRODUCT_EVIDENCE_URL]` |
-| Agent autonomously makes or receives real USDC | standing-policy design; offline executor moves no funds | `[VERIFIED_REAL_USDC_TRANSACTION_URL]` plus footage showing no per-payment approval |
+| Required Circle Agent Stack / Agent Wallet usage | guarded lane plus redacted wallet/policy evidence | final video/product-surface confirmation |
+| Agent autonomously makes or receives real USDC | operator-triggered bounded runner completed one testnet transfer with no Circle approval prompt | final uninterrupted recorded order and official eligibility recheck |
 | Public repository | project export tooling and disclosure documents exist | `[PUBLIC_REPOSITORY_URL]` |
 | Creativeness & Innovation | OfferRail binds proposal, settlement, delivery, and receipt | working public flow and accurately scoped comparison |
 | Centrality to Business | settlement authorization is bound to the accepted proposal | one demonstrated commercial order whose loop depends on the Circle settlement |
@@ -158,7 +160,7 @@ four bonus-prize criteria above without published weights.
 
 | ID | Narrow claim | Artifact | Verification | Status |
 |---|---|---|---|---|
-| C-01 | Payment execution has offline and guarded live executor boundaries. | [`../../apps/api/autonomerce/payments/executors.py`](../../apps/api/autonomerce/payments/executors.py) | `tests/test_payments.py` | `REPRODUCIBLE`; real transaction `PLACEHOLDER` |
+| C-01 | Payment execution has offline and guarded live executor boundaries. | [`../../apps/api/autonomerce/payments/executors.py`](../../apps/api/autonomerce/payments/executors.py) | `tests/test_payments.py` | `REPRODUCIBLE`; Arc testnet execution `AVAILABLE` |
 | C-02 | Chain, token, asset, amount, payer, payee, and limits are policy checked. | [`../../apps/api/autonomerce/payments/policy.py`](../../apps/api/autonomerce/payments/policy.py) | `tests/test_payments.py` | `REPRODUCIBLE` |
 | C-03 | One payment is bound to one accepted proposal/idempotency contract. | [`../../apps/api/autonomerce/payments/service.py`](../../apps/api/autonomerce/payments/service.py) | `tests/test_payments.py` | `REPRODUCIBLE` |
 | C-04 | Durable SQLite payment state is available for the supported live topology. | [`../../apps/api/autonomerce/payments/store.py`](../../apps/api/autonomerce/payments/store.py) | `tests/test_payments.py`, `tests/test_repository_persistence.py` | `REPRODUCIBLE` |
@@ -167,7 +169,7 @@ four bonus-prize criteria above without published weights.
 | C-07 | Public payment fields are recursively redacted. | [`../../apps/api/autonomerce/payments/redaction.py`](../../apps/api/autonomerce/payments/redaction.py) | `tests/test_payments.py` | `REPRODUCIBLE` |
 | C-08 | x402 `PAYMENT-REQUIRED` parsing exists. | [`../../apps/api/autonomerce/payments/x402.py`](../../apps/api/autonomerce/payments/x402.py) | `tests/test_payments.py` | `REPRODUCIBLE`; end-to-end x402 demo pending |
 | C-09 | API composition can inject the payment adapter and preserves contract checks. | [`../../apps/api/autonomerce/payments/api_adapter.py`](../../apps/api/autonomerce/payments/api_adapter.py), [`../../apps/api/autonomerce/api/adapters.py`](../../apps/api/autonomerce/api/adapters.py) | `tests/test_adapter_composition.py`, `tests/test_api.py` | `REPRODUCIBLE` |
-| C-LIVE | Required Circle Agent Wallet autonomously made or received real USDC. | `[CIRCLE_AGENT_WALLET_AND_TRANSACTION_EVIDENCE_URL]` | wallet product proof plus explorer inspection | `BLOCKING PLACEHOLDER` |
+| C-LIVE | A bounded Circle Agent Wallet runner transferred 0.10 USDC on Arc testnet and replayed without duplication. | [`../../evidence/public/circle-arc-testnet-transaction.public.json`](../../evidence/public/circle-arc-testnet-transaction.public.json), [`../../evidence/public/wallet-policy.redacted.json`](../../evidence/public/wallet-policy.redacted.json) | explorer, Circle history, balance delta, independent Arc RPC | `AVAILABLE`; final deployed-order/video eligibility remains `BLOCKING` |
 
 ### F — Fulfillment and delivery validation
 
@@ -210,9 +212,9 @@ associated claim must be removed.
 | L-01 | `https://github.com/tomyimkc/autonomerce` | final tagged commit, license, disclosure, setup, security, limitations | public-source eligibility and reproducibility | `AVAILABLE`; final contest tag pending |
 | L-02 | `https://autonomerce-web-6dnob6ekdq-uc.a.run.app` | clean-session access, HTTPS, health/status, matching deployed revision | deployed-demo claim | `AVAILABLE` |
 | L-03 | [`../../evidence/public/gemini-call.redacted.json`](../../evidence/public/gemini-call.redacted.json) | model/config/time/latency, structured output hash, resulting SKU/order linkage | Gemini used operationally for productization | `AVAILABLE`; served-model and usage/cost fields unavailable |
-| L-04 | `[CIRCLE_AGENT_WALLET_EVIDENCE_URL]` | public address, network, product/wallet evidence, policy/version, safe caps/allowlists | required Circle wallet surface used | `BLOCKING` |
-| L-05 | `[VERIFIED_TRANSACTION_EXPLORER_URL]` | independently inspectable exact USDC transfer | real transaction exists | `BLOCKING` |
-| L-06 | `[REDACTED_ORDER_TRANSACTION_DELIVERY_RECORD_URL]` | one-order linkage across proposal, payment, fulfillment, and verdict | Circle is central to the commercial loop | `BLOCKING` |
+| L-04 | [`../../evidence/public/wallet-policy.redacted.json`](../../evidence/public/wallet-policy.redacted.json) | public addresses, network, wallet surface, safe caps/allowlists | Circle Agent Wallet testnet surface used | `AVAILABLE`; video pending |
+| L-05 | [`../../evidence/public/circle-arc-testnet-transaction.public.json`](../../evidence/public/circle-arc-testnet-transaction.public.json) | independently inspectable exact USDC transfer | Arc testnet transaction exists | `AVAILABLE` |
+| L-06 | `[REDACTED_ORDER_TRANSACTION_DELIVERY_RECORD_URL]` | one deployed-order linkage across Gemini, proposal, payment, fulfillment, and verdict | Circle is central to the full commercial loop | `BLOCKING`; settlement-only proof is available |
 | L-07 | `[NO_PER_PAYMENT_APPROVAL_VIDEO_TIMESTAMP]` | policy configured before checkout; uninterrupted autonomous settlement | autonomy within standing policy | `BLOCKING` |
 | L-08 | `[CUSTOMER_CONSENT_AND_CLASSIFICATION_URL]` | anonymized external relationship, selected publication permissions | customer/quote/transaction publication | `BLOCKING` for customer claims |
 | L-09 | `[REVENUE_AND_UNIT_ECONOMICS_SNAPSHOT_URL]` | UTC window, qualifying transactions, exclusions, refunds, all variable costs, margin | measured revenue/margin | `BLOCKING` for business results |

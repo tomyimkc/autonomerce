@@ -11,14 +11,15 @@ plans into business evidence.
 1. [`JUDGE-QUICKSTART.md`](JUDGE-QUICKSTART.md)
 2. [`EVIDENCE-INDEX.md`](EVIDENCE-INDEX.md)
 3. [`DEVPOST-DRAFT.md`](DEVPOST-DRAFT.md)
-4. [`VIDEO-STORYBOARD.md`](VIDEO-STORYBOARD.md)
-5. [`DEMO-RUNBOOK.md`](DEMO-RUNBOOK.md)
-6. [`SETUP-PROOF-CHECKLIST.md`](SETUP-PROOF-CHECKLIST.md)
-7. [`METRICS-DEFINITIONS.md`](METRICS-DEFINITIONS.md)
-8. [`JUDGE-CHECKLIST.md`](JUDGE-CHECKLIST.md)
-9. [`KNOWN-LIMITATIONS.md`](KNOWN-LIMITATIONS.md)
-10. [`CUSTOMER-INTERVIEW-TEMPLATE.md`](CUSTOMER-INTERVIEW-TEMPLATE.md)
-11. [`CUSTOMER-CONSENT-TEMPLATE.md`](CUSTOMER-CONSENT-TEMPLATE.md)
+4. [`DEVPOST-FINAL-CANDIDATE.md`](DEVPOST-FINAL-CANDIDATE.md)
+5. [`VIDEO-STORYBOARD.md`](VIDEO-STORYBOARD.md)
+6. [`DEMO-RUNBOOK.md`](DEMO-RUNBOOK.md)
+7. [`SETUP-PROOF-CHECKLIST.md`](SETUP-PROOF-CHECKLIST.md)
+8. [`METRICS-DEFINITIONS.md`](METRICS-DEFINITIONS.md)
+9. [`JUDGE-CHECKLIST.md`](JUDGE-CHECKLIST.md)
+10. [`KNOWN-LIMITATIONS.md`](KNOWN-LIMITATIONS.md)
+11. [`CUSTOMER-INTERVIEW-TEMPLATE.md`](CUSTOMER-INTERVIEW-TEMPLATE.md)
+12. [`CUSTOMER-CONSENT-TEMPLATE.md`](CUSTOMER-CONSENT-TEMPLATE.md)
 
 Machine-readable public evidence templates are under
 [`../../evidence/templates/`](../../evidence/templates/).
@@ -47,11 +48,11 @@ The following is a repository assessment, not a final contest verdict.
 |---|---|---|
 | Domain and OfferRail core | Typed contracts, deterministic money/policy/state logic, idempotency, and public receipt code with tests | “Implemented and tested offline” |
 | Integrated demo | `python -m autonomerce.demo` connects Agent Cards, productization, opted-in matching, bounded negotiation, mock payment, fulfillment validation, and a synthetic public receipt | “Credential-free integrated offline demo; no funds move” |
-| Gemini | Structured `GeminiDecisionProvider` plus productization, fit, proposal, negotiation, and delivery-decision boundaries; the current integrated demo uses the offline provider | “Gemini adapter implemented; live judged-call proof pending” |
-| Circle | Guarded Circle CLI executor, payment policy, durable SQLite payment store option, x402 parser, verification hooks, and an API payment adapter; offline is the default | “Circle payment lane implemented; Agent Wallet and real transaction proof pending” |
+| Gemini | Structured provider plus one deployed `gemini-2.5-flash` productization receipt; the credential-free demo still uses the offline provider | “Deployed Gemini productization verified for one synthetic seller capability” |
+| Circle | Guarded Circle CLI executor plus one independently verified 0.10 USDC Arc testnet Agent Wallet transfer and durable replay | “Circle testnet integration verified; not customer revenue or a deployed end-to-end order” |
 | API | FastAPI workflow from seller onboarding through metrics, with injectable adapters | “Runnable credential-free API” |
 | Web | Polished Next.js local replay using deterministic fixture data and no live API calls | “Synthetic local replay UI” |
-| Deployment | Docker/Cloud Run instructions and preflight scripts | “Deployment path documented; public deployment proof pending” |
+| Deployment | Public Cloud Run BFF connected to a private IAM-protected API, with immutable image/revision evidence | “Public judging deployment available; payment remains offline there” |
 | Customers and revenue | No approved public records in this lane | “Not yet evidenced” |
 
 ## Sources of truth

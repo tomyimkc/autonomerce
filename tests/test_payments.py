@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import uuid
 
 import pytest
 
@@ -51,6 +52,9 @@ from autonomerce.payments.api_adapter import (  # noqa: E402
     PaymentAdapter as APIPaymentAdapter,
     build_payment_adapter,
 )
+from autonomerce.payments.executors import (  # noqa: E402
+    _circle_cli_idempotency_key,
+)
 
 
 PAYER = "0x1111111111111111111111111111111111111111"
@@ -62,6 +66,22 @@ BASE_SEPOLIA_USDC = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
 TX_HASH = "0x" + ("a" * 64)
 REQUIREMENT_FINGERPRINT = "b" * 64
 FIXED_TIME = datetime(2026, 7, 31, 12, 0, tzinfo=timezone.utc)
+
+
+def _wire_idempotency_key(argv: list[str]) -> str:
+    return argv[argv.index("--idempotency-key") + 1]
+
+
+def test_circle_cli_maps_internal_keys_to_stable_uuidv4_wire_keys():
+    first = _circle_cli_idempotency_key("internal-order-key")
+    replay = _circle_cli_idempotency_key("internal-order-key")
+    other = _circle_cli_idempotency_key("different-order-key")
+
+    assert first == replay
+    assert first != other
+    parsed = uuid.UUID(first)
+    assert parsed.version == 4
+    assert parsed.variant == uuid.RFC_4122
 
 
 def proposal(
@@ -377,15 +397,17 @@ def test_live_adapter_rejects_process_local_store_and_exposes_durability(tmp_pat
     assert adapter.store.durability is StoreDurability.SINGLE_NODE
 
 
-def test_live_adapter_confirms_only_after_independent_asset_lookup(tmp_path):
+def test_live_adapter_accepts_complete_only_after_independent_asset_lookup(
+    tmp_path,
+):
     lookup_calls: list[str] = []
 
     def runner(argv, **kwargs):
         payload = {
             "data": {
-                "idempotencyKey": "live-independent-lookup",
+                "idempotencyKey": _wire_idempotency_key(argv),
                 "id": "circle-transfer-verified",
-                "state": "CONFIRMED",
+                "state": "COMPLETE",
                 "blockchain": "ARC-TESTNET",
                 "amounts": ["1"],
                 "sourceAddress": PAYER,
@@ -514,6 +536,159 @@ def test_circle_cli_rehashes_binary_immediately_before_transfer(tmp_path):
         match="SHA-256 does not match the pinned value",
     ):
         executor.execute(intent())
+
+
+def test_circle_cli_interpreter_prefixes_argv(tmp_path):
+    interpreter = tmp_path / "node"
+    interpreter.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    interpreter.chmod(0o700)
+    cli_script = tmp_path / "circle.js"
+    cli_script.write_text("#!/usr/bin/env node\n", encoding="utf-8")
+    cli_script.chmod(0o700)
+    calls = []
+
+    def fake_runner(argv, **kwargs):
+        calls.append((argv, kwargs))
+        payload = {
+            "data": {
+                "idempotencyKey": _wire_idempotency_key(argv),
+                "state": "COMPLETE",
+                "blockchain": "ARC-TESTNET",
+                "amounts": ["1"],
+                "sourceAddress": PAYER,
+                "destinationAddress": PAYEE,
+                "txHash": TX_HASH,
+                "contractAddress": ARC_TESTNET_USDC,
+            }
+        }
+        return subprocess.CompletedProcess(argv, 0, json.dumps(payload), "")
+
+    executor = CircleCLIExecutor(
+        mode=PaymentMode.TESTNET,
+        binary=str(cli_script),
+        binary_sha256=hashlib.sha256(cli_script.read_bytes()).hexdigest(),
+        interpreter_binary=str(interpreter),
+        interpreter_sha256=hashlib.sha256(interpreter.read_bytes()).hexdigest(),
+        runner=fake_runner,
+    )
+    executor.execute(intent())
+
+    argv, kwargs = calls[0]
+    assert argv[:5] == [
+        str(interpreter.resolve()),
+        str(cli_script.resolve()),
+        "wallet",
+        "transfer",
+        PAYEE,
+    ]
+    assert kwargs["shell"] is False
+
+
+@pytest.mark.parametrize(
+    "interpreter_kwargs",
+    [
+        {"interpreter_binary": "/absolute/node"},
+        {"interpreter_sha256": "0" * 64},
+    ],
+)
+def test_circle_cli_interpreter_path_and_digest_are_a_required_pair(
+    interpreter_kwargs,
+):
+    with pytest.raises(PaymentValidationError, match="must be provided together"):
+        CircleCLIExecutor(
+            mode=PaymentMode.TESTNET,
+            runner=lambda *args, **kwargs: None,
+            **interpreter_kwargs,
+        )
+
+
+def test_circle_cli_interpreter_requires_pinned_cli_script(tmp_path):
+    interpreter = tmp_path / "node"
+    interpreter.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    interpreter.chmod(0o700)
+    cli_script = tmp_path / "circle.js"
+    cli_script.write_text("#!/usr/bin/env node\n", encoding="utf-8")
+    cli_script.chmod(0o700)
+
+    with pytest.raises(PaymentValidationError, match="pinned CLI script"):
+        CircleCLIExecutor(
+            mode=PaymentMode.TESTNET,
+            binary=str(cli_script),
+            interpreter_binary=str(interpreter),
+            interpreter_sha256=hashlib.sha256(
+                interpreter.read_bytes()
+            ).hexdigest(),
+            runner=lambda *args, **kwargs: None,
+        )
+
+
+@pytest.mark.parametrize(
+    ("bad_target", "message"),
+    [
+        ("cli", "Circle CLI SHA-256"),
+        ("interpreter", "Circle CLI interpreter SHA-256"),
+    ],
+)
+def test_circle_cli_interpreter_mode_rejects_mismatched_digests(
+    tmp_path,
+    bad_target,
+    message,
+):
+    interpreter = tmp_path / "node"
+    interpreter.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    interpreter.chmod(0o700)
+    cli_script = tmp_path / "circle.js"
+    cli_script.write_text("#!/usr/bin/env node\n", encoding="utf-8")
+    cli_script.chmod(0o700)
+    cli_digest = hashlib.sha256(cli_script.read_bytes()).hexdigest()
+    interpreter_digest = hashlib.sha256(interpreter.read_bytes()).hexdigest()
+    if bad_target == "cli":
+        cli_digest = "0" * 64
+    else:
+        interpreter_digest = "0" * 64
+
+    with pytest.raises(PaymentValidationError, match=message):
+        CircleCLIExecutor(
+            mode=PaymentMode.TESTNET,
+            binary=str(cli_script),
+            binary_sha256=cli_digest,
+            interpreter_binary=str(interpreter),
+            interpreter_sha256=interpreter_digest,
+            runner=lambda *args, **kwargs: None,
+        )
+
+
+@pytest.mark.parametrize("changed_target", ["cli", "interpreter"])
+def test_circle_cli_interpreter_mode_rehashes_both_before_each_transfer(
+    tmp_path,
+    changed_target,
+):
+    interpreter = tmp_path / "node"
+    interpreter.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    interpreter.chmod(0o700)
+    cli_script = tmp_path / "circle.js"
+    cli_script.write_text("#!/usr/bin/env node\n", encoding="utf-8")
+    cli_script.chmod(0o700)
+    calls = []
+    executor = CircleCLIExecutor(
+        mode=PaymentMode.TESTNET,
+        binary=str(cli_script),
+        binary_sha256=hashlib.sha256(cli_script.read_bytes()).hexdigest(),
+        interpreter_binary=str(interpreter),
+        interpreter_sha256=hashlib.sha256(interpreter.read_bytes()).hexdigest(),
+        runner=lambda *args, **kwargs: calls.append(args),
+    )
+
+    changed = cli_script if changed_target == "cli" else interpreter
+    changed.write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+    changed.chmod(0o700)
+
+    with pytest.raises(
+        PaymentValidationError,
+        match="SHA-256 does not match the pinned value",
+    ):
+        executor.execute(intent())
+    assert calls == []
 
 
 @pytest.mark.parametrize(
@@ -646,7 +821,7 @@ def test_circle_cli_adapter_uses_argv_no_shell_and_validates_response():
         calls.append((argv, kwargs))
         payload = {
             "data": {
-                "idempotencyKey": "idem;echo-unsafe",
+                "idempotencyKey": _wire_idempotency_key(argv),
                 "id": "circle-transfer-1",
                 "state": "CONFIRMED",
                 "blockchain": "ARC-TESTNET",
@@ -683,10 +858,11 @@ def test_circle_cli_adapter_uses_argv_no_shell_and_validates_response():
         "--chain",
         "ARC-TESTNET",
         "--idempotency-key",
-        "idem;echo-unsafe",
+        _circle_cli_idempotency_key("idem;echo-unsafe"),
         "--output",
         "json",
     ]
+    assert _wire_idempotency_key(argv) != "idem;echo-unsafe"
     assert kwargs["shell"] is False
     assert kwargs["check"] is False
     assert result.transaction_hash == TX_HASH
@@ -697,7 +873,7 @@ def test_circle_cli_adapter_rejects_mismatched_confirmation():
     def fake_runner(argv, **kwargs):
         payload = {
             "data": {
-                "idempotencyKey": "idem-1",
+                "idempotencyKey": _wire_idempotency_key(argv),
                 "state": "CONFIRMED",
                 "blockchain": "ARC-TESTNET",
                 "amounts": ["1"],
@@ -714,11 +890,59 @@ def test_circle_cli_adapter_rejects_mismatched_confirmation():
         executor.execute(intent())
 
 
+@pytest.mark.parametrize("state", ["FAILED", "CANCELLED", "DENIED"])
+def test_circle_cli_rejects_unsuccessful_terminal_states(state):
+    def fake_runner(argv, **kwargs):
+        payload = {
+            "data": {
+                "idempotencyKey": _wire_idempotency_key(argv),
+                "state": state,
+                "blockchain": "ARC-TESTNET",
+                "amounts": ["1"],
+                "sourceAddress": PAYER,
+                "destinationAddress": PAYEE,
+                "txHash": TX_HASH,
+                "contractAddress": ARC_TESTNET_USDC,
+            }
+        }
+        return subprocess.CompletedProcess(argv, 0, json.dumps(payload), "")
+
+    executor = CircleCLIExecutor(mode=PaymentMode.TESTNET, runner=fake_runner)
+    with pytest.raises(CircleExecutionError, match="unsuccessful terminal") as failure:
+        executor.execute(intent())
+    assert failure.value.terminal
+    assert failure.value.reason_code == "circle_cli_terminal_failure"
+
+
+@pytest.mark.parametrize("state", ["PENDING", "INITIATED", ""])
+def test_circle_cli_rejects_nonterminal_or_missing_states(state):
+    def fake_runner(argv, **kwargs):
+        payload = {
+            "data": {
+                "idempotencyKey": _wire_idempotency_key(argv),
+                "state": state,
+                "blockchain": "ARC-TESTNET",
+                "amounts": ["1"],
+                "sourceAddress": PAYER,
+                "destinationAddress": PAYEE,
+                "txHash": TX_HASH,
+                "contractAddress": ARC_TESTNET_USDC,
+            }
+        }
+        return subprocess.CompletedProcess(argv, 0, json.dumps(payload), "")
+
+    executor = CircleCLIExecutor(mode=PaymentMode.TESTNET, runner=fake_runner)
+    with pytest.raises(CircleExecutionError, match="terminal success") as failure:
+        executor.execute(intent())
+    assert not failure.value.terminal
+    assert failure.value.reason_code == "circle_cli_unconfirmed_state"
+
+
 def test_circle_cli_rejects_current_contract_address_mismatch():
     def fake_runner(argv, **kwargs):
         payload = {
             "data": {
-                "idempotencyKey": "idem-1",
+                "idempotencyKey": _wire_idempotency_key(argv),
                 "state": "CONFIRMED",
                 "blockchain": "ARC-TESTNET",
                 "amounts": ["1"],

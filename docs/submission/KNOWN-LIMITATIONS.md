@@ -11,13 +11,19 @@ before publishing.
 1. **The deployed Gemini proof covers productization only.** It uses synthetic
    seller data and records no external customer, served-model metadata, token
    usage, or cost.
-2. **No Circle Agent Wallet proof is committed here.** The payment lane includes
-   guarded Circle CLI execution and an API adapter, but offline mode is the
-   default.
-3. **No real verifiable USDC transaction is approved in public evidence.**
+2. **The Circle proof is testnet-only and separate from the deployed Gemini
+   order.** One 0.10 USDC Agent Wallet transfer is independently verified, but
+   the Cloud Run workflow still uses offline payment.
+3. **No deployed Gemini-to-Circle-to-fulfillment order is approved in public
+   evidence.**
 4. **No external customer, design-partner, revenue, repeat-purchase, customer
    quote, or measured margin record is approved here.**
-5. **Circle sponsor eligibility is therefore not yet evidenced.**
+5. **Final Circle sponsor eligibility remains incomplete** until the video and
+   deployed commercial-order linkage requirements are satisfied and the
+   official rules are rechecked. The sponsor page requires a “real,
+   verifiable USDC transaction” but does not explicitly state that an Arc
+   testnet transfer satisfies that phrase, so this repository does not assume
+   that testnet proof alone clears eligibility.
 
 These are blocking evidence gaps, not permission to imply that setup happened
 privately.
@@ -70,12 +76,14 @@ privately.
 
 - Offline payment receipts contain deterministic synthetic transaction hashes
   and no explorer URL.
-- A guarded CLI transfer is not by itself proof that the required Circle Agent
-  Wallet product is used; platform-specific wallet proof must be captured.
+- The testnet transfer used the Circle CLI Agent Wallet surface and publishes
+  both wallet addresses, bounded application policy, transaction hash, and
+  explorer URL. A final video still needs to show the product surface and
+  uninterrupted order path.
 - Live modes require owner wallet allowlists and durable SQLite state.
-- Live startup requires a reviewed Circle CLI SHA-256 and an independent
-  transaction-lookup factory. Neither is configured or evidenced in this
-  repository snapshot.
+- The testnet runner pins the Circle CLI and Node interpreter by SHA-256 and
+  independently verifies Arc receipts. The deployed Cloud Run API does not run
+  this payment topology.
 - Mainnet requires two explicit software opt-ins, but owner-side wallet policy,
   authentication, funding, and emergency-stop evidence remain operational tasks.
 - Ambiguous CLI timeouts remain unresolved/submitting and require reconciliation.

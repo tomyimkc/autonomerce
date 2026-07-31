@@ -19,8 +19,10 @@ OpenAPI, or custom agent into an autonomous seller that can:
 [`30-second quickstart`](docs/submission/JUDGE-QUICKSTART.md), then inspect the
 [`claim-to-proof evidence index`](docs/submission/EVIDENCE-INDEX.md). The public
 Cloud Run application now uses live Vertex AI Gemini productization behind a
-private IAM-protected API. Payment and fulfillment remain synthetic/offline and
-move no funds.
+private IAM-protected API. Separately, the guarded Circle lane has one
+independently verified 0.10 USDC Arc testnet Agent Wallet transfer with durable
+idempotent replay. It is not customer revenue and is not yet linked to the
+deployed Gemini order or fulfillment.
 
 **Public application:**
 `https://autonomerce-web-6dnob6ekdq-uc.a.run.app`
@@ -239,6 +241,8 @@ Start with [`infra/README.md`](infra/README.md) and
 The judging deployment is split into a public owner-session-protected Next.js
 BFF and a private Cloud Run IAM API. Its redacted build identity and one deployed
 Gemini productization receipt are in [`evidence/public/`](evidence/public/).
+The same directory also contains a separately executed Circle Agent Wallet Arc
+testnet transaction and redacted policy evidence.
 
 The repository intentionally fails closed when required live settings are
 missing or contradictory. Do not weaken trusted hosts, durability checks,
@@ -256,8 +260,10 @@ At this repository snapshot:
 
 - one redacted deployed Gemini productization receipt is committed;
 - the public web deployment is connected to the private IAM-protected API;
-- no Circle Agent Wallet transaction proof is committed;
-- no real funds have moved through this implementation;
+- one founder-owned Circle Agent Wallet transfer of 0.10 testnet USDC is
+  independently verified and committed;
+- the deployed Cloud Run order still uses offline payment, and the testnet
+  transfer is not yet linked to deployed Gemini productization or fulfillment;
 - no external customer, revenue, margin, or production-availability claim is
   approved.
 

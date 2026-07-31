@@ -15,6 +15,7 @@ import selectors
 import subprocess
 import time
 from typing import Any, Mapping, Protocol
+import uuid
 
 from autonomerce.contracts import usdc, usdc_text
 
@@ -98,6 +99,11 @@ _SHA256 = re.compile(r"^[a-f0-9]{64}$")
 _EVM_ADDRESS = re.compile(r"^0x[a-fA-F0-9]{40}$")
 _TOKEN_OUTPUT_KEYS = ("token", "tokenSymbol", "currency", "assetSymbol")
 _ASSET_OUTPUT_KEYS = ("asset", "assetAddress", "tokenAddress", "contractAddress")
+_CIRCLE_SUCCESS_STATES = frozenset({"CONFIRMED", "COMPLETE"})
+_CIRCLE_TERMINAL_FAILURE_STATES = frozenset(
+    {"FAILED", "CANCELLED", "DENIED"}
+)
+_CIRCLE_IDEMPOTENCY_DOMAIN = b"autonomerce-circle-cli-idempotency-v1\x00"
 
 
 class _OutputLimitExceeded(RuntimeError):
@@ -112,21 +118,33 @@ def _timestamp(clock: Clock) -> str:
     return clock().astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def verify_circle_binary_sha256(binary: str | Path, expected_sha256: str) -> str:
-    """Resolve and hash one executable, returning its immutable argv path."""
+def _circle_cli_idempotency_key(internal_key: str) -> str:
+    """Map an internal durable key to Circle's required UUIDv4 wire format."""
 
+    digest = hashlib.sha256(
+        _CIRCLE_IDEMPOTENCY_DOMAIN + internal_key.encode("utf-8")
+    ).digest()
+    return str(uuid.UUID(bytes=digest[:16], version=4))
+
+
+def _verify_executable_sha256(
+    binary: str | Path,
+    expected_sha256: str,
+    *,
+    label: str,
+) -> str:
     expected = str(expected_sha256).strip().lower()
     if not _SHA256.fullmatch(expected):
         raise PaymentValidationError(
-            "Circle CLI SHA-256 must be exactly 64 lowercase hexadecimal characters"
+            f"{label} SHA-256 must be exactly 64 lowercase hexadecimal characters"
         )
     try:
         path = Path(binary).resolve(strict=True)
     except OSError as exc:
-        raise PaymentValidationError("Circle CLI executable does not exist") from exc
+        raise PaymentValidationError(f"{label} executable does not exist") from exc
     if not path.is_file() or not os.access(path, os.X_OK):
         raise PaymentValidationError(
-            "Circle CLI path must resolve to an executable regular file"
+            f"{label} path must resolve to an executable regular file"
         )
     digest = hashlib.sha256()
     try:
@@ -134,10 +152,35 @@ def verify_circle_binary_sha256(binary: str | Path, expected_sha256: str) -> str
             for chunk in iter(lambda: executable.read(1024 * 1024), b""):
                 digest.update(chunk)
     except OSError as exc:
-        raise PaymentValidationError("Circle CLI executable could not be hashed") from exc
+        raise PaymentValidationError(
+            f"{label} executable could not be hashed"
+        ) from exc
     if not hmac.compare_digest(digest.hexdigest(), expected):
-        raise PaymentValidationError("Circle CLI SHA-256 does not match the pinned value")
+        raise PaymentValidationError(
+            f"{label} SHA-256 does not match the pinned value"
+        )
     return str(path)
+
+
+def verify_circle_binary_sha256(binary: str | Path, expected_sha256: str) -> str:
+    """Resolve and hash one Circle CLI executable or launcher script."""
+
+    return _verify_executable_sha256(
+        binary,
+        expected_sha256,
+        label="Circle CLI",
+    )
+
+
+def _verify_circle_interpreter_sha256(
+    binary: str | Path,
+    expected_sha256: str,
+) -> str:
+    return _verify_executable_sha256(
+        binary,
+        expected_sha256,
+        label="Circle CLI interpreter",
+    )
 
 
 def _canonical_usdc_assets(
@@ -525,6 +568,8 @@ class CircleCLIExecutor:
         max_output_bytes: int = DEFAULT_MAX_OUTPUT_BYTES,
         canonical_usdc_assets_by_chain: Mapping[str, str] | None = None,
         binary_sha256: str | None = None,
+        interpreter_binary: str | Path | None = None,
+        interpreter_sha256: str | None = None,
     ) -> None:
         self.mode = PaymentMode.parse(mode)
         if self.mode is PaymentMode.OFFLINE:
@@ -551,13 +596,51 @@ class CircleCLIExecutor:
             )
         if not str(binary).strip() or "\x00" in str(binary):
             raise PaymentValidationError("Circle CLI binary path is invalid")
+        interpreter_configured = interpreter_binary is not None
+        interpreter_digest_configured = interpreter_sha256 is not None
+        if interpreter_configured != interpreter_digest_configured:
+            raise PaymentValidationError(
+                "Circle CLI interpreter path and SHA-256 must be provided together"
+            )
+        if interpreter_configured:
+            if (
+                interpreter_binary is None
+                or not Path(interpreter_binary).is_absolute()
+                or not str(interpreter_binary).strip()
+                or "\x00" in str(interpreter_binary)
+            ):
+                raise PaymentValidationError(
+                    "Circle CLI interpreter requires an absolute executable path"
+                )
+            if binary_sha256 is None:
+                raise PaymentValidationError(
+                    "Circle CLI interpreter mode requires a pinned CLI script SHA-256"
+                )
+            if not Path(str(binary)).is_absolute():
+                raise PaymentValidationError(
+                    "Circle CLI interpreter mode requires an absolute CLI script path"
+                )
         self.canonical_usdc_assets_by_chain = _canonical_usdc_assets(
             canonical_usdc_assets_by_chain
         )
         self.binary_sha256 = (
             str(binary_sha256).strip().lower() if binary_sha256 is not None else None
         )
-        if runner is None:
+        self.interpreter_sha256 = (
+            str(interpreter_sha256).strip().lower()
+            if interpreter_sha256 is not None
+            else None
+        )
+        if interpreter_configured:
+            binary = verify_circle_binary_sha256(
+                str(binary),
+                self.binary_sha256 or "",
+            )
+            interpreter_binary = _verify_circle_interpreter_sha256(
+                str(interpreter_binary),
+                self.interpreter_sha256 or "",
+            )
+        elif runner is None:
             if self.binary_sha256 is None:
                 raise PaymentValidationError(
                     "live Circle CLI execution requires a pinned executable SHA-256"
@@ -575,6 +658,9 @@ class CircleCLIExecutor:
                 "Circle CLI working directory must be an existing absolute directory"
             )
         self.binary = str(binary)
+        self.interpreter_binary = (
+            str(interpreter_binary) if interpreter_binary is not None else None
+        )
         self.timeout_seconds = timeout_seconds
         self.runner = runner
         self._uses_bounded_runner = runner is None
@@ -599,8 +685,16 @@ class CircleCLIExecutor:
             raise PaymentValidationError(
                 "payment intent asset does not match configured canonical USDC"
             )
+        argv_prefix = (
+            [self.binary]
+            if self.interpreter_binary is None
+            else [self.interpreter_binary, self.binary]
+        )
+        circle_idempotency_key = _circle_cli_idempotency_key(
+            intent.idempotency_key
+        )
         return [
-            self.binary,
+            *argv_prefix,
             "wallet",
             "transfer",
             intent.payee_wallet,
@@ -613,7 +707,7 @@ class CircleCLIExecutor:
             "--chain",
             intent.chain,
             "--idempotency-key",
-            intent.idempotency_key,
+            circle_idempotency_key,
             "--output",
             "json",
         ]
@@ -622,10 +716,22 @@ class CircleCLIExecutor:
         argv = self.build_argv(intent)
         expected_asset = self.canonical_usdc_assets_by_chain[intent.chain]
         try:
-            if self._uses_bounded_runner:
+            if self.interpreter_binary is not None:
+                # Interpreter mode pins both executable layers and re-checks both
+                # immediately before every transfer.
+                _verify_circle_interpreter_sha256(
+                    self.interpreter_binary,
+                    self.interpreter_sha256 or "",
+                )
+                verify_circle_binary_sha256(
+                    self.binary,
+                    self.binary_sha256 or "",
+                )
+            elif self._uses_bounded_runner:
                 # Re-hash immediately before every transfer so a post-startup binary
                 # replacement cannot silently bypass the startup preflight.
                 verify_circle_binary_sha256(self.binary, self.binary_sha256 or "")
+            if self._uses_bounded_runner:
                 completed = _bounded_subprocess_run(
                     argv,
                     timeout=self.timeout_seconds,
@@ -726,18 +832,29 @@ class CircleCLIExecutor:
                     "missing current Circle CLI fields: " + ", ".join(missing)
                 )
             response_idempotency_key = data["idempotencyKey"]
+            expected_idempotency_key = _circle_cli_idempotency_key(
+                intent.idempotency_key
+            )
             if (
                 not isinstance(response_idempotency_key, str)
-                or response_idempotency_key != intent.idempotency_key
+                or response_idempotency_key != expected_idempotency_key
             ):
                 raise CircleExecutionError(
                     "Circle CLI confirmed an unexpected idempotency key",
                     reason_code="circle_cli_idempotency_mismatch",
                 )
             state = str(data["state"]).strip().upper()
-            if state != "CONFIRMED":
+            if state in _CIRCLE_TERMINAL_FAILURE_STATES:
                 raise CircleExecutionError(
-                    f"Circle CLI did not prove confirmation (state={state or 'missing'})",
+                    f"Circle CLI reported unsuccessful terminal state "
+                    f"(state={state})",
+                    terminal=True,
+                    reason_code="circle_cli_terminal_failure",
+                )
+            if state not in _CIRCLE_SUCCESS_STATES:
+                raise CircleExecutionError(
+                    f"Circle CLI did not prove terminal success "
+                    f"(state={state or 'missing'})",
                     reason_code="circle_cli_unconfirmed_state",
                 )
             chain = canonical_chain(data["blockchain"])

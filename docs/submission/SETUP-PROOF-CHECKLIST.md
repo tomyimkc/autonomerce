@@ -98,11 +98,11 @@ Public proof bundle:
 
 Owner-only:
 
-- [ ] Circle account access complete;
+- [x] Circle account access complete;
 - [ ] OTP/KYC/account verification complete if required;
-- [ ] correct testnet/mainnet session active;
-- [ ] Circle Agent Wallet created;
-- [ ] owner approves wallet policy;
+- [x] correct testnet session active;
+- [x] Circle Agent Wallet created;
+- [x] owner approves the bounded testnet application policy;
 - [ ] mainnet wallet funded only with approved operating budget;
 - [ ] emergency stop understood and tested safely.
 
@@ -116,13 +116,13 @@ Private proof:
 
 Public redacted proof:
 
-- [ ] wallet address;
-- [ ] network;
-- [ ] policy ID/version;
-- [ ] per-transaction cap;
-- [ ] cumulative/count cap;
-- [ ] payer/payee or recipient allowlist evidence;
-- [ ] allowed token and chain;
+- [x] wallet address;
+- [x] network;
+- [x] policy ID/version;
+- [x] per-transaction cap;
+- [x] cumulative/count cap;
+- [x] payer/payee or recipient allowlist evidence;
+- [x] allowed token and chain;
 - [ ] screenshot showing no per-payment approval is required inside policy.
 
 Never publish OTPs, recovery material, session tokens, authorization headers, or
@@ -130,16 +130,16 @@ unrestricted API credentials.
 
 ## 6. Testnet payment proof
 
-- [ ] accepted proposal exists;
-- [ ] exact amount, chain, token, payer, and payee are authorized;
-- [ ] durable idempotency store is active for live mode;
-- [ ] payment confirms;
-- [ ] explorer independently confirms;
-- [ ] same idempotency key does not execute twice;
+- [x] accepted proposal exists;
+- [x] exact amount, chain, token, payer, and payee are authorized;
+- [x] durable idempotency store is active for the testnet runner;
+- [x] payment confirms;
+- [x] explorer and independent Arc RPC confirm;
+- [x] same idempotency key does not execute twice;
 - [ ] fulfillment follows;
 - [ ] delivery validation is separate;
-- [ ] public record says `testnet`;
-- [ ] counted-as-revenue is false.
+- [x] public record says `testnet`;
+- [x] counted-as-revenue is false.
 
 ## 7. External mainnet payment proof
 

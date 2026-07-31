@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "autonomerce.wallet_policy.public.v1",
+  "recordKind": "wallet_policy",
+  "evidenceClassification": "testnet_verified",
+  "provider": "circle",
+  "walletSurface": "Circle Agent Wallet",
+  "environment": "testnet",
+  "network": "ARC-TESTNET",
+  "token": "USDC",
+  "canonicalAsset": "0x3600000000000000000000000000000000000000",
+  "payerWallet": "0xd5eaf79637decd656e3adb52985cf0afb6cc29d8",
+  "payeeWallet": "0xebbcd5a37a086cbe0e978c26feff14e69bffa2a6",
+  "applicationPolicy": {
+    "policyId": "circle_arc_testnet_order_cap_v1",
+    "maximumPerPaymentUsdc": "0.1",
+    "maximumTotalUsdc": "0.2",
+    "maximumPaymentCount": 2,
+    "payerAllowlistRequired": true,
+    "payeeAllowlistRequired": true,
+    "selfPaymentAllowed": false,
+    "mainnetEnabled": false,
+    "durableStore": "SQLite"
+  },
+  "executionBoundary": {
+    "circleCliVersion": "0.0.6",
+    "circleCliSha256": "92769b4f35065730bfb1b475cca3cae69563cdf2f421539968be1513d6927f2d",
+    "nodeInterpreterSha256": "bbbf9d37b01befb9213cbddb7bff110f6931da271396aa1f5be25593102f3bbd",
+    "internalIdempotencyKeyPublished": false,
+    "circleWireIdempotencyFormat": "deterministic UUIDv4",
+    "independentArcRpcVerificationRequired": true,
+    "circlePerPaymentApprovalPromptObserved": false,
+    "operatorTriggeredTestRun": true,
+    "videoProofAvailable": false
+  },
+  "observedAttempts": [
+    {
+      "attempt": 1,
+      "result": "not_submitted",
+      "reasonCode": "circle_cli_interpreter_missing",
+      "fundsMoved": false
+    },
+    {
+      "attempt": 2,
+      "result": "not_submitted",
+      "reasonCode": "circle_cli_invalid_request",
+      "fundsMoved": false
+    },
+    {
+      "attempt": 3,
+      "result": "confirmed",
+      "transactionHash": "0xb3a036d46b71e93d37b69ddf1046ff1d708d1c4b33db73b863a4fa3d4a2f7d56",
+      "fundsMoved": true,
+      "idempotentReplayVerified": true
+    }
+  ],
+  "claimBoundary": [
+    "Testnet integration evidence only.",
+    "No customer, revenue, mainnet, or production claim.",
+    "The transfer was operator-triggered after standing application policy setup; final video proof of an uninterrupted agent-initiated order remains pending."
+  ],
+  "evidenceGeneratedAt": "2026-07-31T17:09:23Z"
+}

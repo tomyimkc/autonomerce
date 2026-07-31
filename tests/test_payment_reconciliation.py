@@ -34,6 +34,9 @@ from autonomerce.payments import (  # noqa: E402
     SQLitePaymentStore,
     SubmissionStatus,
 )
+from autonomerce.payments.executors import (  # noqa: E402
+    _circle_cli_idempotency_key,
+)
 
 
 PAYER = "0x1111111111111111111111111111111111111111"
@@ -531,7 +534,7 @@ def test_circle_cli_uses_sanitized_environment_and_fixed_cwd(
     executable = tmp_path / "circle-fixture"
     payload = {
         "data": {
-            "idempotencyKey": "reconcile-1",
+            "idempotencyKey": _circle_cli_idempotency_key("reconcile-1"),
             "id": "circle-transfer-1",
             "state": "CONFIRMED",
             "blockchain": "ARC-TESTNET",

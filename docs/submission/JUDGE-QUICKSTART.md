@@ -1,13 +1,16 @@
 # Autonomerce / OfferRail — judge quickstart
 
 `submission draft: 2026-07-31` · `candidateOnly: true` ·
-`Gemini: live_verified` · `payment: synthetic/offline`
+`Gemini: live_verified` · `Circle: testnet_verified` ·
+`deployed payment: synthetic/offline`
 
 > **Evidence boundary:** the public Cloud Run application is connected to a
 > private IAM-protected API and one deployed `gemini-2.5-flash` productization
 > call is recorded in [`../../evidence/public/`](../../evidence/public/).
-> Payment and fulfillment remain synthetic/offline. There is still no Circle
-> Agent Wallet transaction, external customer, revenue, or production result.
+> The deployed Gemini order still uses synthetic/offline payment and
+> fulfillment. Separately, the repository contains one independently verified
+> 0.10 USDC Arc testnet Circle Agent Wallet transfer with durable idempotent
+> replay. It is not customer revenue and is not yet a deployed end-to-end order.
 
 ## If you have 30 seconds
 
@@ -37,12 +40,14 @@ and one accepted proposal is bound to at most one settlement.
 
 **What can be verified now:** a deployed Gemini productization call, a public
 owner-session-protected BFF connected to a private API, a reproducible offline
-workflow, typed contracts, policy denials, idempotent payment replay,
-fulfillment validation, redaction, and evidence schemas. The deployed judged
-trace used synthetic buyer/seller data, mock payment, and zero real funds.
+workflow, typed contracts, policy denials, fulfillment validation, redaction,
+and evidence schemas. A separate bounded runner proves one Circle Agent Wallet
+Arc testnet settlement, independent canonical-USDC receipt verification, and
+idempotent replay. The deployed Gemini trace still used synthetic buyer/seller
+data and mock payment.
 
-**What still needs real proof:** `[CIRCLE_AGENT_WALLET]`,
-`[VERIFIABLE_USDC_TRANSACTION]`, and
+**What still needs proof:** one deployed order linking Gemini, Circle,
+fulfillment, and receipt; an under-three-minute recorded run; and
 `[EXTERNAL_CUSTOMER_AND_UNIT_ECONOMICS]`.
 
 Start here:
@@ -180,9 +185,6 @@ Never collapse these states into “real,” “live,” “customer,” “reve
 
 - `[UNDER_3_MINUTE_VIDEO_URL]`
 - `[PUBLIC_EVIDENCE_INDEX_URL]`
-- `[CIRCLE_AGENT_WALLET_ADDRESS]`
-- `[WALLET_POLICY_EVIDENCE_URL]`
-- `[VERIFIED_TRANSACTION_EXPLORER_URL]`
 - `[REDACTED_ORDER_TRANSACTION_DELIVERY_RECORD_URL]`
 - `[EXTERNAL_CUSTOMER_CONSENT_EVIDENCE_URL]`
 - `[REVENUE_AND_UNIT_ECONOMICS_SNAPSHOT_URL]`
@@ -200,3 +202,7 @@ Current resolved links:
   [`../../evidence/public/build-identity.json`](../../evidence/public/build-identity.json)
 - deployed Gemini call:
   [`../../evidence/public/gemini-call.redacted.json`](../../evidence/public/gemini-call.redacted.json)
+- Circle Agent Wallet policy:
+  [`../../evidence/public/wallet-policy.redacted.json`](../../evidence/public/wallet-policy.redacted.json)
+- Arc testnet transaction:
+  [`../../evidence/public/circle-arc-testnet-transaction.public.json`](../../evidence/public/circle-arc-testnet-transaction.public.json)

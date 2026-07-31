@@ -1,5 +1,16 @@
 """Autonomerce Circle/x402 payment lane."""
 
+from .arc_rpc_lookup import (
+    ARC_TESTNET_CHAIN_ID,
+    ARC_TESTNET_CHAIN_ID_HEX,
+    ARC_TESTNET_EXPLORER_URL,
+    ARC_TESTNET_RPC_URL,
+    ARC_TESTNET_USDC,
+    ArcRPCLookupError,
+    ArcTestnetRPCClient,
+    arc_testnet_transaction_lookup_factory,
+    build_arc_testnet_transaction_lookup,
+)
 from .errors import (
     CircleExecutionError,
     PaymentError,
@@ -65,6 +76,13 @@ from .x402 import (
 )
 
 __all__ = [
+    "ARC_TESTNET_CHAIN_ID",
+    "ARC_TESTNET_CHAIN_ID_HEX",
+    "ARC_TESTNET_EXPLORER_URL",
+    "ARC_TESTNET_RPC_URL",
+    "ARC_TESTNET_USDC",
+    "ArcRPCLookupError",
+    "ArcTestnetRPCClient",
     "CircleCLIExecutor",
     "CircleExecutionError",
     "CircleExecutor",
@@ -106,6 +124,8 @@ __all__ = [
     "SpendingSnapshot",
     "X402ParseError",
     "X402PaymentRequirement",
+    "arc_testnet_transaction_lookup_factory",
+    "build_arc_testnet_transaction_lookup",
     "canonical_chain",
     "is_mainnet_chain",
     "is_testnet_chain",
