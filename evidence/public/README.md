@@ -6,11 +6,14 @@ logs.
 
 ## Current evidence
 
-- [`build-identity.json`](build-identity.json) binds the merged Sophia revision,
-  immutable container images, Cloud Run revisions, public web URL, and private
-  API IAM boundary.
+- [`build-identity.json`](build-identity.json) binds the exact public source
+  commit, immutable Cloud Build image digests, Cloud Run revisions, public web
+  URL, private API IAM boundary, and offline-payment smoke trace.
 - [`gemini-call.redacted.json`](gemini-call.redacted.json) records one deployed
   Vertex AI Gemini productization call and the resulting structured SKU fields.
+- [`ci-and-security.json`](ci-and-security.json) records the exact standalone
+  CI run, deterministic release checks, deployed revisions, and the no-funds
+  boundary.
 - [`transactions.public.json`](transactions.public.json) records the linked
   synthetic/offline settlement and delivery result. It explicitly says that no
   funds moved and that the amount is not revenue.

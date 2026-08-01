@@ -4,9 +4,11 @@
   "evidenceClassification": "live_verified_offline_payment",
   "source": {
     "publicRepository": "https://github.com/tomyimkc/autonomerce",
-    "sophiaPullRequest": 1781,
-    "sophiaMergeCommit": "626bba7ff8a55c037ab0ffe183b7617b43907864",
-    "sophiaFastCiRun": "https://github.com/tomyimkc/sophia-agi/actions/runs/30635229283"
+    "deployedPublicRepositoryCommit": "7137650ffa8891346793a516d427476fee9c944f",
+    "publicCiRun": "https://github.com/tomyimkc/autonomerce/actions/runs/30678533790",
+    "sophiaPullRequest": 1790,
+    "sophiaPullRequestHead": "81b503c15ad26d66932ec51cb429e7d99d1763ca",
+    "sophiaMergeCommit": "7612f0894399014a0dd60326592d3b43e884427d"
   },
   "cloud": {
     "projectId": "gen-lang-client-0791755511",
@@ -14,22 +16,20 @@
     "publicWebUrl": "https://autonomerce-web-6dnob6ekdq-uc.a.run.app",
     "publicWebNumericUrl": "https://autonomerce-web-908139148745.us-central1.run.app",
     "privateApiUrl": "https://autonomerce-api-908139148745.us-central1.run.app",
-    "apiRevision": "autonomerce-api-00002-n8h",
-    "apiRevisionCreatedAt": "2026-07-31T15:28:17.166848Z",
-    "apiImage": "us-central1-docker.pkg.dev/gen-lang-client-0791755511/autonomerce/api@sha256:e210879da41ae2920f04211db5ffb5860eca8e8bd5d8cf3b44ba9e15600ac664",
-    "webRevision": "autonomerce-web-00004-r5p",
-    "webRevisionCreatedAt": "2026-07-31T15:47:01.258858Z",
-    "webImage": "us-central1-docker.pkg.dev/gen-lang-client-0791755511/autonomerce/web@sha256:a961a3b26da27ef4c198d7f77bd4f4305c01a9c362a5742c6b0284fe0b96a2d0",
-    "containerBuildReceipts": [
-      {
-        "component": "api",
-        "id": "a8641436-633a-4bf1-aff1-d61563998a2b"
-      },
-      {
-        "component": "web",
-        "id": "0e71d99e-ee22-45ca-a90f-3fff9b85eb4a"
-      }
-    ]
+    "apiRevision": "autonomerce-api-00003-ddk",
+    "apiRevisionCreatedAt": "2026-08-01T07:16:56.288576Z",
+    "apiImage": "us-central1-docker.pkg.dev/gen-lang-client-0791755511/autonomerce/api@sha256:20fc5aecf5811d84926dac7d9dc13ecfb46921ebdd335976f82c10afab15e38b",
+    "webRevision": "autonomerce-web-00005-nkt",
+    "webRevisionCreatedAt": "2026-08-01T07:18:30.893618Z",
+    "webImage": "us-central1-docker.pkg.dev/gen-lang-client-0791755511/autonomerce/web@sha256:db9dec81085b6f5ae1f5db97b721afa2c337f141ca2832a49a9ff1d74568e8ad",
+    "containerBuildReceipt": {
+      "provider": "Google Cloud Build",
+      "id": "49ab5a9c-d78c-4c45-8457-c1cff5e1f1e6",
+      "status": "SUCCESS",
+      "createdAt": "2026-08-01T07:12:18.661336556Z",
+      "finishedAt": "2026-08-01T07:14:06.303352Z",
+      "targetArchitecture": "linux/amd64"
+    }
   },
   "runtime": {
     "runtimeMode": "gemini",
@@ -49,12 +49,17 @@
   "verification": {
     "publicStatusHttp": 200,
     "publicStatusConnected": true,
+    "publicStatusRuntimeMode": "gemini",
+    "publicStatusProductizer": "google:gemini-2.5-flash",
+    "directPrivateApiHttp": 403,
     "ownerLoginHttp": 200,
     "onboardingHttp": 201,
     "workflowHttp": 201,
-    "idempotentReplayHttp": 201,
-    "idempotentReplaySameProposal": true,
-    "idempotentReplaySamePayment": true
+    "workflowProposalState": "delivered",
+    "workflowPaymentState": "confirmed",
+    "workflowPaymentMocked": true,
+    "workflowFulfillmentAccepted": true,
+    "workflowReceiptPublished": false
   },
   "claimBoundary": [
     "The public web service is connected to a private IAM-protected API.",
@@ -62,5 +67,5 @@
     "Payment and fulfillment are offline and synthetic.",
     "No real funds moved and no revenue is claimed."
   ],
-  "evidenceGeneratedAt": "2026-07-31T15:32:52.202804Z"
+  "evidenceGeneratedAt": "2026-08-01T07:40:24Z"
 }

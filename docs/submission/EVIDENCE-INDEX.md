@@ -188,8 +188,8 @@ four bonus-prize criteria above without published weights.
 | R-02 | The API composes onboarding through receipt and metrics. | [`../../apps/api/autonomerce/api/app.py`](../../apps/api/autonomerce/api/app.py) | `tests/test_api.py`, `tests/test_e2e_offline.py` | `REPRODUCIBLE` |
 | R-03 | Public receipt publication is separate and consent scoped. | [`../../apps/api/autonomerce/api/app.py`](../../apps/api/autonomerce/api/app.py), [`../../apps/api/autonomerce/api/repository.py`](../../apps/api/autonomerce/api/repository.py) | `tests/test_api.py`, `tests/test_runtime_preflight.py` | `REPRODUCIBLE` |
 | R-04 | Threats and controls are documented. | [`../../security/THREAT-MODEL.md`](../../security/THREAT-MODEL.md), [`../../security/README.md`](../../security/README.md) | `tests/security/test_controls.py` | `AVAILABLE` / `REPRODUCIBLE` |
-| R-05 | Public files can be scanned for likely secrets. | [`../../scripts/scan_public_secrets.py`](../../scripts/scan_public_secrets.py) | `[PUBLIC_CI_RUN_URL]` | script `AVAILABLE`; final pass `PLACEHOLDER` |
-| R-06 | Deployment modes and fail-closed settings are documented. | [`../../infra/README.md`](../../infra/README.md), [`../../docs/DEPLOYMENT-SECURITY.md`](../../docs/DEPLOYMENT-SECURITY.md) | `tests/test_runtime_preflight.py` | `AVAILABLE`; public deployment `PLACEHOLDER` |
+| R-05 | Public files can be scanned for likely secrets. | [`../../scripts/scan_public_secrets.py`](../../scripts/scan_public_secrets.py) | [`../../evidence/public/ci-and-security.json`](../../evidence/public/ci-and-security.json) | `AVAILABLE`; exact public release CI passed |
+| R-06 | Deployment modes and fail-closed settings are documented. | [`../../infra/README.md`](../../infra/README.md), [`../../docs/DEPLOYMENT-SECURITY.md`](../../docs/DEPLOYMENT-SECURITY.md) | `tests/test_runtime_preflight.py`, [`../../evidence/public/build-identity.json`](../../evidence/public/build-identity.json) | `AVAILABLE`; public LIVE BFF and private offline-payment API verified |
 | R-07 | Pre-existing work is disclosed. | [`../../PREEXISTING-ASSET-DISCLOSURE.md`](../../PREEXISTING-ASSET-DISCLOSURE.md) | manual review against final public history | `AVAILABLE`; final revision review pending |
 
 ### B — Business and public-evidence definitions
@@ -218,7 +218,7 @@ associated claim must be removed.
 | L-07 | `[NO_PER_PAYMENT_APPROVAL_VIDEO_TIMESTAMP]` | policy configured before checkout; uninterrupted autonomous settlement | autonomy within standing policy | `BLOCKING` |
 | L-08 | `[CUSTOMER_CONSENT_AND_CLASSIFICATION_URL]` | anonymized external relationship, selected publication permissions | customer/quote/transaction publication | `BLOCKING` for customer claims |
 | L-09 | `[REVENUE_AND_UNIT_ECONOMICS_SNAPSHOT_URL]` | UTC window, qualifying transactions, exclusions, refunds, all variable costs, margin | measured revenue/margin | `BLOCKING` for business results |
-| L-10 | `[PUBLIC_CI_RUN_URL]` | final commit, tests, secret scan, claim lint, schema checks | final-revision verification claim | `BLOCKING` before “passes” wording |
+| L-10 | [`../../evidence/public/ci-and-security.json`](../../evidence/public/ci-and-security.json) | final commit, tests, secret scan, typecheck, production build, lock checks, and deterministic demo hash | final-revision verification claim | `AVAILABLE` |
 | L-11 | `[UNDER_3_MINUTE_VIDEO_URL]` | complete linked story with readable evidence and accurate labels | submitted demonstration | `BLOCKING` |
 
 ## Final artifact naming suggestion

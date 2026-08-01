@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "autonomerce.ci_security.public.v1",
+  "recordKind": "ci_and_security",
+  "evidenceClassification": "offline_verified",
+  "source": {
+    "publicRepository": "https://github.com/tomyimkc/autonomerce",
+    "deployedPublicRepositoryCommit": "7137650ffa8891346793a516d427476fee9c944f",
+    "workflow": "CI",
+    "runId": 30678533790,
+    "runUrl": "https://github.com/tomyimkc/autonomerce/actions/runs/30678533790",
+    "createdAt": "2026-08-01T01:43:28Z",
+    "completedAt": "2026-08-01T01:44:11Z",
+    "conclusion": "success"
+  },
+  "verifiedChecks": {
+    "pythonTests": {
+      "passed": 371,
+      "failed": 0
+    },
+    "webTests": {
+      "passed": 47,
+      "failed": 0
+    },
+    "typescriptTypecheck": "passed",
+    "nextProductionBuild": "passed",
+    "publicSecretScan": "passed",
+    "shellSyntaxScriptsValidated": 9,
+    "uvFrozenLockCheck": "passed",
+    "offlineDemoByteIdentical": true,
+    "offlineDemoSha256": "f0043e9741116dd84b326aad0ad09173bd1fa7288df5d755d467decc27858831"
+  },
+  "deploymentVerification": {
+    "cloudBuildId": "49ab5a9c-d78c-4c45-8457-c1cff5e1f1e6",
+    "cloudBuildStatus": "SUCCESS",
+    "apiRevision": "autonomerce-api-00003-ddk",
+    "webRevision": "autonomerce-web-00005-nkt",
+    "apiTrafficPercent": 100,
+    "webTrafficPercent": 100,
+    "apiPublicInvokerBindings": [],
+    "webPublicInvoker": true,
+    "paymentMode": "offline",
+    "movesFunds": false
+  },
+  "claimBoundary": [
+    "The CI result verifies the exact public source commit and its deterministic release preflight.",
+    "The deployed smoke trace verifies Gemini-backed productization and an offline synthetic workflow.",
+    "The result does not prove an external customer, Circle-linked order, revenue, profit, or product-market fit."
+  ],
+  "evidenceGeneratedAt": "2026-08-01T07:40:24Z"
+}

@@ -10,47 +10,48 @@
   "servedModelId": null,
   "operation": "productize_capability",
   "deployment": {
-    "sourceCommit": "626bba7ff8a55c037ab0ffe183b7617b43907864",
-    "apiRevision": "autonomerce-api-00002-n8h",
-    "apiImageDigest": "sha256:e210879da41ae2920f04211db5ffb5860eca8e8bd5d8cf3b44ba9e15600ac664",
+    "deployedPublicRepositoryCommit": "7137650ffa8891346793a516d427476fee9c944f",
+    "sophiaMergeCommit": "7612f0894399014a0dd60326592d3b43e884427d",
+    "apiRevision": "autonomerce-api-00003-ddk",
+    "apiImageDigest": "sha256:20fc5aecf5811d84926dac7d9dc13ecfb46921ebdd335976f82c10afab15e38b",
     "region": "us-central1",
     "runtimeServiceAccountClass": "dedicated API service account"
   },
   "requestEvidence": {
-    "requestStartedAt": "2026-07-31T15:32:42.135291Z",
-    "requestCompletedAt": "2026-07-31T15:32:51.000207Z",
-    "latencyMs": 8863.405802,
+    "requestStartedAt": "2026-08-01T07:25:17.489400Z",
+    "requestCompletedAt": "2026-08-01T07:25:28.610385Z",
+    "latencyMs": 11120.985343,
     "httpMethod": "POST",
-    "applicationPath": "/sellers/seller_c98e735d9345c224a2e10050/skus/preview",
+    "applicationPath": "/sellers/seller_89252006f9fa8b3020b1afbe/skus/preview",
     "httpStatus": 200,
-    "cloudRunRevision": "autonomerce-api-00002-n8h"
+    "cloudRunRevision": "autonomerce-api-00003-ddk"
   },
   "inputSummary": {
     "sellerClass": "synthetic A2A source-verification agent",
-    "capabilityName": "Source verification",
-    "declaredOutcome": "Return a bounded source-verification evidence pack",
-    "declaredBasePriceUsdc": "0.55",
+    "capabilityName": "Source verification evidence pack",
+    "declaredOutcome": "Return a bounded source-verification result with an auditable evidence receipt",
+    "declaredBasePriceUsdc": "1",
     "declaredDeliverySeconds": 120,
     "promptPublished": false,
     "chainOfThoughtRequested": false
   },
   "structuredResult": {
-    "skuId": "sku_22c7fbe3d7c9bc675c292e36",
-    "name": "Source verification",
-    "outcome": "Return a bounded source-verification evidence pack",
-    "basePriceUsdc": "0.55",
+    "skuId": "sku_ce98b2fcfaff3e9b0366a253",
+    "name": "Source verification evidence pack",
+    "outcome": "Return a bounded source-verification result with an auditable evidence receipt",
+    "basePriceUsdc": "1",
     "capacityPerHour": 20,
     "maximumLatencySeconds": 120,
     "acceptanceCriteria": [
       "non_empty_artifact",
       "output_schema_valid"
     ],
-    "onboardingResponseSha256": "47d976ce8ff0757d7e846b63d415a6196c2172078a1464e2180b74df456d81d4"
+    "onboardingResponseSha256": "3d41ff21b15fe2e9480a660312d2988ab9bfb8919bf3d8625c74eb2947c1fdea"
   },
   "deterministicAuthority": {
-    "minimumPriceUsdc": "0.50",
-    "maximumPriceUsdc": "1.65",
-    "maximumDiscountFraction": "0.1",
+    "minimumPriceUsdc": "0.8",
+    "maximumPriceUsdc": "3",
+    "maximumDiscountFraction": "0.2",
     "maximumTasksPerHour": 20,
     "allowedBuyerHost": "buyer.example",
     "allowedToken": "USDC",
@@ -66,6 +67,7 @@
   },
   "notes": [
     "The Cloud Run request log and returned structured SKU bind this call to the deployed API revision.",
+    "The productization request took 11.121 seconds on the deployed revision and returned HTTP 200.",
     "The served model identifier and token-usage fields were not exposed by this application call and are not inferred.",
     "This evidence proves deployed Gemini productization only; it does not prove Circle settlement or external demand."
   ]
