@@ -225,6 +225,40 @@ not the external design-partner pilot and is not customer evidence.
 - [ ] revenue JSON validates;
 - [ ] dashboard numbers match JSON exactly.
 
+## 9A. XPRIZE Product Evidence package
+
+- [x] tracked `Product_Evidence/` source package exists;
+- [x] Circle, Gemini, Cloud, CI, financial, disclosure, and limitation artifacts
+      have an explicit archive allowlist;
+- [x] May-August qualifying revenue and verified-user values are zero where no
+      approved public evidence supports a positive value;
+- [x] the founder-owned Arc testnet transfer remains separate and
+      `countedAsRevenue=false`;
+- [x] zero verified expense records are distinguished from unknown actual total
+      expenses and unknown actual net profit/loss;
+- [x] screenshot requirements are placeholders/checklists rather than fabricated
+      images;
+- [x] the builder rejects traversal, private/generated paths, symlinks,
+      non-files, likely secrets, email addresses, local home paths, and binary
+      payloads;
+- [x] generated ZIP timestamps and modes are deterministic;
+- [x] generated manifest SHA-256 and size values are reverified after build;
+- [ ] owner supplies and reconciles every eligible expense amount;
+- [ ] owner captures, redacts, and approves every required screenshot;
+- [ ] final archive is regenerated from the submitted commit and its SHA-256 is
+      retained;
+- [ ] owner compares the final archive against the live form and official rules.
+
+Build and verify:
+
+```bash
+python3 scripts/build_xprize_product_evidence.py \
+  --output /tmp/autonomerce-xprize-product-evidence.zip
+
+python3 scripts/build_xprize_product_evidence.py \
+  --verify /tmp/autonomerce-xprize-product-evidence.zip
+```
+
 ## 10. Public repository
 
 - [ ] standalone repository is public;

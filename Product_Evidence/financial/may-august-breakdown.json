@@ -1,0 +1,117 @@
+{
+  "candidateOnly": true,
+  "canClaimAGI": false,
+  "currency": "USD",
+  "eligibilityWindow": {
+    "end": "2026-08-17T20:00:00Z",
+    "start": "2026-05-19T17:00:00Z"
+  },
+  "excludedTechnicalEvidence": [
+    {
+      "amountUsdc": "0.1",
+      "classification": "testnet",
+      "countedAsRevenue": false,
+      "customerRelationship": "founder",
+      "externalCustomer": false,
+      "network": "ARC-TESTNET",
+      "occurredAt": "2026-07-31T17:04:42Z",
+      "source": "evidence/public/circle-arc-testnet-transaction.public.json"
+    }
+  ],
+  "limitations": [
+    "Zero revenue and user values mean no approved qualifying public evidence was supplied.",
+    "Zero verified expense records does not establish that actual expenses were zero.",
+    "Actual total expenses and actual net profit/loss remain unknown until the owner supplies a complete ledger.",
+    "August is partial through the observation timestamp.",
+    "The founder-owned Arc testnet transfer is technical evidence and never customer revenue."
+  ],
+  "monthlyBreakdown": [
+    {
+      "actualTotalExpensesUsd": null,
+      "expenseCompleteness": "unknown_total",
+      "month": "2026-05",
+      "periodStatus": "complete_observation_period",
+      "qualifyingRecognizedRevenueUsd": "0",
+      "testnetEvidence": {
+        "countedAsRevenue": false,
+        "transferCount": 0,
+        "transferVolumeUsdc": "0"
+      },
+      "verifiedExpenseRecordsUsd": "0",
+      "verifiedExternalUsers": 0,
+      "verifiedPayingUsers": 0
+    },
+    {
+      "actualTotalExpensesUsd": null,
+      "expenseCompleteness": "unknown_total",
+      "month": "2026-06",
+      "periodStatus": "complete_observation_period",
+      "qualifyingRecognizedRevenueUsd": "0",
+      "testnetEvidence": {
+        "countedAsRevenue": false,
+        "transferCount": 0,
+        "transferVolumeUsdc": "0"
+      },
+      "verifiedExpenseRecordsUsd": "0",
+      "verifiedExternalUsers": 0,
+      "verifiedPayingUsers": 0
+    },
+    {
+      "actualTotalExpensesUsd": null,
+      "expenseCompleteness": "unknown_total",
+      "month": "2026-07",
+      "periodStatus": "complete_observation_period",
+      "qualifyingRecognizedRevenueUsd": "0",
+      "testnetEvidence": {
+        "countedAsRevenue": false,
+        "transferCount": 1,
+        "transferVolumeUsdc": "0.1"
+      },
+      "verifiedExpenseRecordsUsd": "0",
+      "verifiedExternalUsers": 0,
+      "verifiedPayingUsers": 0
+    },
+    {
+      "actualTotalExpensesUsd": null,
+      "expenseCompleteness": "unknown_total",
+      "month": "2026-08",
+      "periodStatus": "partial_through_observed_time",
+      "qualifyingRecognizedRevenueUsd": "0",
+      "testnetEvidence": {
+        "countedAsRevenue": false,
+        "transferCount": 0,
+        "transferVolumeUsdc": "0"
+      },
+      "verifiedExpenseRecordsUsd": "0",
+      "verifiedExternalUsers": 0,
+      "verifiedPayingUsers": 0
+    }
+  ],
+  "observedThrough": "2026-08-01T00:00:00Z",
+  "profitAndLoss": {
+    "actualNetProfitLossUsd": null,
+    "actualTotalExpensesUsd": null,
+    "expenseCompleteness": "unknown_total",
+    "grossRecognizedRevenueUsd": "0",
+    "verifiedExpenseRecordsUsd": "0"
+  },
+  "projectName": "Autonomerce",
+  "recordKind": "xprize_financial_summary",
+  "reportingBasis": "approved_public_evidence_only",
+  "schemaVersion": "autonomerce.xprize.financial-summary.v1",
+  "sources": [
+    "evidence/public/circle-arc-testnet-transaction.public.json",
+    "evidence/public/gemini-call.redacted.json",
+    "evidence/public/build-identity.json",
+    "evidence/templates/contest/contest-financial-evidence.default.json",
+    "docs/submission/METRICS-DEFINITIONS.md",
+    "docs/submission/KNOWN-LIMITATIONS.md"
+  ],
+  "userCounts": {
+    "verifiedExternalCustomers": 0,
+    "verifiedExternalDesignPartners": 0,
+    "verifiedExternalUsers": 0,
+    "verifiedPayingCustomers": 0,
+    "verifiedPayingUsers": 0
+  }
+}

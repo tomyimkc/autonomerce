@@ -17,6 +17,10 @@ claim.
       architecture, safe demo, and limitations.
 - [ ] Pre-existing asset disclosure is present.
 - [ ] Evidence index uses UTC timestamps and immutable commit/revision IDs.
+- [ ] Final `Product_Evidence/` ZIP was generated from the submitted commit and
+      its manifest hashes verify.
+- [ ] Screenshot placeholders were either replaced by owner-reviewed redacted
+      captures or left visibly missing; no fabricated screenshot is present.
 
 ## 2. Build with Gemini rubric
 
@@ -30,6 +34,9 @@ claim.
 - [ ] Each published revenue transaction links to an order and settlement.
 - [ ] At least one delivered order links payment to acceptance evidence.
 - [ ] Revenue window and exclusions are explicit.
+- [ ] Zero qualifying revenue/users are reported where no approved evidence
+      supports a positive value.
+- [ ] Zero verified expense records are not presented as zero actual expenses.
 - [ ] Gemini, external-service, network/payment, and infrastructure costs are
       measured.
 - [ ] Gross margin is calculated from actual costs.

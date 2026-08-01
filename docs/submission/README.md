@@ -10,19 +10,27 @@ plans into business evidence.
 
 1. [`JUDGE-QUICKSTART.md`](JUDGE-QUICKSTART.md)
 2. [`EVIDENCE-INDEX.md`](EVIDENCE-INDEX.md)
-3. [`DEVPOST-DRAFT.md`](DEVPOST-DRAFT.md)
-4. [`DEVPOST-FINAL-CANDIDATE.md`](DEVPOST-FINAL-CANDIDATE.md)
-5. [`VIDEO-STORYBOARD.md`](VIDEO-STORYBOARD.md)
-6. [`DEMO-RUNBOOK.md`](DEMO-RUNBOOK.md)
-7. [`SETUP-PROOF-CHECKLIST.md`](SETUP-PROOF-CHECKLIST.md)
-8. [`METRICS-DEFINITIONS.md`](METRICS-DEFINITIONS.md)
-9. [`JUDGE-CHECKLIST.md`](JUDGE-CHECKLIST.md)
-10. [`KNOWN-LIMITATIONS.md`](KNOWN-LIMITATIONS.md)
-11. [`CUSTOMER-INTERVIEW-TEMPLATE.md`](CUSTOMER-INTERVIEW-TEMPLATE.md)
-12. [`CUSTOMER-CONSENT-TEMPLATE.md`](CUSTOMER-CONSENT-TEMPLATE.md)
+3. [`../../Product_Evidence/README.md`](../../Product_Evidence/README.md)
+4. [`DEVPOST-DRAFT.md`](DEVPOST-DRAFT.md)
+5. [`DEVPOST-FINAL-CANDIDATE.md`](DEVPOST-FINAL-CANDIDATE.md)
+6. [`VIDEO-STORYBOARD.md`](VIDEO-STORYBOARD.md)
+7. [`DEMO-RUNBOOK.md`](DEMO-RUNBOOK.md)
+8. [`SETUP-PROOF-CHECKLIST.md`](SETUP-PROOF-CHECKLIST.md)
+9. [`METRICS-DEFINITIONS.md`](METRICS-DEFINITIONS.md)
+10. [`JUDGE-CHECKLIST.md`](JUDGE-CHECKLIST.md)
+11. [`KNOWN-LIMITATIONS.md`](KNOWN-LIMITATIONS.md)
+12. [`CUSTOMER-INTERVIEW-TEMPLATE.md`](CUSTOMER-INTERVIEW-TEMPLATE.md)
+13. [`CUSTOMER-CONSENT-TEMPLATE.md`](CUSTOMER-CONSENT-TEMPLATE.md)
 
 Machine-readable public evidence templates are under
 [`../../evidence/templates/`](../../evidence/templates/).
+
+The deterministic contest archive is sourced from
+[`../../Product_Evidence/`](../../Product_Evidence/) and built with
+`scripts/build_xprize_product_evidence.py`. It contains explicit screenshot
+placeholders rather than fabricated captures, and its financial summary keeps
+actual expenses and net profit/loss unknown while the expense ledger is
+incomplete.
 
 ## Evidence-state vocabulary
 
@@ -54,6 +62,7 @@ The following is a repository assessment, not a final contest verdict.
 | Web | Polished Next.js local replay using deterministic fixture data and no live API calls | “Synthetic local replay UI” |
 | Deployment | Public Cloud Run BFF connected to a private IAM-protected API, with immutable image/revision evidence | “Public judging deployment available; payment remains offline there” |
 | Customers and revenue | No approved public records in this lane | “Not yet evidenced” |
+| XPRIZE Product Evidence | deterministic allowlisted ZIP source, hash manifest, provider index, zero-evidence financial summary, and screenshot checklist | “Submission evidence package is reproducible; business-result and owner-only screenshot inputs remain incomplete” |
 
 ## Sources of truth
 

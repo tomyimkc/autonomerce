@@ -170,6 +170,12 @@ npm run check
 cd ../..
 
 python3 scripts/scan_public_secrets.py
+
+python3 scripts/build_xprize_product_evidence.py \
+  --output /tmp/autonomerce-xprize-product-evidence.zip
+
+python3 scripts/build_xprize_product_evidence.py \
+  --verify /tmp/autonomerce-xprize-product-evidence.zip
 ```
 
 When this project is developed inside Sophia, also run:
@@ -230,10 +236,17 @@ examples/                        deterministic fixtures and offline demo
 security/                        controls and threat-model support
 tests/                           unit, integration, adversarial, persistence
 docs/submission/                 Devpost, video, evidence, and judge checklists
+Product_Evidence/                deterministic XPRIZE evidence package sources
 wiki/                            tracked OKF record profile and index
 evidence/templates/okf/          private-workspace record templates
 infra/                           container, preflight, Cloud Run, Compute Engine
 ```
+
+The XPRIZE package reports zero qualifying revenue and zero verified external
+users because no approved public business evidence supports a positive value.
+Its actual expense and net profit/loss fields remain unknown rather than
+inferring missing billing records as zero. See
+[`Product_Evidence/README.md`](Product_Evidence/README.md).
 
 ## Private OKF record workspace
 
