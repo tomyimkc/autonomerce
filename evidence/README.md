@@ -11,6 +11,11 @@ Public evidence belongs here only after redaction and owner consent.
 - [`public/circle-arc-testnet-transaction.public.json`](public/circle-arc-testnet-transaction.public.json)
 - [`public/README.md`](public/README.md)
 
+The self-contained contest archive source is under
+[`../Product_Evidence/`](../Product_Evidence/). Its builder copies only an
+explicit allowlist of these approved records, emits a SHA-256 manifest, and
+rejects private OKF paths, symlinks, secret/PII-like text, and binary payloads.
+
 ## Private, untracked artifacts
 
 Keep under `evidence/private/`:

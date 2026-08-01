@@ -16,6 +16,7 @@ passed, that an external service was used, or that a business result occurred.
 | Circle | one bounded Circle Agent Wallet Arc testnet transfer independently verified; deployed Gemini order still uses offline payment | “0.10 USDC Arc testnet integration and idempotent replay verified; not revenue or a deployed end-to-end order.” |
 | Web/API | public Cloud Run LIVE BFF connected to a private IAM-protected API | “Public application is deployed; funds movement is disabled.” |
 | Customers and revenue | no approved public evidence | “Not yet evidenced.” |
+| Product Evidence package | deterministic allowlist, manifest hashes, provider index, financial zero/unknown boundaries, and screenshot placeholders | “The package is reproducible; it does not establish a positive business result or replace owner-supplied screenshots.” |
 | Circle prize eligibility | wallet and transaction proof available; testnet sufficiency is not assumed; final video and deployed order linkage incomplete | “Targeting the prize with testnet evidence; final eligibility proof is still pending.” |
 
 The credential-free offline demo remains synthetic. Separately, the public
@@ -50,6 +51,7 @@ Evidence classifications remain separate:
 | J-06 | Final judge audit | [`JUDGE-CHECKLIST.md`](JUDGE-CHECKLIST.md) | `AVAILABLE` |
 | J-07 | Owner setup and publication gates | [`SETUP-PROOF-CHECKLIST.md`](SETUP-PROOF-CHECKLIST.md) | `AVAILABLE` |
 | J-08 | Metric definitions and exclusions | [`METRICS-DEFINITIONS.md`](METRICS-DEFINITIONS.md) | `AVAILABLE` |
+| J-09 | Self-contained XPRIZE product-evidence archive source and build instructions | [`../../Product_Evidence/README.md`](../../Product_Evidence/README.md) | `AVAILABLE`; owner screenshots and complete expenses remain missing |
 
 ## Proof chain for the recorded order
 
@@ -67,7 +69,7 @@ below. Do not assemble one apparent order from unrelated runs.
 | Circle settlement | Agent Wallet address, network, canonical USDC, exact amount, payer/payee, transaction hash, explorer URL, confirmation time, idempotency result | [`../../evidence/public/circle-arc-testnet-transaction.public.json`](../../evidence/public/circle-arc-testnet-transaction.public.json) and [`../../evidence/public/wallet-policy.redacted.json`](../../evidence/public/wallet-policy.redacted.json) | `AVAILABLE` for the testnet settlement; deployed-order linkage remains `BLOCKING` |
 | Fulfillment | seller endpoint class, payment ID, artifact hash, validator, per-criterion results, delivery time | implementation and tests listed in F-01 through F-04 | Not available — `BLOCKING` for accepted external delivery as of 2026-08-01 |
 | Receipt publication | order/proposal/payment/fulfillment IDs, evidence classification, redacted fields, publication consent reference | implementation listed in R-01 through R-05 | Not available — `BLOCKING` for a published linked-order receipt as of 2026-08-01 |
-| Business snapshot | fixed UTC window, external-customer classification, exclusions, refunds, costs, revenue, margin, repeat denominator | templates and definitions listed in B-01 through B-05 | Not available — `BLOCKING` for revenue or margin claims as of 2026-08-01 |
+| Business snapshot | fixed UTC window, external-customer classification, exclusions, refunds, costs, revenue, margin, repeat denominator | [`../../Product_Evidence/financial/may-august-breakdown.json`](../../Product_Evidence/financial/may-august-breakdown.json) reports zero qualifying revenue/users and unknown actual expenses/P&L | zero-evidence snapshot `AVAILABLE`; positive business results and a complete expense ledger remain `BLOCKING` |
 
 ## Rubric-to-proof map
 
@@ -76,10 +78,10 @@ below. Do not assemble one apparent order from unrelated runs.
 | Claim or judge question | Current proof | Classification | Missing proof |
 |---|---|---|---|
 | Is there a workable business model? | fee/revenue-share model and order-level cost formula in [`DEVPOST-DRAFT.md`](DEVPOST-DRAFT.md) and [`METRICS-DEFINITIONS.md`](METRICS-DEFINITIONS.md) | `planned` economics | Not available — measured order-level costs are `BLOCKING` as of 2026-08-01 |
-| Are customers and revenue real? | schemas deliberately exclude synthetic/testnet/self/founder/affiliate/reimbursed/circular activity | no approved business result | Not available — qualifying external-customer records and a qualifying mainnet transaction index are `BLOCKING` as of 2026-08-01 |
+| Are customers and revenue real? | schemas exclude synthetic/testnet/self/founder/affiliate/reimbursed/circular activity; the Product Evidence summary reports zero qualifying revenue and users | no approved positive business result | Not available — qualifying external-customer records and a qualifying mainnet transaction index are `BLOCKING` as of 2026-08-01 |
 | Was paid work delivered? | separate fulfillment contract and receipt code | offline fixtures only | Not available — order-linked accepted external delivery is `BLOCKING` as of 2026-08-01 |
-| Is margin measured? | reproducible formula and zero/null rules | no measured variable costs | Not available — a public margin snapshot is `BLOCKING` as of 2026-08-01 |
-| Are all expenses and customer-acquisition costs disclosed? | metric definitions and zero/null rules exist | no approved expense statement | Not available — a complete P&L covering hosting, Gemini, Circle/network, external services, contractors, marketing, and acquisition spend is `BLOCKING` as of 2026-08-01 |
+| Is margin measured? | reproducible formula plus [`../../Product_Evidence/financial/P_AND_L.md`](../../Product_Evidence/financial/P_AND_L.md) | actual net P&L remains unknown because expenses are incomplete | complete amount-bearing expense records remain `BLOCKING` |
+| Are all expenses and customer-acquisition costs disclosed? | Product Evidence reports zero verified expense records but does not infer actual expenses as zero | incomplete expense statement | owner reconciliation of hosting, Gemini, Circle/network, external service, contractor, marketing, acquisition, compute, and infrastructure spend remains `BLOCKING` |
 | Is the model sustainable? | adapter boundaries, deployment docs, SQLite single-host topology, fail-closed preflight, and explicit limitations | feasibility documentation | public deployment, measured reliability, repeat behavior, design-partner evidence, and an honest scale plan beyond the single-host topology |
 
 ### Build with Gemini — AI-Native Operations
@@ -200,6 +202,8 @@ four bonus-prize criteria above without published weights.
 | B-03 | Revenue, costs, margin, and exclusions are schema constrained. | [`../../evidence/templates/revenue.public.schema.json`](../../evidence/templates/revenue.public.schema.json) | `AVAILABLE` |
 | B-04 | Example records are visibly synthetic and zero-revenue. | [`../../evidence/templates/transaction.public.synthetic.example.json`](../../evidence/templates/transaction.public.synthetic.example.json), [`../../evidence/templates/revenue.public.synthetic.example.json`](../../evidence/templates/revenue.public.synthetic.example.json) | `AVAILABLE`; not business evidence |
 | B-05 | Customer publication permissions are separated by field/use. | [`CUSTOMER-CONSENT-TEMPLATE.md`](CUSTOMER-CONSENT-TEMPLATE.md) | template `AVAILABLE`; signed records not available and `BLOCKING` for customer publication |
+| B-06 | The May-August summary reports evidence-supported zeros while preserving unknown actual expenses and net P&L. | [`../../Product_Evidence/financial/may-august-breakdown.json`](../../Product_Evidence/financial/may-august-breakdown.json) | `AVAILABLE`; positive result not claimed |
+| B-07 | The contest archive rejects private/generated paths, symlinks, secret/PII-like text, and verifies payload hashes. | [`../../scripts/build_xprize_product_evidence.py`](../../scripts/build_xprize_product_evidence.py) | `REPRODUCIBLE` through `tests/test_xprize_product_evidence.py` |
 
 ## Required live evidence register
 
@@ -216,7 +220,7 @@ the associated claim must be removed.
 | L-06 | Not available as of 2026-08-01 | one deployed-order linkage across Gemini, proposal, payment, fulfillment, and verdict | Circle is central to the full commercial loop | `BLOCKING`; settlement-only proof is available |
 | L-07 | Not available as of 2026-08-01 | policy configured before checkout; uninterrupted autonomous settlement | autonomy within standing policy | `BLOCKING` |
 | L-08 | Not available as of 2026-08-01 | anonymized external relationship, selected publication permissions | customer/quote/transaction publication | `BLOCKING` for customer claims |
-| L-09 | Not available as of 2026-08-01 | UTC window, qualifying transactions, exclusions, refunds, all variable costs, margin | measured revenue/margin | `BLOCKING` for business results |
+| L-09 | [`../../Product_Evidence/financial/may-august-breakdown.json`](../../Product_Evidence/financial/may-august-breakdown.json) | UTC window, zero qualifying revenue/users, testnet exclusion, zero verified expense records, and unknown actual expense/P&L fields | honest zero-evidence snapshot | `AVAILABLE`; complete expenses and any positive business result remain `BLOCKING` |
 | L-10 | [`../../evidence/public/ci-and-security.json`](../../evidence/public/ci-and-security.json) and public [`CI` workflow](https://github.com/tomyimkc/autonomerce/actions/workflows/ci.yml) | tests, secret scan, typecheck, production build, lock checks, and deterministic demo hash | verified release checks | deployed-source receipt is `AVAILABLE`; verify the latest `main` run immediately before submission |
 | L-11 | Not available as of 2026-08-01 | complete linked story with readable evidence and accurate labels | submitted demonstration | `BLOCKING` |
 
@@ -235,6 +239,8 @@ evidence/public/revenue.public.json
 evidence/public/customer-evidence.public.json
 evidence/public/ci-and-security.json
 evidence/public/video-checksum.txt
+Product_Evidence/
+dist/autonomerce-xprize-product-evidence.zip
 ```
 
 Do not create a “live” artifact by editing the synthetic examples. Generate it

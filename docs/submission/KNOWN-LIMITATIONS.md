@@ -140,6 +140,12 @@ privately.
 - the implementation can record network, infrastructure, fulfillment, other
   variable costs, and refunds per completed deal, but no approved external
   customer cost record exists in the public evidence as of August 1, 2026.
+- The tracked Product Evidence summary reports `$0.00` of verified expense
+  records because no approved amount-bearing record was supplied. It keeps
+  actual total expenses and actual net profit/loss `null`; it does not claim
+  that the project actually incurred no costs.
+- The Product Evidence screenshot directory contains a checklist only. No
+  screenshot or video-frame evidence is implied by that placeholder.
 
 The public revenue schema and
 [`METRICS-DEFINITIONS.md`](METRICS-DEFINITIONS.md) must govern submission numbers.

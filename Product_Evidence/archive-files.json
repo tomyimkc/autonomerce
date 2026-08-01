@@ -1,0 +1,74 @@
+{
+  "archiveRoot": "Product_Evidence",
+  "files": [
+    {
+      "archive": "Product_Evidence/EVIDENCE-INDEX.md",
+      "source": "Product_Evidence/EVIDENCE-INDEX.md"
+    },
+    {
+      "archive": "Product_Evidence/PRE-MAY-19-RESOURCES.md",
+      "source": "Product_Evidence/PRE-MAY-19-RESOURCES.md"
+    },
+    {
+      "archive": "Product_Evidence/README.md",
+      "source": "Product_Evidence/README.md"
+    },
+    {
+      "archive": "Product_Evidence/archive-files.json",
+      "source": "Product_Evidence/archive-files.json"
+    },
+    {
+      "archive": "Product_Evidence/disclosures/KNOWN-LIMITATIONS.md",
+      "source": "docs/submission/KNOWN-LIMITATIONS.md"
+    },
+    {
+      "archive": "Product_Evidence/disclosures/PREEXISTING-ASSET-DISCLOSURE.md",
+      "source": "PREEXISTING-ASSET-DISCLOSURE.md"
+    },
+    {
+      "archive": "Product_Evidence/evidence/circle/circle-arc-testnet-transaction.public.json",
+      "source": "evidence/public/circle-arc-testnet-transaction.public.json"
+    },
+    {
+      "archive": "Product_Evidence/evidence/circle/wallet-policy.redacted.json",
+      "source": "evidence/public/wallet-policy.redacted.json"
+    },
+    {
+      "archive": "Product_Evidence/evidence/cloud/build-identity.json",
+      "source": "evidence/public/build-identity.json"
+    },
+    {
+      "archive": "Product_Evidence/evidence/cloud/ci-and-security.json",
+      "source": "evidence/public/ci-and-security.json"
+    },
+    {
+      "archive": "Product_Evidence/evidence/gemini/gemini-call.redacted.json",
+      "source": "evidence/public/gemini-call.redacted.json"
+    },
+    {
+      "archive": "Product_Evidence/evidence/workflow/transactions.public.json",
+      "source": "evidence/public/transactions.public.json"
+    },
+    {
+      "archive": "Product_Evidence/financial/METRICS-DEFINITIONS.md",
+      "source": "docs/submission/METRICS-DEFINITIONS.md"
+    },
+    {
+      "archive": "Product_Evidence/financial/P_AND_L.md",
+      "source": "Product_Evidence/financial/P_AND_L.md"
+    },
+    {
+      "archive": "Product_Evidence/financial/contest-financial-evidence.default.json",
+      "source": "evidence/templates/contest/contest-financial-evidence.default.json"
+    },
+    {
+      "archive": "Product_Evidence/financial/may-august-breakdown.json",
+      "source": "Product_Evidence/financial/may-august-breakdown.json"
+    },
+    {
+      "archive": "Product_Evidence/screenshots/README.md",
+      "source": "Product_Evidence/screenshots/README.md"
+    }
+  ],
+  "schemaVersion": "autonomerce.xprize.archive-spec.v1"
+}
