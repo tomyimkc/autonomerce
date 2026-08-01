@@ -1,6 +1,6 @@
 # Known limitations
 
-`assessment snapshot: 2026-07-31`
+`assessment snapshot: 2026-08-01`
 
 This file describes the current repository state observed while preparing the
 submission lane. Other implementation lanes are active, so re-audit immediately
