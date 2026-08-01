@@ -3,6 +3,12 @@ import { createHash } from "node:crypto";
 import type {
   BackendMetrics,
   BackendStatus,
+  DealClassification,
+  DealCustomerRelationship,
+  DealEvidenceInput,
+  DealFundingSource,
+  DealSettlementClass,
+  DealVariableCosts,
   OnboardingInput,
   OnboardingResult,
   WorkflowInput,
@@ -74,6 +80,18 @@ function booleanField(value: JsonObject, key: string): boolean {
     contractError(`Private API returned invalid ${key}`);
   }
   return value[key];
+}
+
+function literalField<T extends string>(
+  value: JsonObject,
+  key: string,
+  allowed: readonly T[],
+): T {
+  const selected = stringField(value, key);
+  if (!allowed.includes(selected as T)) {
+    contractError(`Private API returned invalid ${key}`);
+  }
+  return selected as T;
 }
 
 function stringArrayField(value: JsonObject, key: string): string[] {
@@ -284,6 +302,199 @@ function proposalById(
   );
 }
 
+const DEAL_CUSTOMER_RELATIONSHIPS = [
+  "arms_length",
+  "related_party",
+  "self",
+] as const satisfies readonly DealCustomerRelationship[];
+
+const DEAL_FUNDING_SOURCES = [
+  "customer_funded",
+  "founder_sponsored",
+  "reimbursed",
+  "unknown",
+] as const satisfies readonly DealFundingSource[];
+
+const DEAL_SETTLEMENT_CLASSES = [
+  "unsettled",
+  "offline_mock",
+  "testnet",
+  "mainnet",
+  "unsupported",
+] as const satisfies readonly DealSettlementClass[];
+
+function parseDealVariableCosts(value: unknown): DealVariableCosts {
+  const costs = record(value, "deal variable costs");
+  return {
+    networkFeesUsdc: stringField(costs, "networkFeesUsdc"),
+    infrastructureUsdc: stringField(costs, "infrastructureUsdc"),
+    fulfillmentUsdc: stringField(costs, "fulfillmentUsdc"),
+    otherUsdc: stringField(costs, "otherUsdc"),
+    totalUsdc: stringField(costs, "totalUsdc"),
+  };
+}
+
+function parseDealClassification(
+  value: unknown,
+  expectedProposalId: string,
+): DealClassification {
+  const classification = record(value, "deal classification");
+  const evidence = record(classification.evidence, "deal evidence");
+  const proposalId = stringField(evidence, "proposalId");
+  if (proposalId !== expectedProposalId) {
+    contractError(
+      "Private API returned deal evidence for a different proposal",
+    );
+  }
+
+  const settlementClass = literalField(
+    classification,
+    "settlementClass",
+    DEAL_SETTLEMENT_CLASSES,
+  );
+  const countsAsRevenue = booleanField(
+    classification,
+    "countsAsRevenue",
+  );
+  const paidUser = booleanField(classification, "paidUser");
+  const acceptedFulfillment = booleanField(
+    classification,
+    "acceptedFulfillment",
+  );
+  const paidTask = booleanField(classification, "paidTask");
+  const paidExternalTask = booleanField(
+    classification,
+    "paidExternalTask",
+  );
+  const acceptedPaidExternalTask = booleanField(
+    classification,
+    "acceptedPaidExternalTask",
+  );
+  const paymentConfirmed = booleanField(
+    classification,
+    "paymentConfirmed",
+  );
+  const relationshipVerified = booleanField(
+    evidence,
+    "relationshipVerified",
+  );
+  if (countsAsRevenue && settlementClass !== "mainnet") {
+    contractError(
+      "Private API counted a non-mainnet deal as revenue",
+    );
+  }
+  if (paidUser && !countsAsRevenue) {
+    contractError(
+      "Private API returned a paid user for a non-revenue deal",
+    );
+  }
+  if (paidTask && !paymentConfirmed) {
+    contractError(
+      "Private API returned a paid task without confirmed settlement",
+    );
+  }
+  if (paidExternalTask && !countsAsRevenue) {
+    contractError(
+      "Private API returned a paid external task outside revenue classification",
+    );
+  }
+  if (
+    acceptedPaidExternalTask &&
+    (!paidExternalTask || !acceptedFulfillment)
+  ) {
+    contractError(
+      "Private API returned an accepted paid external task without delivery",
+    );
+  }
+  if (
+    booleanField(classification, "externalCustomer") &&
+    !relationshipVerified
+  ) {
+    contractError(
+      "Private API promoted unverified relationship evidence",
+    );
+  }
+
+  return {
+    evidence: {
+      evidenceId: stringField(evidence, "evidenceId"),
+      proposalId,
+      ownerId: stringField(evidence, "ownerId"),
+      customerId: nullableStringField(evidence, "customerId"),
+      userId: nullableStringField(evidence, "userId"),
+      customerRelationship: literalField(
+        evidence,
+        "customerRelationship",
+        DEAL_CUSTOMER_RELATIONSHIPS,
+      ),
+      fundingSource: literalField(
+        evidence,
+        "fundingSource",
+        DEAL_FUNDING_SOURCES,
+      ),
+      consentReference: stringField(evidence, "consentReference"),
+      evidenceReference: stringField(
+        evidence,
+        "evidenceReference",
+      ),
+      relationshipVerified,
+      verifierReference: stringField(evidence, "verifierReference"),
+      refundsUsdc: stringField(evidence, "refundsUsdc"),
+      refundWindowClosed: booleanField(
+        evidence,
+        "refundWindowClosed",
+      ),
+      refundWindowClosedAt: stringField(
+        evidence,
+        "refundWindowClosedAt",
+      ),
+      variableCosts: parseDealVariableCosts(evidence.variableCosts),
+      costsMeasured: booleanField(evidence, "costsMeasured"),
+      measuredAt: stringField(evidence, "measuredAt"),
+      recordedAt: stringField(evidence, "recordedAt"),
+    },
+    idempotentReplay: booleanField(
+      classification,
+      "idempotentReplay",
+    ),
+    settlementClass,
+    paymentConfirmed,
+    acceptedFulfillment,
+    externalCustomer: booleanField(
+      classification,
+      "externalCustomer",
+    ),
+    countsAsRevenue,
+    userAcquired: booleanField(classification, "userAcquired"),
+    paidUser,
+    paidTask,
+    paidExternalTask,
+    acceptedPaidExternalTask,
+    paymentAmountUsdc: stringField(
+      classification,
+      "paymentAmountUsdc",
+    ),
+    grossExternalRevenueUsdc: stringField(
+      classification,
+      "grossExternalRevenueUsdc",
+    ),
+    refundsUsdc: stringField(classification, "refundsUsdc"),
+    netExternalRevenueUsdc: stringField(
+      classification,
+      "netExternalRevenueUsdc",
+    ),
+    variableCostsUsdc: stringField(
+      classification,
+      "variableCostsUsdc",
+    ),
+    excludedPilotSpendUsdc: stringField(
+      classification,
+      "excludedPilotSpendUsdc",
+    ),
+    grossMarginUsdc: stringField(classification, "grossMarginUsdc"),
+  };
+}
+
 function parseMetrics(value: unknown): BackendMetrics {
   const metrics = record(value, "metrics response");
   const metricsIdCandidate =
@@ -307,9 +518,21 @@ function parseMetrics(value: unknown): BackendMetrics {
       "negotiatedPriceChangeUsdc",
     ),
     paidTasks: nullableNumberField(metrics, "paidTasks"),
+    paidExternalTasks: nullableNumberField(
+      metrics,
+      "paidExternalTasks",
+    ),
+    acceptedPaidExternalTasks: nullableNumberField(
+      metrics,
+      "acceptedPaidExternalTasks",
+    ),
     paidTasksStatus: nullableStringField(metrics, "paidTasksStatus"),
     confirmedLivePayments: numberField(metrics, "confirmedLivePayments"),
     mockedPaymentCount: numberField(metrics, "mockedPaymentCount"),
+    unsupportedPaymentCount: nullableNumberField(
+      metrics,
+      "unsupportedPaymentCount",
+    ),
     successfulFulfillment: numberField(metrics, "successfulFulfillment"),
     usdcRevenue: nullableStringField(metrics, "usdcRevenue"),
     liveSettlementVolumeUsdc: stringField(
@@ -319,6 +542,10 @@ function parseMetrics(value: unknown): BackendMetrics {
     mockedPaymentVolumeUsdc: stringField(
       metrics,
       "mockedPaymentVolumeUsdc",
+    ),
+    unsupportedPaymentVolumeUsdc: nullableStringField(
+      metrics,
+      "unsupportedPaymentVolumeUsdc",
     ),
     medianDeliverySeconds: nullableNumberField(
       metrics,
@@ -332,6 +559,49 @@ function parseMetrics(value: unknown): BackendMetrics {
     revenueClassification: nullableStringField(
       metrics,
       "revenueClassification",
+    ),
+    dealEvidenceCount: nullableNumberField(
+      metrics,
+      "dealEvidenceCount",
+    ),
+    usersAcquired: nullableNumberField(metrics, "usersAcquired"),
+    payingUsers: nullableNumberField(metrics, "payingUsers"),
+    acceptedExternalFulfillments: nullableNumberField(
+      metrics,
+      "acceptedExternalFulfillments",
+    ),
+    unclassifiedConfirmedPayments: nullableNumberField(
+      metrics,
+      "unclassifiedConfirmedPayments",
+    ),
+    grossExternalRevenueUsdc: nullableStringField(
+      metrics,
+      "grossExternalRevenueUsdc",
+    ),
+    refundsUsdc: nullableStringField(metrics, "refundsUsdc"),
+    netExternalRevenueUsdc: nullableStringField(
+      metrics,
+      "netExternalRevenueUsdc",
+    ),
+    variableCostsUsdc: nullableStringField(
+      metrics,
+      "variableCostsUsdc",
+    ),
+    excludedPilotSpendUsdc: nullableStringField(
+      metrics,
+      "excludedPilotSpendUsdc",
+    ),
+    grossMarginPercent: nullableStringField(
+      metrics,
+      "grossMarginPercent",
+    ),
+    repeatPurchaseRate: nullableStringField(
+      metrics,
+      "repeatPurchaseRate",
+    ),
+    repeatPurchaseRateStatus: nullableStringField(
+      metrics,
+      "repeatPurchaseRateStatus",
     ),
   };
 }
@@ -523,6 +793,70 @@ export class AutonomerceService {
         unattended: booleanField(policy, "unattended"),
       },
     };
+  }
+
+  async recordDealEvidence(
+    proposalId: string,
+    input: DealEvidenceInput,
+  ): Promise<DealClassification> {
+    await this.requireConnected();
+    if (!proposalId) {
+      throw new BackendRequestError(
+        "Proposal ID is required for deal evidence",
+        400,
+        "deal_evidence_proposal_required",
+      );
+    }
+
+    const value = await this.client.post<unknown>(
+      `/proposals/${encodeURIComponent(proposalId)}/deal-evidence`,
+      {
+        customerId: input.customerId,
+        userId: input.userId,
+        customerRelationship: input.customerRelationship,
+        fundingSource: input.fundingSource,
+        consentReference: input.consentReference,
+        refundsUsdc: input.refundsUsdc,
+        refundWindowClosed: input.refundWindowClosed,
+        variableCosts: {
+          networkFeesUsdc: input.variableCosts.networkFeesUsdc,
+          infrastructureUsdc:
+            input.variableCosts.infrastructureUsdc,
+          fulfillmentUsdc: input.variableCosts.fulfillmentUsdc,
+          otherUsdc: input.variableCosts.otherUsdc,
+        },
+        costsMeasured: input.costsMeasured,
+        measuredAt: input.measuredAt,
+        evidenceReference: input.evidenceReference,
+      },
+    );
+    const classification = parseDealClassification(value, proposalId);
+    const evidence = classification.evidence;
+    if (
+      evidence.customerId !== input.customerId ||
+      evidence.userId !== input.userId ||
+      evidence.customerRelationship !== input.customerRelationship ||
+      evidence.fundingSource !== input.fundingSource ||
+      evidence.consentReference !== input.consentReference ||
+      evidence.evidenceReference !== input.evidenceReference ||
+      evidence.refundsUsdc !== input.refundsUsdc ||
+      evidence.refundWindowClosed !== input.refundWindowClosed ||
+      evidence.costsMeasured !== input.costsMeasured ||
+      evidence.measuredAt !== input.measuredAt ||
+      evidence.variableCosts.networkFeesUsdc !==
+        input.variableCosts.networkFeesUsdc ||
+      evidence.variableCosts.infrastructureUsdc !==
+        input.variableCosts.infrastructureUsdc ||
+      evidence.variableCosts.fulfillmentUsdc !==
+        input.variableCosts.fulfillmentUsdc ||
+      evidence.variableCosts.otherUsdc !==
+        input.variableCosts.otherUsdc
+    ) {
+      contractError(
+        "Private API rewrote owner-attested deal evidence",
+      );
+    }
+    return classification;
   }
 
   async runWorkflow(input: WorkflowInput): Promise<WorkflowResult> {

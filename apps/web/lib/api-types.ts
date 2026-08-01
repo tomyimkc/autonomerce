@@ -107,6 +107,97 @@ export interface WorkflowTimelineEvent {
   time: string;
 }
 
+export type DealCustomerRelationship =
+  | "arms_length"
+  | "related_party"
+  | "self";
+
+export type DealFundingSource =
+  | "customer_funded"
+  | "founder_sponsored"
+  | "reimbursed"
+  | "unknown";
+
+export interface DealVariableCostsInput {
+  networkFeesUsdc: string;
+  infrastructureUsdc: string;
+  fulfillmentUsdc: string;
+  otherUsdc: string;
+}
+
+export interface DealVariableCosts extends DealVariableCostsInput {
+  totalUsdc: string;
+}
+
+/**
+ * Owner-attested deal facts. Payment network, payment confirmation,
+ * fulfillment acceptance, and all classification booleans are deliberately
+ * omitted: the private API derives them from its authoritative records.
+ */
+export interface DealEvidenceInput {
+  customerId: string | null;
+  userId: string | null;
+  customerRelationship: DealCustomerRelationship;
+  fundingSource: DealFundingSource;
+  consentReference: string;
+  refundsUsdc: string;
+  refundWindowClosed: true;
+  variableCosts: DealVariableCostsInput;
+  costsMeasured: true;
+  measuredAt: string;
+  evidenceReference: string;
+}
+
+export interface DealEvidenceRecord {
+  evidenceId: string;
+  proposalId: string;
+  ownerId: string;
+  customerId: string | null;
+  userId: string | null;
+  customerRelationship: DealCustomerRelationship;
+  fundingSource: DealFundingSource;
+  consentReference: string;
+  evidenceReference: string;
+  relationshipVerified: boolean;
+  verifierReference: string;
+  refundsUsdc: string;
+  refundWindowClosed: boolean;
+  refundWindowClosedAt: string;
+  variableCosts: DealVariableCosts;
+  costsMeasured: boolean;
+  measuredAt: string;
+  recordedAt: string;
+}
+
+export type DealSettlementClass =
+  | "unsettled"
+  | "offline_mock"
+  | "testnet"
+  | "mainnet"
+  | "unsupported";
+
+export interface DealClassification {
+  evidence: DealEvidenceRecord;
+  idempotentReplay: boolean;
+  settlementClass: DealSettlementClass;
+  paymentConfirmed: boolean;
+  acceptedFulfillment: boolean;
+  externalCustomer: boolean;
+  countsAsRevenue: boolean;
+  userAcquired: boolean;
+  paidUser: boolean;
+  paidTask: boolean;
+  paidExternalTask: boolean;
+  acceptedPaidExternalTask: boolean;
+  paymentAmountUsdc: string;
+  grossExternalRevenueUsdc: string;
+  refundsUsdc: string;
+  netExternalRevenueUsdc: string;
+  variableCostsUsdc: string;
+  excludedPilotSpendUsdc: string;
+  grossMarginUsdc: string;
+}
+
 export interface BackendMetrics {
   metricsId: string | null;
   registeredSellerAgents: number;
@@ -115,13 +206,17 @@ export interface BackendMetrics {
   proposalAcceptanceRate: string;
   negotiatedPriceChangeUsdc: string;
   paidTasks: number | null;
+  paidExternalTasks: number | null;
+  acceptedPaidExternalTasks: number | null;
   paidTasksStatus: string | null;
   confirmedLivePayments: number;
   mockedPaymentCount: number;
+  unsupportedPaymentCount: number | null;
   successfulFulfillment: number;
   usdcRevenue: string | null;
   liveSettlementVolumeUsdc: string;
   mockedPaymentVolumeUsdc: string;
+  unsupportedPaymentVolumeUsdc: string | null;
   medianDeliverySeconds: number | null;
   paymentFailures: number;
   policyDenials: number;
@@ -129,6 +224,19 @@ export interface BackendMetrics {
   grossMarginUsdc: string | null;
   grossMarginStatus: string | null;
   revenueClassification: string | null;
+  dealEvidenceCount: number | null;
+  usersAcquired: number | null;
+  payingUsers: number | null;
+  acceptedExternalFulfillments: number | null;
+  unclassifiedConfirmedPayments: number | null;
+  grossExternalRevenueUsdc: string | null;
+  refundsUsdc: string | null;
+  netExternalRevenueUsdc: string | null;
+  variableCostsUsdc: string | null;
+  excludedPilotSpendUsdc: string | null;
+  grossMarginPercent: string | null;
+  repeatPurchaseRate: string | null;
+  repeatPurchaseRateStatus: string | null;
 }
 
 export interface WorkflowResult {

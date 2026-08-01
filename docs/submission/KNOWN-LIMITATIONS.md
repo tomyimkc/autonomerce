@@ -128,16 +128,18 @@ privately.
 ## Metrics limitations
 
 - `paidTasks`, `usdcRevenue`, and `repeatPurchaseRate` are intentionally null
-  until external-customer classification exists.
+  until every confirmed payment in scope has verified, complete deal evidence.
 - live settlement volume is reported separately and does not prove the payer is
   an external customer rather than founder/self/affiliate/reimbursed.
-- `grossMarginUsdc` is intentionally null because variable costs are not ingested.
+- `grossMarginUsdc` remains null until verified deal evidence explicitly closes
+  the refund window and records measured per-order costs.
 - `medianDeliverySeconds` measures payment confirmation to accepted delivery when
   timestamps are available; it is not full order-to-delivery duration.
 - Offline counters are process-local. The supported single-host live repository
   persists operational metrics in SQLite, but no multi-host aggregation exists.
-- no current metric records Gemini cost, Circle/network fee, external-service
-  cost, refund, or variable infrastructure cost.
+- the implementation can record network, infrastructure, fulfillment, other
+  variable costs, and refunds per completed deal, but no approved external
+  customer cost record exists in the public evidence as of August 1, 2026.
 
 The public revenue schema and
 [`METRICS-DEFINITIONS.md`](METRICS-DEFINITIONS.md) must govern submission numbers.

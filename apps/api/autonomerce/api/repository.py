@@ -25,6 +25,14 @@ from autonomerce.contracts import (
     usdc_text,
 )
 
+from .deal_classification import (
+    DealEvidence,
+    SettlementClass,
+    aggregate_deal_metrics,
+    classify_deal,
+    settlement_class_for_payment,
+)
+
 
 @dataclass(frozen=True)
 class ProspectRecord:
@@ -289,6 +297,7 @@ class InMemoryRepository:
         self.payment_mocked: dict[str, bool] = {}
         self.fulfillments: dict[str, FulfillmentReceipt] = {}
         self.fulfillment_by_proposal: dict[str, str] = {}
+        self.deal_evidence: dict[str, DealEvidence] = {}
         self.receipt_publications: dict[str, ReceiptPublication] = {}
         self.publication_by_proposal: dict[str, str] = {}
         self.accepted_proposal_ids: set[str] = set()
@@ -735,6 +744,60 @@ class InMemoryRepository:
             )
         return receipt
 
+    def save_deal_evidence(self, evidence: DealEvidence) -> DealEvidence:
+        """Append one immutable business-classification record per proposal."""
+
+        with self._lock:
+            proposal = self.proposals.get(evidence.proposal_id)
+            if proposal is None:
+                raise ValueError("deal evidence proposal does not exist")
+            if self.proposal_owners.get(evidence.proposal_id) != evidence.owner_id:
+                raise ValueError("deal evidence owner does not match proposal")
+            payment_id = self.payment_by_proposal.get(evidence.proposal_id)
+            fulfillment_id = self.fulfillment_by_proposal.get(
+                evidence.proposal_id
+            )
+            classify_deal(
+                evidence,
+                payment=(
+                    self.payments.get(payment_id) if payment_id is not None else None
+                ),
+                mocked=(
+                    self.payment_mocked.get(payment_id, False)
+                    if payment_id is not None
+                    else False
+                ),
+                fulfillment=(
+                    self.fulfillments.get(fulfillment_id)
+                    if fulfillment_id is not None
+                    else None
+                ),
+            )
+            existing = self.deal_evidence.get(evidence.proposal_id)
+            if existing is not None:
+                if existing.semantic_key() != evidence.semantic_key():
+                    raise ValueError("deal evidence is append-only and cannot be rewritten")
+                return existing
+            self.deal_evidence[evidence.proposal_id] = evidence
+            return evidence
+
+    def deal_evidence_for_proposal(
+        self, proposal_id: str
+    ) -> DealEvidence | None:
+        with self._lock:
+            return self.deal_evidence.get(proposal_id)
+
+    def list_deal_evidence(
+        self, *, owner_id: str | None = None
+    ) -> list[DealEvidence]:
+        with self._lock:
+            evidence = list(self.deal_evidence.values())
+            if owner_id is not None:
+                evidence = [
+                    item for item in evidence if item.owner_id == owner_id
+                ]
+            return evidence
+
     def save_receipt_publication(
         self, publication: ReceiptPublication
     ) -> ReceiptPublication:
@@ -797,17 +860,30 @@ class InMemoryRepository:
                 if payment.state == PaymentState.CONFIRMED
                 and payment.proposal_id in proposal_ids
             ]
+            settlement_classes = {
+                payment.payment_id: settlement_class_for_payment(
+                    payment,
+                    mocked=self.payment_mocked.get(payment.payment_id, False),
+                )
+                for payment in confirmed
+            }
             live = [
                 payment
                 for payment in confirmed
-                if not self.payment_mocked.get(payment.payment_id, False)
-                and "TEST" not in payment.chain.upper()
+                if settlement_classes[payment.payment_id]
+                is SettlementClass.MAINNET
             ]
             mocked = [
                 payment
                 for payment in confirmed
-                if self.payment_mocked.get(payment.payment_id, False)
-                or "TEST" in payment.chain.upper()
+                if settlement_classes[payment.payment_id]
+                in {SettlementClass.OFFLINE_MOCK, SettlementClass.TESTNET}
+            ]
+            unsupported = [
+                payment
+                for payment in confirmed
+                if settlement_classes[payment.payment_id]
+                is SettlementClass.UNSUPPORTED
             ]
             successful = [
                 receipt
@@ -864,6 +940,38 @@ class InMemoryRepository:
                 if elapsed >= 0:
                     delivery_seconds.append(elapsed)
 
+            evidence_records = [
+                item
+                for item in self.deal_evidence.values()
+                if item.proposal_id in proposal_ids
+            ]
+            classifications = [
+                classify_deal(
+                    item,
+                    payment=self.payments.get(
+                        self.payment_by_proposal.get(item.proposal_id, "")
+                    ),
+                    mocked=self.payment_mocked.get(
+                        self.payment_by_proposal.get(item.proposal_id, ""),
+                        False,
+                    ),
+                    fulfillment=self.fulfillments.get(
+                        self.fulfillment_by_proposal.get(item.proposal_id, "")
+                    ),
+                )
+                for item in evidence_records
+            ]
+            deal_metrics = aggregate_deal_metrics(classifications)
+            classified_proposal_ids = {
+                item.evidence.proposal_id for item in classifications
+            }
+            unclassified_confirmed = [
+                item
+                for item in confirmed
+                if item.proposal_id not in classified_proposal_ids
+            ]
+            classification_complete = not unclassified_confirmed
+
             registered_sellers = sum(
                 1
                 for seller_id in self.sellers
@@ -876,24 +984,89 @@ class InMemoryRepository:
                 "proposalsSent": len(proposals),
                 "proposalAcceptanceRate": format(acceptance_rate, "f"),
                 "negotiatedPriceChangeUsdc": usdc_text(abs(negotiated_total)),
-                "paidTasks": None,
-                "paidTasksStatus": "requires_external_customer_classification",
+                "dealEvidenceCount": deal_metrics["dealEvidenceCount"],
+                "usersAcquired": deal_metrics["usersAcquired"],
+                "payingUsers": (
+                    deal_metrics["payingUsers"]
+                    if classification_complete
+                    else None
+                ),
+                "acceptedExternalFulfillments": deal_metrics[
+                    "acceptedExternalFulfillments"
+                ],
+                "paidTasks": (
+                    deal_metrics["paidTasks"]
+                    if classification_complete
+                    else None
+                ),
+                "paidExternalTasks": (
+                    deal_metrics["paidExternalTasks"]
+                    if classification_complete
+                    else None
+                ),
+                "acceptedPaidExternalTasks": (
+                    deal_metrics["acceptedPaidExternalTasks"]
+                    if classification_complete
+                    else None
+                ),
+                "paidTasksStatus": (
+                    "classified_confirmed_settlements"
+                    if classification_complete
+                    else "requires_external_customer_classification"
+                ),
                 "confirmedLivePayments": len(live),
                 "mockedPaymentCount": len(mocked),
-                "usdcRevenue": None,
+                "unsupportedPaymentCount": len(unsupported),
+                "unclassifiedConfirmedPayments": len(unclassified_confirmed),
+                "grossExternalRevenueUsdc": (
+                    deal_metrics["grossExternalRevenueUsdc"]
+                    if classification_complete
+                    else None
+                ),
+                "refundsUsdc": (
+                    deal_metrics["refundsUsdc"]
+                    if classification_complete
+                    else None
+                ),
+                "netExternalRevenueUsdc": (
+                    deal_metrics["netExternalRevenueUsdc"]
+                    if classification_complete
+                    else None
+                ),
+                "variableCostsUsdc": deal_metrics["variableCostsUsdc"],
+                "excludedPilotSpendUsdc": deal_metrics[
+                    "excludedPilotSpendUsdc"
+                ],
+                "usdcRevenue": (
+                    deal_metrics["netExternalRevenueUsdc"]
+                    if classification_complete
+                    else None
+                ),
                 "liveSettlementVolumeUsdc": usdc_text(
                     sum((payment.amount_usdc for payment in live), Decimal("0"))
                 ),
                 "mockedPaymentVolumeUsdc": usdc_text(
                     sum((payment.amount_usdc for payment in mocked), Decimal("0"))
                 ),
+                "unsupportedPaymentVolumeUsdc": usdc_text(
+                    sum(
+                        (payment.amount_usdc for payment in unsupported),
+                        Decimal("0"),
+                    )
+                ),
                 "successfulFulfillment": len(successful),
                 "medianDeliverySeconds": (
                     float(median(delivery_seconds)) if delivery_seconds else None
                 ),
-                "repeatPurchaseRate": None,
+                "repeatPurchaseRate": (
+                    deal_metrics["repeatPurchaseRate"]
+                    if classification_complete
+                    else None
+                ),
                 "repeatPurchaseRateStatus": (
-                    "requires_external_customer_classification"
+                    "classified_external_customer_purchases"
+                    if classification_complete
+                    else "requires_external_customer_classification"
                 ),
                 "paymentFailures": sum(
                     1
@@ -904,7 +1077,24 @@ class InMemoryRepository:
                 ),
                 "policyDenials": self.policy_denials,
                 "duplicatePaymentCount": self.duplicate_payment_attempts,
-                "grossMarginUsdc": None,
-                "grossMarginStatus": "requires_measured_variable_costs",
-                "revenueClassification": "unmeasured_external_customer_status",
+                "grossMarginUsdc": (
+                    deal_metrics["grossMarginUsdc"]
+                    if classification_complete
+                    else None
+                ),
+                "grossMarginPercent": (
+                    deal_metrics["grossMarginPercent"]
+                    if classification_complete
+                    else None
+                ),
+                "grossMarginStatus": (
+                    "classified_measured_variable_costs"
+                    if classification_complete
+                    else "requires_measured_variable_costs"
+                ),
+                "revenueClassification": (
+                    "complete_external_customer_classification"
+                    if classification_complete
+                    else "unmeasured_external_customer_status"
+                ),
             }

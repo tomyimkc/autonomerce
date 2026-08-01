@@ -1,0 +1,727 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://autonomerce.example/schemas/contest-financial-evidence.v2.schema.json",
+  "title": "Autonomerce contest financial evidence v2",
+  "description": "Fail-closed generated accounting evidence and blocked Devpost draft answers.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "recordKind",
+    "projectName",
+    "eligibilityWindow",
+    "observedThrough",
+    "asOf",
+    "generatedAt",
+    "reportingStatus",
+    "currency",
+    "inputDigestSha256",
+    "usdcUsdValuationPolicy",
+    "profitAndLoss",
+    "monthlySummary",
+    "counts",
+    "customerConcentration",
+    "classificationExclusions",
+    "relatedPartyReporting",
+    "fundingSourceExclusions",
+    "displayReconciliation",
+    "fieldMapProvenance",
+    "devpostCustomAnswerPayload",
+    "privacyValidation",
+    "limitations"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "autonomerce.contest.financial-evidence.v2"
+    },
+    "recordKind": {
+      "const": "contest_financial_evidence"
+    },
+    "projectName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "eligibilityWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start",
+        "end"
+      ],
+      "properties": {
+        "start": {
+          "const": "2026-05-19T17:00:00Z"
+        },
+        "end": {
+          "const": "2026-08-17T20:00:00Z"
+        }
+      }
+    },
+    "observedThrough": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "asOf": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reportingStatus": {
+      "enum": [
+        "partial_as_of",
+        "complete_window"
+      ]
+    },
+    "currency": {
+      "const": "USD"
+    },
+    "inputDigestSha256": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "usdcUsdValuationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset",
+        "reportingCurrency",
+        "method",
+        "noPegInference"
+      ],
+      "properties": {
+        "asset": {
+          "const": "USDC"
+        },
+        "reportingCurrency": {
+          "const": "USD"
+        },
+        "method": {
+          "const": "event_level_explicit"
+        },
+        "noPegInference": {
+          "const": true
+        }
+      }
+    },
+    "profitAndLoss": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observedSettlementGmvUsd",
+        "grossRecognizedRevenueUsd",
+        "refundsUsd",
+        "netRecognizedRevenueUsd",
+        "knownExpensesUsd",
+        "knownCogsUsd",
+        "knownMarketingCacUsd",
+        "knownAdditionalExpensesUsd",
+        "totalExpensesUsd",
+        "cogsUsd",
+        "marketingCacUsd",
+        "additionalExpensesUsd",
+        "netProfitLossUsd",
+        "expenseCompleteness"
+      ],
+      "properties": {
+        "observedSettlementGmvUsd": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+        },
+        "grossRecognizedRevenueUsd": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+        },
+        "refundsUsd": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+        },
+        "netRecognizedRevenueUsd": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+        },
+        "knownExpensesUsd": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+        },
+        "knownCogsUsd": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+        },
+        "knownMarketingCacUsd": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+        },
+        "knownAdditionalExpensesUsd": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+        },
+        "totalExpensesUsd": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+        },
+        "cogsUsd": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+        },
+        "marketingCacUsd": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+        },
+        "additionalExpensesUsd": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+        },
+        "netProfitLossUsd": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+        },
+        "expenseCompleteness": {
+          "enum": [
+            "complete",
+            "unknown_total"
+          ]
+        }
+      }
+    },
+    "monthlySummary": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "month",
+          "eligibleThrough",
+          "observedThrough",
+          "periodComplete",
+          "grossRecognizedRevenueUsd",
+          "refundsCashBasisUsd",
+          "netRecognizedRevenueUsd",
+          "knownExpensesUsd",
+          "totalExpensesUsd",
+          "netProfitLossUsd",
+          "expenseCompleteness"
+        ],
+        "properties": {
+          "month": {
+            "enum": [
+              "2026-05",
+              "2026-06",
+              "2026-07",
+              "2026-08"
+            ]
+          },
+          "eligibleThrough": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "observedThrough": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "periodComplete": {
+            "type": "boolean"
+          },
+          "grossRecognizedRevenueUsd": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+          },
+          "refundsCashBasisUsd": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+          },
+          "netRecognizedRevenueUsd": {
+            "type": "string",
+            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+          },
+          "knownExpensesUsd": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+          },
+          "totalExpensesUsd": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+          },
+          "netProfitLossUsd": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+          },
+          "expenseCompleteness": {
+            "enum": [
+              "complete",
+              "unknown_total"
+            ]
+          }
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "externalCustomers",
+        "externalUsers",
+        "externalDesignPartners",
+        "payingExternalCustomers",
+        "payingExternalUsers",
+        "qualifyingRevenueEvents"
+      ],
+      "properties": {
+        "externalCustomers": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "externalUsers": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "externalDesignPartners": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "payingExternalCustomers": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "payingExternalUsers": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "qualifyingRevenueEvents": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "customerConcentration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "positiveNetRevenueCustomerCount",
+        "largestCustomerNetRevenueUsd",
+        "largestCustomerRevenueSharePercent",
+        "thresholdPercent",
+        "limitationFlag",
+        "limitationReason"
+      ],
+      "properties": {
+        "positiveNetRevenueCustomerCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "largestCustomerNetRevenueUsd": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+        },
+        "largestCustomerRevenueSharePercent": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+        },
+        "thresholdPercent": {
+          "const": "40"
+        },
+        "limitationFlag": {
+          "type": "boolean"
+        },
+        "limitationReason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 500
+        }
+      }
+    },
+    "classificationExclusions": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "classification",
+          "eventCount",
+          "grossSettlementValueUsd",
+          "refundsUsd",
+          "netSettlementValueUsd",
+          "eventIds"
+        ],
+        "properties": {
+          "classification": {
+            "enum": [
+              "synthetic",
+              "offline_mock",
+              "testnet",
+              "mainnet_nonqualifying",
+              "unsettled"
+            ]
+          },
+          "eventCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "grossSettlementValueUsd": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+          },
+          "refundsUsd": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+          },
+          "netSettlementValueUsd": {
+            "type": "string",
+            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+          },
+          "eventIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^revenue_[a-f0-9]{12}$"
+            },
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "relatedPartyReporting": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "relationshipClass",
+          "eventCount",
+          "grossSettlementValueUsd",
+          "refundsUsd",
+          "netRelatedPartyAmountUsd",
+          "eventIds"
+        ],
+        "properties": {
+          "relationshipClass": {
+            "enum": [
+              "related_party",
+              "self",
+              "founder",
+              "affiliate"
+            ]
+          },
+          "eventCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "grossSettlementValueUsd": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+          },
+          "refundsUsd": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+          },
+          "netRelatedPartyAmountUsd": {
+            "type": "string",
+            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+          },
+          "eventIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^revenue_[a-f0-9]{12}$"
+            },
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "fundingSourceExclusions": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "fundingClass",
+          "eventCount",
+          "grossSettlementValueUsd",
+          "refundsUsd",
+          "netExcludedFundingUsd",
+          "eventIds"
+        ],
+        "properties": {
+          "fundingClass": {
+            "enum": [
+              "reimbursed",
+              "circular"
+            ]
+          },
+          "eventCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "grossSettlementValueUsd": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+          },
+          "refundsUsd": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+          },
+          "netExcludedFundingUsd": {
+            "type": "string",
+            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+          },
+          "eventIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^revenue_[a-f0-9]{12}$"
+            },
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "displayReconciliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "roundingMode",
+        "months",
+        "displayTotalRevenueUsd",
+        "displayMonthlySumUsd",
+        "differenceUsd"
+      ],
+      "properties": {
+        "roundingMode": {
+          "const": "ROUND_HALF_UP_TO_CENTS"
+        },
+        "months": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "month",
+              "displayNetRevenueUsd"
+            ],
+            "properties": {
+              "month": {
+                "enum": [
+                  "2026-05",
+                  "2026-06",
+                  "2026-07",
+                  "2026-08"
+                ]
+              },
+              "displayNetRevenueUsd": {
+                "type": "string",
+                "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+              }
+            }
+          }
+        },
+        "displayTotalRevenueUsd": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "displayMonthlySumUsd": {
+          "type": "string",
+          "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+        },
+        "differenceUsd": {
+          "const": "0"
+        }
+      }
+    },
+    "fieldMapProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceType",
+        "retrievedAt",
+        "revision",
+        "independentlyLiveVerified",
+        "numericIdStatus",
+        "snapshotDigest"
+      ],
+      "properties": {
+        "sourceType": {
+          "const": "owner_verified_mcp_snapshot"
+        },
+        "retrievedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "independentlyLiveVerified": {
+          "const": false
+        },
+        "numericIdStatus": {
+          "const": "owner_verified_draft_values_not_official_public_ids"
+        },
+        "snapshotDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    },
+    "devpostCustomAnswerPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "draftOnly",
+        "automaticSubmission",
+        "requiresOwnerReview",
+        "fieldIdsOfficialPublicVerified",
+        "sourceEvidenceDigest",
+        "fieldMapSnapshotDigest",
+        "answers"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "autonomerce.devpost.custom-answer-payload.v2"
+        },
+        "draftOnly": {
+          "const": true
+        },
+        "automaticSubmission": {
+          "const": false
+        },
+        "requiresOwnerReview": {
+          "const": true
+        },
+        "fieldIdsOfficialPublicVerified": {
+          "const": false
+        },
+        "sourceEvidenceDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "fieldMapSnapshotDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "answers": {
+          "type": "array",
+          "minItems": 11,
+          "maxItems": 11,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "fieldId",
+              "label",
+              "draftAnswer",
+              "readiness",
+              "pasteReady",
+              "blockers"
+            ],
+            "properties": {
+              "fieldId": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "draftAnswer": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 5000
+              },
+              "readiness": {
+                "enum": [
+                  "owner_review_required",
+                  "blocked_incomplete_facts"
+                ]
+              },
+              "pasteReady": {
+                "const": false
+              },
+              "blockers": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "privacyValidation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "opaqueIdsRequired",
+        "credentialOrPiiLikeNotesRejected"
+      ],
+      "properties": {
+        "status": {
+          "const": "passed"
+        },
+        "opaqueIdsRequired": {
+          "const": true
+        },
+        "credentialOrPiiLikeNotesRejected": {
+          "const": true
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "maxItems": 100
+    }
+  }
+}

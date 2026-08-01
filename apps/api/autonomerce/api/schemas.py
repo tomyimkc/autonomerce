@@ -8,7 +8,7 @@ import re
 from typing import Any, Literal
 from urllib.parse import urlsplit
 
-from pydantic import AliasChoices, BaseModel, ConfigDict, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
 
 
 MAX_TEXT_LENGTH = 8_192
@@ -24,6 +24,10 @@ _BLOCKED_NETWORK_HOSTS = {
 _FIXTURE_HOSTS = {"example.com", "example.net", "example.org"}
 _FIXTURE_SUFFIXES = (".example", ".test", ".invalid")
 _DNS_LABEL = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$")
+_CUSTOMER_ID_PATTERN = r"^customer_[0-9a-f]{16,64}$"
+_USER_ID_PATTERN = r"^user_[0-9a-f]{16,64}$"
+_CONSENT_REFERENCE_PATTERN = r"^consent_[0-9a-f]{16,64}$"
+_EVIDENCE_REFERENCE_PATTERN = r"^evidence_[0-9a-f]{16,64}$"
 
 
 def _ip_address(host: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:
@@ -315,6 +319,64 @@ class FulfillmentRequest(APIModel):
         default_factory=dict, max_length=MAX_COLLECTION_ITEMS
     )
     validator: str | None = Field(default=None, max_length=200)
+
+
+class VariableCostsRequest(APIModel):
+    network_fees_usdc: Decimal = Field(ge=0)
+    infrastructure_usdc: Decimal = Field(ge=0)
+    fulfillment_usdc: Decimal = Field(ge=0)
+    other_usdc: Decimal = Field(ge=0)
+
+
+class DealEvidenceCreate(APIModel):
+    """Owner-authored facts only; settlement and revenue claims are derived."""
+
+    customer_relationship: Literal[
+        "arms_length",
+        "related_party",
+        "self",
+    ]
+    funding_source: Literal[
+        "customer_funded",
+        "founder_sponsored",
+        "reimbursed",
+        "unknown",
+    ]
+    customer_id: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=200,
+        pattern=_CUSTOMER_ID_PATTERN,
+    )
+    user_id: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=200,
+        pattern=_USER_ID_PATTERN,
+    )
+    consent_reference: str = Field(
+        min_length=1,
+        max_length=200,
+        pattern=_CONSENT_REFERENCE_PATTERN,
+    )
+    evidence_reference: str = Field(
+        min_length=1,
+        max_length=200,
+        pattern=_EVIDENCE_REFERENCE_PATTERN,
+    )
+    refunds_usdc: Decimal = Field(ge=0)
+    refund_window_closed: Literal[True]
+    variable_costs: VariableCostsRequest
+    costs_measured: Literal[True]
+    measured_at: str = Field(min_length=1, max_length=128)
+
+    @model_validator(mode="after")
+    def require_arms_length_customer(self) -> "DealEvidenceCreate":
+        if self.customer_relationship == "arms_length" and not self.customer_id:
+            raise ValueError(
+                "arms-length deal evidence requires an opaque customerId"
+            )
+        return self
 
 
 class ReceiptPublishRequest(APIModel):

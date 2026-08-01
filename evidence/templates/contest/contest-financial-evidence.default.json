@@ -1,0 +1,353 @@
+{
+  "asOf": "2026-08-01T00:00:00Z",
+  "classificationExclusions": [
+    {
+      "classification": "synthetic",
+      "eventCount": 0,
+      "eventIds": [],
+      "grossSettlementValueUsd": "0",
+      "netSettlementValueUsd": "0",
+      "refundsUsd": "0"
+    },
+    {
+      "classification": "offline_mock",
+      "eventCount": 0,
+      "eventIds": [],
+      "grossSettlementValueUsd": "0",
+      "netSettlementValueUsd": "0",
+      "refundsUsd": "0"
+    },
+    {
+      "classification": "testnet",
+      "eventCount": 0,
+      "eventIds": [],
+      "grossSettlementValueUsd": "0",
+      "netSettlementValueUsd": "0",
+      "refundsUsd": "0"
+    },
+    {
+      "classification": "mainnet_nonqualifying",
+      "eventCount": 0,
+      "eventIds": [],
+      "grossSettlementValueUsd": "0",
+      "netSettlementValueUsd": "0",
+      "refundsUsd": "0"
+    },
+    {
+      "classification": "unsettled",
+      "eventCount": 0,
+      "eventIds": [],
+      "grossSettlementValueUsd": "0",
+      "netSettlementValueUsd": "0",
+      "refundsUsd": "0"
+    }
+  ],
+  "counts": {
+    "externalCustomers": 0,
+    "externalDesignPartners": 0,
+    "externalUsers": 0,
+    "payingExternalCustomers": 0,
+    "payingExternalUsers": 0,
+    "qualifyingRevenueEvents": 0
+  },
+  "currency": "USD",
+  "customerConcentration": {
+    "largestCustomerNetRevenueUsd": "0",
+    "largestCustomerRevenueSharePercent": null,
+    "limitationFlag": false,
+    "limitationReason": null,
+    "positiveNetRevenueCustomerCount": 0,
+    "thresholdPercent": "40"
+  },
+  "devpostCustomAnswerPayload": {
+    "answers": [
+      {
+        "blockers": [],
+        "draftAnswer": "$0.00",
+        "fieldId": 27418,
+        "label": "Total Revenue",
+        "pasteReady": false,
+        "readiness": "owner_review_required"
+      },
+      {
+        "blockers": [],
+        "draftAnswer": "2026-05: $0.00; 2026-06: $0.00; 2026-07: $0.00; 2026-08: $0.00 (partial through 2026-08-01T00:00:00Z)",
+        "fieldId": 27419,
+        "label": "Monthly Revenue",
+        "pasteReady": false,
+        "readiness": "owner_review_required"
+      },
+      {
+        "blockers": [],
+        "draftAnswer": "Eligible window: 2026-05-19T17:00:00Z through 2026-08-17T20:00:00Z; financial facts are observed only through 2026-08-01T00:00:00Z and generated at 2026-08-01T00:00:01Z. The observed facts contain 0 external customer(s), 0 external user(s), and 0 external design partner(s); customer nature counts: none; user nature counts: none; design-partner nature counts: none. Paying counts require positive net recognized revenue after cash-basis refunds: 0 paying customer(s) and 0 paying user(s). Revenue is recognized only from evidence-bound mainnet_external_customer classifications: 0 accepted-fulfillment event(s) and 0 explicit earned-basis event(s). Confirmed settlement/GMV ($0.00) is distinct from net recognized revenue ($0.00). USDC-to-USD values require event-level source digests and no peg value is inferred.",
+        "fieldId": 27659,
+        "label": "Revenue Explanation",
+        "pasteReady": false,
+        "readiness": "owner_review_required"
+      },
+      {
+        "blockers": [],
+        "draftAnswer": "$0.00",
+        "fieldId": 27423,
+        "label": "Related-Party Revenue",
+        "pasteReady": false,
+        "readiness": "owner_review_required"
+      },
+      {
+        "blockers": [
+          "Expense facts are incomplete through the full eligible window; the field is blocked and no missing amount is inferred as zero."
+        ],
+        "draftAnswer": null,
+        "fieldId": 27460,
+        "label": "Total Expenses",
+        "pasteReady": false,
+        "readiness": "blocked_incomplete_facts"
+      },
+      {
+        "blockers": [
+          "Expense facts are incomplete through the full eligible window; the field is blocked and no missing amount is inferred as zero."
+        ],
+        "draftAnswer": null,
+        "fieldId": 27422,
+        "label": "COGS",
+        "pasteReady": false,
+        "readiness": "blocked_incomplete_facts"
+      },
+      {
+        "blockers": [
+          "Expense facts are incomplete through the full eligible window; the field is blocked and no missing amount is inferred as zero."
+        ],
+        "draftAnswer": null,
+        "fieldId": 27421,
+        "label": "Marketing/CAC",
+        "pasteReady": false,
+        "readiness": "blocked_incomplete_facts"
+      },
+      {
+        "blockers": [],
+        "draftAnswer": "Marketing/CAC is blocked because the expense record is incomplete. Known marketing/CAC items total $0.00, but unknown amounts are not rendered as zero.",
+        "fieldId": 27463,
+        "label": "Marketing Explanation",
+        "pasteReady": false,
+        "readiness": "owner_review_required"
+      },
+      {
+        "blockers": [
+          "Expense facts are incomplete through the full eligible window; the field is blocked and no missing amount is inferred as zero."
+        ],
+        "draftAnswer": null,
+        "fieldId": 27464,
+        "label": "Additional Expenses",
+        "pasteReady": false,
+        "readiness": "blocked_incomplete_facts"
+      },
+      {
+        "blockers": [],
+        "draftAnswer": "0",
+        "fieldId": 27465,
+        "label": "Users Acquired",
+        "pasteReady": false,
+        "readiness": "owner_review_required"
+      },
+      {
+        "blockers": [],
+        "draftAnswer": "0",
+        "fieldId": 27466,
+        "label": "Paying Users",
+        "pasteReady": false,
+        "readiness": "owner_review_required"
+      }
+    ],
+    "automaticSubmission": false,
+    "draftOnly": true,
+    "fieldIdsOfficialPublicVerified": false,
+    "fieldMapSnapshotDigest": "sha256:6fd1b37b19d72ffb83abfce1c190220fe67dcb713a9b6deef16c25f43129552b",
+    "requiresOwnerReview": true,
+    "schemaVersion": "autonomerce.devpost.custom-answer-payload.v2",
+    "sourceEvidenceDigest": "sha256:580202e5976f67846bfdb9ac6d1e4505d1ac7cba8287eb4cd55fccd7b8ae12ea"
+  },
+  "displayReconciliation": {
+    "differenceUsd": "0",
+    "displayMonthlySumUsd": "0.00",
+    "displayTotalRevenueUsd": "0.00",
+    "months": [
+      {
+        "displayNetRevenueUsd": "0.00",
+        "month": "2026-05"
+      },
+      {
+        "displayNetRevenueUsd": "0.00",
+        "month": "2026-06"
+      },
+      {
+        "displayNetRevenueUsd": "0.00",
+        "month": "2026-07"
+      },
+      {
+        "displayNetRevenueUsd": "0.00",
+        "month": "2026-08"
+      }
+    ],
+    "roundingMode": "ROUND_HALF_UP_TO_CENTS"
+  },
+  "eligibilityWindow": {
+    "end": "2026-08-17T20:00:00Z",
+    "start": "2026-05-19T17:00:00Z"
+  },
+  "fieldMapProvenance": {
+    "independentlyLiveVerified": false,
+    "numericIdStatus": "owner_verified_draft_values_not_official_public_ids",
+    "retrievedAt": "2026-08-01T00:00:00Z",
+    "revision": "owner-verified-mcp-snapshot-2026-08-01-r1",
+    "snapshotDigest": "sha256:6fd1b37b19d72ffb83abfce1c190220fe67dcb713a9b6deef16c25f43129552b",
+    "sourceType": "owner_verified_mcp_snapshot"
+  },
+  "fundingSourceExclusions": [
+    {
+      "eventCount": 0,
+      "eventIds": [],
+      "fundingClass": "reimbursed",
+      "grossSettlementValueUsd": "0",
+      "netExcludedFundingUsd": "0",
+      "refundsUsd": "0"
+    },
+    {
+      "eventCount": 0,
+      "eventIds": [],
+      "fundingClass": "circular",
+      "grossSettlementValueUsd": "0",
+      "netExcludedFundingUsd": "0",
+      "refundsUsd": "0"
+    }
+  ],
+  "generatedAt": "2026-08-01T00:00:01Z",
+  "inputDigestSha256": "sha256:580202e5976f67846bfdb9ac6d1e4505d1ac7cba8287eb4cd55fccd7b8ae12ea",
+  "limitations": [
+    "This default is observed only through 2026-08-01T00:00:00Z.",
+    "Future August dates through the eligibility end are not certified as zero or complete.",
+    "No complete expense record was supplied; expense answer fields remain blocked.",
+    "This is a partial-period snapshot; dates after observedThrough are not certified as zero or complete.",
+    "Expense answers are blocked because the full eligible expense record is incomplete.",
+    "No evidence-bound qualifying recognized-revenue event was supplied."
+  ],
+  "monthlySummary": [
+    {
+      "eligibleThrough": "2026-05-31T23:59:59Z",
+      "expenseCompleteness": "unknown_total",
+      "grossRecognizedRevenueUsd": "0",
+      "knownExpensesUsd": "0",
+      "month": "2026-05",
+      "netProfitLossUsd": null,
+      "netRecognizedRevenueUsd": "0",
+      "observedThrough": "2026-08-01T00:00:00Z",
+      "periodComplete": true,
+      "refundsCashBasisUsd": "0",
+      "totalExpensesUsd": null
+    },
+    {
+      "eligibleThrough": "2026-06-30T23:59:59Z",
+      "expenseCompleteness": "unknown_total",
+      "grossRecognizedRevenueUsd": "0",
+      "knownExpensesUsd": "0",
+      "month": "2026-06",
+      "netProfitLossUsd": null,
+      "netRecognizedRevenueUsd": "0",
+      "observedThrough": "2026-08-01T00:00:00Z",
+      "periodComplete": true,
+      "refundsCashBasisUsd": "0",
+      "totalExpensesUsd": null
+    },
+    {
+      "eligibleThrough": "2026-07-31T23:59:59Z",
+      "expenseCompleteness": "unknown_total",
+      "grossRecognizedRevenueUsd": "0",
+      "knownExpensesUsd": "0",
+      "month": "2026-07",
+      "netProfitLossUsd": null,
+      "netRecognizedRevenueUsd": "0",
+      "observedThrough": "2026-08-01T00:00:00Z",
+      "periodComplete": true,
+      "refundsCashBasisUsd": "0",
+      "totalExpensesUsd": null
+    },
+    {
+      "eligibleThrough": "2026-08-17T20:00:00Z",
+      "expenseCompleteness": "unknown_total",
+      "grossRecognizedRevenueUsd": "0",
+      "knownExpensesUsd": "0",
+      "month": "2026-08",
+      "netProfitLossUsd": null,
+      "netRecognizedRevenueUsd": "0",
+      "observedThrough": "2026-08-01T00:00:00Z",
+      "periodComplete": false,
+      "refundsCashBasisUsd": "0",
+      "totalExpensesUsd": null
+    }
+  ],
+  "observedThrough": "2026-08-01T00:00:00Z",
+  "privacyValidation": {
+    "credentialOrPiiLikeNotesRejected": true,
+    "opaqueIdsRequired": true,
+    "status": "passed"
+  },
+  "profitAndLoss": {
+    "additionalExpensesUsd": null,
+    "cogsUsd": null,
+    "expenseCompleteness": "unknown_total",
+    "grossRecognizedRevenueUsd": "0",
+    "knownAdditionalExpensesUsd": "0",
+    "knownCogsUsd": "0",
+    "knownExpensesUsd": "0",
+    "knownMarketingCacUsd": "0",
+    "marketingCacUsd": null,
+    "netProfitLossUsd": null,
+    "netRecognizedRevenueUsd": "0",
+    "observedSettlementGmvUsd": "0",
+    "refundsUsd": "0",
+    "totalExpensesUsd": null
+  },
+  "projectName": "Autonomerce",
+  "recordKind": "contest_financial_evidence",
+  "relatedPartyReporting": [
+    {
+      "eventCount": 0,
+      "eventIds": [],
+      "grossSettlementValueUsd": "0",
+      "netRelatedPartyAmountUsd": "0",
+      "refundsUsd": "0",
+      "relationshipClass": "related_party"
+    },
+    {
+      "eventCount": 0,
+      "eventIds": [],
+      "grossSettlementValueUsd": "0",
+      "netRelatedPartyAmountUsd": "0",
+      "refundsUsd": "0",
+      "relationshipClass": "self"
+    },
+    {
+      "eventCount": 0,
+      "eventIds": [],
+      "grossSettlementValueUsd": "0",
+      "netRelatedPartyAmountUsd": "0",
+      "refundsUsd": "0",
+      "relationshipClass": "founder"
+    },
+    {
+      "eventCount": 0,
+      "eventIds": [],
+      "grossSettlementValueUsd": "0",
+      "netRelatedPartyAmountUsd": "0",
+      "refundsUsd": "0",
+      "relationshipClass": "affiliate"
+    }
+  ],
+  "reportingStatus": "partial_as_of",
+  "schemaVersion": "autonomerce.contest.financial-evidence.v2",
+  "usdcUsdValuationPolicy": {
+    "asset": "USDC",
+    "method": "event_level_explicit",
+    "noPegInference": true,
+    "reportingCurrency": "USD"
+  }
+}

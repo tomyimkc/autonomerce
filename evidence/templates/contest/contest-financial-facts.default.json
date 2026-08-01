@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "autonomerce.contest.financial-facts.v2",
+  "projectName": "Autonomerce",
+  "eligibilityWindow": {
+    "start": "2026-05-19T17:00:00Z",
+    "end": "2026-08-17T20:00:00Z"
+  },
+  "observedThrough": "2026-08-01T00:00:00Z",
+  "asOf": "2026-08-01T00:00:00Z",
+  "generatedAt": "2026-08-01T00:00:01Z",
+  "currency": "USD",
+  "fieldMap": {
+    "sourceType": "owner_verified_mcp_snapshot",
+    "retrievedAt": "2026-08-01T00:00:00Z",
+    "revision": "owner-verified-mcp-snapshot-2026-08-01-r1",
+    "independentlyLiveVerified": false,
+    "numericIdStatus": "owner_verified_draft_values_not_official_public_ids",
+    "snapshotDigest": "sha256:6fd1b37b19d72ffb83abfce1c190220fe67dcb713a9b6deef16c25f43129552b",
+    "fields": [
+      {
+        "fieldId": 27418,
+        "label": "Total Revenue"
+      },
+      {
+        "fieldId": 27419,
+        "label": "Monthly Revenue"
+      },
+      {
+        "fieldId": 27659,
+        "label": "Revenue Explanation"
+      },
+      {
+        "fieldId": 27423,
+        "label": "Related-Party Revenue"
+      },
+      {
+        "fieldId": 27460,
+        "label": "Total Expenses"
+      },
+      {
+        "fieldId": 27422,
+        "label": "COGS"
+      },
+      {
+        "fieldId": 27421,
+        "label": "Marketing/CAC"
+      },
+      {
+        "fieldId": 27463,
+        "label": "Marketing Explanation"
+      },
+      {
+        "fieldId": 27464,
+        "label": "Additional Expenses"
+      },
+      {
+        "fieldId": 27465,
+        "label": "Users Acquired"
+      },
+      {
+        "fieldId": 27466,
+        "label": "Paying Users"
+      }
+    ]
+  },
+  "usdcUsdValuationPolicy": {
+    "asset": "USDC",
+    "reportingCurrency": "USD",
+    "method": "event_level_explicit",
+    "noPegInference": true
+  },
+  "externalCustomers": [],
+  "externalUsers": [],
+  "externalDesignPartners": [],
+  "revenueEvents": [],
+  "expenseMonths": [
+    {
+      "month": "2026-05",
+      "completeness": "unknown_total",
+      "items": []
+    },
+    {
+      "month": "2026-06",
+      "completeness": "unknown_total",
+      "items": []
+    },
+    {
+      "month": "2026-07",
+      "completeness": "unknown_total",
+      "items": []
+    },
+    {
+      "month": "2026-08",
+      "completeness": "unknown_total",
+      "items": []
+    }
+  ],
+  "notes": [
+    "This default is observed only through 2026-08-01T00:00:00Z.",
+    "Future August dates through the eligibility end are not certified as zero or complete.",
+    "No complete expense record was supplied; expense answer fields remain blocked."
+  ]
+}

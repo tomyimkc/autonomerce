@@ -1,0 +1,717 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://autonomerce.example/schemas/contest-financial-facts.v2.schema.json",
+  "title": "Autonomerce contest financial facts v2",
+  "description": "Explicit time-bounded, evidence-bound, credential-free financial facts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "projectName",
+    "eligibilityWindow",
+    "observedThrough",
+    "asOf",
+    "generatedAt",
+    "currency",
+    "fieldMap",
+    "usdcUsdValuationPolicy",
+    "externalCustomers",
+    "externalUsers",
+    "externalDesignPartners",
+    "revenueEvents",
+    "expenseMonths",
+    "notes"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "autonomerce.contest.financial-facts.v2"
+    },
+    "projectName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "eligibilityWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start",
+        "end"
+      ],
+      "properties": {
+        "start": {
+          "const": "2026-05-19T17:00:00Z"
+        },
+        "end": {
+          "const": "2026-08-17T20:00:00Z"
+        }
+      }
+    },
+    "observedThrough": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "asOf": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "currency": {
+      "const": "USD"
+    },
+    "fieldMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceType",
+        "retrievedAt",
+        "revision",
+        "independentlyLiveVerified",
+        "numericIdStatus",
+        "snapshotDigest",
+        "fields"
+      ],
+      "properties": {
+        "sourceType": {
+          "const": "owner_verified_mcp_snapshot"
+        },
+        "retrievedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^owner-verified-mcp-snapshot-[a-z0-9.-]{1,80}$"
+        },
+        "independentlyLiveVerified": {
+          "const": false
+        },
+        "numericIdStatus": {
+          "const": "owner_verified_draft_values_not_official_public_ids"
+        },
+        "snapshotDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 11,
+          "maxItems": 11,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "fieldId",
+              "label"
+            ],
+            "properties": {
+              "fieldId": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              }
+            }
+          }
+        }
+      }
+    },
+    "usdcUsdValuationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset",
+        "reportingCurrency",
+        "method",
+        "noPegInference"
+      ],
+      "properties": {
+        "asset": {
+          "const": "USDC"
+        },
+        "reportingCurrency": {
+          "const": "USD"
+        },
+        "method": {
+          "const": "event_level_explicit"
+        },
+        "noPegInference": {
+          "const": true
+        }
+      }
+    },
+    "externalCustomers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "nature",
+          "firstObservedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^customer_[a-f0-9]{12}$"
+          },
+          "nature": {
+            "enum": [
+              "arms_length_prospect",
+              "arms_length_customer"
+            ]
+          },
+          "firstObservedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "externalUsers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "customerId",
+          "engagementClassification",
+          "firstObservedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^user_[a-f0-9]{12}$"
+          },
+          "customerId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^customer_[a-f0-9]{12}$"
+          },
+          "engagementClassification": {
+            "enum": [
+              "arms_length",
+              "testnet_founder_sponsored_pilot",
+              "other_external_nonrevenue"
+            ]
+          },
+          "firstObservedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "externalDesignPartners": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "engagementClassification",
+          "firstObservedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^design_partner_[a-f0-9]{12}$"
+          },
+          "engagementClassification": {
+            "enum": [
+              "arms_length",
+              "testnet_founder_sponsored_pilot",
+              "other_external_nonrevenue"
+            ]
+          },
+          "firstObservedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "revenueEvents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "classification",
+          "customerId",
+          "userId",
+          "recognizedAt",
+          "recognizedRevenueUsd",
+          "derivedDealClassification",
+          "relationship",
+          "settlement",
+          "revenueBasis",
+          "refunds"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^revenue_[a-f0-9]{12}$"
+          },
+          "classification": {
+            "enum": [
+              "mainnet_external_customer",
+              "synthetic",
+              "offline_mock",
+              "testnet",
+              "mainnet_nonqualifying",
+              "unsettled"
+            ]
+          },
+          "customerId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^customer_[a-f0-9]{12}$"
+          },
+          "userId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^user_[a-f0-9]{12}$"
+          },
+          "recognizedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recognizedRevenueUsd": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+          },
+          "derivedDealClassification": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "schemaVersion",
+              "sourceRecordId",
+              "sourceDigest",
+              "derivedBy",
+              "derivedAt",
+              "classification",
+              "settlementClass",
+              "paymentConfirmed",
+              "paymentMocked",
+              "externalCustomer",
+              "countsAsRevenue",
+              "acceptedFulfillment"
+            ],
+            "properties": {
+              "schemaVersion": {
+                "const": "autonomerce.deal-classification.v1"
+              },
+              "sourceRecordId": {
+                "type": "string",
+                "pattern": "^deal_classification_[a-f0-9]{12}$"
+              },
+              "sourceDigest": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              },
+              "derivedBy": {
+                "const": "autonomerce.api.deal_classification.classify_deal"
+              },
+              "derivedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "classification": {
+                "enum": [
+                  "mainnet_external_customer",
+                  "synthetic",
+                  "offline_mock",
+                  "testnet",
+                  "mainnet_nonqualifying",
+                  "unsettled"
+                ]
+              },
+              "settlementClass": {
+                "enum": [
+                  "synthetic",
+                  "offline_mock",
+                  "testnet",
+                  "mainnet",
+                  "unsettled"
+                ]
+              },
+              "paymentConfirmed": {
+                "type": "boolean"
+              },
+              "paymentMocked": {
+                "type": "boolean"
+              },
+              "externalCustomer": {
+                "type": "boolean"
+              },
+              "countsAsRevenue": {
+                "type": "boolean"
+              },
+              "acceptedFulfillment": {
+                "type": "boolean"
+              }
+            }
+          },
+          "relationship": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "relationshipClass",
+              "fundingClass",
+              "evidenceDigest"
+            ],
+            "properties": {
+              "relationshipClass": {
+                "enum": [
+                  "arms_length",
+                  "related_party",
+                  "self",
+                  "founder",
+                  "affiliate"
+                ]
+              },
+              "fundingClass": {
+                "enum": [
+                  "customer_funded",
+                  "founder_sponsored",
+                  "reimbursed",
+                  "circular",
+                  "unknown"
+                ]
+              },
+              "evidenceDigest": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              }
+            }
+          },
+          "settlement": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "settlementClass",
+              "confirmed",
+              "mocked",
+              "confirmedAt",
+              "network",
+              "token",
+              "amountUsdc",
+              "transactionHash",
+              "evidenceDigest",
+              "valuation"
+            ],
+            "properties": {
+              "settlementClass": {
+                "enum": [
+                  "synthetic",
+                  "offline_mock",
+                  "testnet",
+                  "mainnet",
+                  "unsettled"
+                ]
+              },
+              "confirmed": {
+                "type": "boolean"
+              },
+              "mocked": {
+                "type": "boolean"
+              },
+              "confirmedAt": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "network": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 80
+              },
+              "token": {
+                "const": "USDC"
+              },
+              "amountUsdc": {
+                "type": "string",
+                "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+              },
+              "transactionHash": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^0x[a-fA-F0-9]{64}$"
+              },
+              "evidenceDigest": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              },
+              "valuation": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "amountUsd",
+                  "rateUsdPerUsdc",
+                  "valuedAt",
+                  "sourceType",
+                  "sourceDigest",
+                  "methodology"
+                ],
+                "properties": {
+                  "amountUsd": {
+                    "type": "string",
+                    "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+                  },
+                  "rateUsdPerUsdc": {
+                    "type": "string",
+                    "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+                  },
+                  "valuedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "sourceType": {
+                    "enum": [
+                      "issuer_redemption_value",
+                      "exchange_quote",
+                      "accounting_statement",
+                      "owner_documented_conversion"
+                    ]
+                  },
+                  "sourceDigest": {
+                    "type": "string",
+                    "pattern": "^sha256:[a-f0-9]{64}$"
+                  },
+                  "methodology": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 500
+                  }
+                }
+              }
+            }
+          },
+          "revenueBasis": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "acceptedFulfillment",
+              "basisAt",
+              "evidenceDigest",
+              "description"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "accepted_fulfillment",
+                  "explicit_earned_revenue_basis"
+                ]
+              },
+              "acceptedFulfillment": {
+                "type": "boolean"
+              },
+              "basisAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "evidenceDigest": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 500
+              }
+            }
+          },
+          "refunds": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "occurredAt",
+                "amountUsdc",
+                "evidenceDigest",
+                "valuation"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^refund_[a-f0-9]{12}$"
+                },
+                "occurredAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "amountUsdc": {
+                  "type": "string",
+                  "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+                },
+                "evidenceDigest": {
+                  "type": "string",
+                  "pattern": "^sha256:[a-f0-9]{64}$"
+                },
+                "valuation": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "amountUsd",
+                    "rateUsdPerUsdc",
+                    "valuedAt",
+                    "sourceType",
+                    "sourceDigest",
+                    "methodology"
+                  ],
+                  "properties": {
+                    "amountUsd": {
+                      "type": "string",
+                      "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+                    },
+                    "rateUsdPerUsdc": {
+                      "type": "string",
+                      "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+                    },
+                    "valuedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "sourceType": {
+                      "enum": [
+                        "issuer_redemption_value",
+                        "exchange_quote",
+                        "accounting_statement",
+                        "owner_documented_conversion"
+                      ]
+                    },
+                    "sourceDigest": {
+                      "type": "string",
+                      "pattern": "^sha256:[a-f0-9]{64}$"
+                    },
+                    "methodology": {
+                      "type": "string",
+                      "minLength": 10,
+                      "maxLength": 500
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "expenseMonths": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "month",
+          "completeness",
+          "items"
+        ],
+        "properties": {
+          "month": {
+            "enum": [
+              "2026-05",
+              "2026-06",
+              "2026-07",
+              "2026-08"
+            ]
+          },
+          "completeness": {
+            "enum": [
+              "complete",
+              "unknown_total"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "occurredAt",
+                "category",
+                "devpostCategory",
+                "amountUsd",
+                "evidenceDigest"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^expense_[a-f0-9]{12}$"
+                },
+                "occurredAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "category": {
+                  "enum": [
+                    "hosting",
+                    "gemini",
+                    "circle_network",
+                    "external_service",
+                    "contractor",
+                    "marketing",
+                    "customer_acquisition",
+                    "seller_compute",
+                    "infrastructure",
+                    "other"
+                  ]
+                },
+                "devpostCategory": {
+                  "enum": [
+                    "cogs",
+                    "marketing_cac",
+                    "additional_expenses"
+                  ]
+                },
+                "amountUsd": {
+                  "type": "string",
+                  "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+                },
+                "evidenceDigest": {
+                  "type": "string",
+                  "pattern": "^sha256:[a-f0-9]{64}$"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "maxItems": 50
+    }
+  }
+}

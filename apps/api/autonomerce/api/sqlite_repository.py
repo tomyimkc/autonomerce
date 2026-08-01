@@ -39,6 +39,16 @@ from autonomerce.contracts import (
     usdc_text,
 )
 
+from .deal_classification import (
+    CustomerRelationship,
+    DealEvidence,
+    FundingSource,
+    SettlementClass,
+    VariableCosts,
+    aggregate_deal_metrics,
+    classify_deal,
+    settlement_class_for_payment,
+)
 from .repository import (
     ProspectRecord,
     ReceiptPublication,
@@ -56,7 +66,7 @@ except ImportError as exc:  # pragma: no cover - deployment targets POSIX hosts.
     ) from exc
 
 
-_SCHEMA_VERSION = "1"
+_SCHEMA_VERSION = "2"
 _POST_ACCEPTANCE_STATES = {
     ProposalState.ACCEPTED,
     ProposalState.PAID,
@@ -405,6 +415,85 @@ def _fulfillment_from_payload(value: Mapping[str, Any]) -> FulfillmentReceipt:
     )
 
 
+def _deal_evidence_payload(value: DealEvidence) -> dict[str, Any]:
+    return {
+        "evidence_id": value.evidence_id,
+        "proposal_id": value.proposal_id,
+        "owner_id": value.owner_id,
+        "customer_relationship": value.customer_relationship.value,
+        "funding_source": value.funding_source.value,
+        "customer_id": value.customer_id,
+        "user_id": value.user_id,
+        "consent_reference": value.consent_reference,
+        "evidence_reference": value.evidence_reference,
+        "relationship_verified": value.relationship_verified,
+        "verifier_reference": value.verifier_reference,
+        "refunds_usdc": usdc_text(value.refunds_usdc),
+        "refund_window_closed": value.refund_window_closed,
+        "refund_window_closed_at": value.refund_window_closed_at,
+        "variable_costs": {
+            "network_fees_usdc": usdc_text(
+                value.variable_costs.network_fees_usdc
+            ),
+            "infrastructure_usdc": usdc_text(
+                value.variable_costs.infrastructure_usdc
+            ),
+            "fulfillment_usdc": usdc_text(
+                value.variable_costs.fulfillment_usdc
+            ),
+            "other_usdc": usdc_text(value.variable_costs.other_usdc),
+        },
+        "costs_measured": value.costs_measured,
+        "measured_at": value.measured_at,
+        "recorded_at": value.recorded_at,
+    }
+
+
+def _deal_evidence_from_payload(value: Mapping[str, Any]) -> DealEvidence:
+    costs = dict(value.get("variable_costs", {}))
+    return DealEvidence(
+        evidence_id=str(value["evidence_id"]),
+        proposal_id=str(value["proposal_id"]),
+        owner_id=str(value["owner_id"]),
+        customer_relationship=CustomerRelationship(
+            str(value["customer_relationship"])
+        ),
+        funding_source=FundingSource(str(value["funding_source"])),
+        customer_id=(
+            str(value["customer_id"])
+            if value.get("customer_id") is not None
+            else None
+        ),
+        user_id=(
+            str(value["user_id"])
+            if value.get("user_id") is not None
+            else None
+        ),
+        consent_reference=str(value["consent_reference"]),
+        evidence_reference=str(value["evidence_reference"]),
+        relationship_verified=bool(value["relationship_verified"]),
+        verifier_reference=str(value["verifier_reference"]),
+        refunds_usdc=Decimal(str(value.get("refunds_usdc", "0"))),
+        refund_window_closed=bool(value["refund_window_closed"]),
+        refund_window_closed_at=str(value["refund_window_closed_at"]),
+        variable_costs=VariableCosts(
+            network_fees_usdc=Decimal(
+                str(costs.get("network_fees_usdc", "0"))
+            ),
+            infrastructure_usdc=Decimal(
+                str(costs.get("infrastructure_usdc", "0"))
+            ),
+            fulfillment_usdc=Decimal(
+                str(costs.get("fulfillment_usdc", "0"))
+            ),
+            other_usdc=Decimal(str(costs.get("other_usdc", "0"))),
+        ),
+        costs_measured=bool(value["costs_measured"]),
+        measured_at=str(value["measured_at"]),
+        recorded_at=str(value["recorded_at"]),
+    )
+
+
 def _publication_from_row(row: sqlite3.Row) -> ReceiptPublication:
     return ReceiptPublication(
         receipt_id=row["receipt_id"],
@@ -742,6 +831,22 @@ class SQLiteRepository:
             )
             """,
             """
+            CREATE TABLE IF NOT EXISTS commerce_deal_evidence (
+                evidence_id TEXT PRIMARY KEY,
+                proposal_id TEXT NOT NULL UNIQUE,
+                owner_id TEXT NOT NULL,
+                recorded_at TEXT NOT NULL,
+                payload_json TEXT NOT NULL,
+                FOREIGN KEY(proposal_id)
+                    REFERENCES commerce_proposals(proposal_id)
+                    ON DELETE RESTRICT
+            )
+            """,
+            """
+            CREATE INDEX IF NOT EXISTS ix_commerce_deal_evidence_owner
+            ON commerce_deal_evidence(owner_id)
+            """,
+            """
             CREATE TABLE IF NOT EXISTS commerce_receipt_publications (
                 receipt_id TEXT PRIMARY KEY,
                 proposal_id TEXT NOT NULL UNIQUE,
@@ -791,6 +896,15 @@ class SQLiteRepository:
                         """
                         INSERT INTO commerce_metadata(key, value)
                         VALUES ('schema_version', ?)
+                        """,
+                        (_SCHEMA_VERSION,),
+                    )
+                elif row["value"] == "1":
+                    connection.execute(
+                        """
+                        UPDATE commerce_metadata
+                        SET value = ?
+                        WHERE key = 'schema_version'
                         """,
                         (_SCHEMA_VERSION,),
                     )
@@ -2183,6 +2297,122 @@ class SQLiteRepository:
                 ) from exc
         return receipt
 
+    def save_deal_evidence(self, evidence: DealEvidence) -> DealEvidence:
+        """Append one immutable business-classification record per proposal."""
+
+        with self._write() as connection:
+            proposal = connection.execute(
+                """
+                SELECT owner_id FROM commerce_proposals
+                WHERE proposal_id = ?
+                """,
+                (evidence.proposal_id,),
+            ).fetchone()
+            if proposal is None:
+                raise ValueError("deal evidence proposal does not exist")
+            if proposal["owner_id"] != evidence.owner_id:
+                raise ValueError("deal evidence owner does not match proposal")
+            payment_row = connection.execute(
+                """
+                SELECT payload_json, mocked FROM commerce_payments
+                WHERE proposal_id = ?
+                """,
+                (evidence.proposal_id,),
+            ).fetchone()
+            fulfillment_row = connection.execute(
+                """
+                SELECT payload_json FROM commerce_fulfillments
+                WHERE proposal_id = ?
+                """,
+                (evidence.proposal_id,),
+            ).fetchone()
+            classify_deal(
+                evidence,
+                payment=(
+                    _payment_from_payload(_json_load(payment_row["payload_json"]))
+                    if payment_row is not None
+                    else None
+                ),
+                mocked=bool(payment_row["mocked"]) if payment_row is not None else False,
+                fulfillment=(
+                    _fulfillment_from_payload(
+                        _json_load(fulfillment_row["payload_json"])
+                    )
+                    if fulfillment_row is not None
+                    else None
+                ),
+            )
+            rows = connection.execute(
+                """
+                SELECT payload_json FROM commerce_deal_evidence
+                WHERE proposal_id = ? OR evidence_id = ?
+                """,
+                (evidence.proposal_id, evidence.evidence_id),
+            ).fetchall()
+            if rows:
+                for row in rows:
+                    existing = _deal_evidence_from_payload(
+                        _json_load(row["payload_json"])
+                    )
+                    if existing.semantic_key() == evidence.semantic_key():
+                        return existing
+                raise ValueError(
+                    "deal evidence is append-only and cannot be rewritten"
+                )
+            try:
+                connection.execute(
+                    """
+                    INSERT INTO commerce_deal_evidence(
+                        evidence_id, proposal_id, owner_id, recorded_at,
+                        payload_json
+                    ) VALUES (?, ?, ?, ?, ?)
+                    """,
+                    (
+                        evidence.evidence_id,
+                        evidence.proposal_id,
+                        evidence.owner_id,
+                        evidence.recorded_at,
+                        _json_dump(_deal_evidence_payload(evidence)),
+                    ),
+                )
+            except sqlite3.IntegrityError as exc:
+                raise ValueError(
+                    "duplicate or invalid deal evidence mapping"
+                ) from exc
+        return evidence
+
+    def deal_evidence_for_proposal(
+        self, proposal_id: str
+    ) -> DealEvidence | None:
+        with self._read() as connection:
+            row = connection.execute(
+                """
+                SELECT payload_json FROM commerce_deal_evidence
+                WHERE proposal_id = ?
+                """,
+                (proposal_id,),
+            ).fetchone()
+            return (
+                _deal_evidence_from_payload(_json_load(row["payload_json"]))
+                if row
+                else None
+            )
+
+    def list_deal_evidence(
+        self, *, owner_id: str | None = None
+    ) -> list[DealEvidence]:
+        query = "SELECT payload_json FROM commerce_deal_evidence"
+        parameters: tuple[Any, ...] = ()
+        if owner_id is not None:
+            query += " WHERE owner_id = ?"
+            parameters = (owner_id,)
+        query += " ORDER BY rowid"
+        with self._read() as connection:
+            return [
+                _deal_evidence_from_payload(_json_load(row["payload_json"]))
+                for row in connection.execute(query, parameters).fetchall()
+            ]
+
     def save_receipt_publication(
         self, publication: ReceiptPublication
     ) -> ReceiptPublication:
@@ -2317,15 +2547,30 @@ class SQLiteRepository:
                 for payment, mocked in payments
                 if payment.state is PaymentState.CONFIRMED
             ]
+            settlement_classes = {
+                payment.payment_id: settlement_class_for_payment(
+                    payment,
+                    mocked=mocked,
+                )
+                for payment, mocked in confirmed
+            }
             live = [
                 payment
-                for payment, mocked in confirmed
-                if not mocked and "TEST" not in payment.chain.upper()
+                for payment, _mocked in confirmed
+                if settlement_classes[payment.payment_id]
+                is SettlementClass.MAINNET
             ]
             mocked_payments = [
                 payment
-                for payment, mocked in confirmed
-                if mocked or "TEST" in payment.chain.upper()
+                for payment, _mocked in confirmed
+                if settlement_classes[payment.payment_id]
+                in {SettlementClass.OFFLINE_MOCK, SettlementClass.TESTNET}
+            ]
+            unsupported = [
+                payment
+                for payment, _mocked in confirmed
+                if settlement_classes[payment.payment_id]
+                is SettlementClass.UNSUPPORTED
             ]
 
             fulfillment_rows = connection.execute(
@@ -2346,6 +2591,58 @@ class SQLiteRepository:
                 for item in fulfillments
                 if item.accepted and item.proposal_id in proposal_ids
             ]
+            payment_by_proposal = {
+                payment.proposal_id: (payment, mocked)
+                for payment, mocked in payments
+            }
+            evidence_query = (
+                "SELECT payload_json FROM commerce_deal_evidence"
+            )
+            evidence_parameters: tuple[Any, ...] = ()
+            if owner_id is not None:
+                evidence_query += " WHERE owner_id = ?"
+                evidence_parameters = (owner_id,)
+            evidence_query += " ORDER BY rowid"
+            evidence_records = [
+                _deal_evidence_from_payload(_json_load(row["payload_json"]))
+                for row in connection.execute(
+                    evidence_query,
+                    evidence_parameters,
+                ).fetchall()
+                if _json_load(row["payload_json"])["proposal_id"]
+                in proposal_ids
+            ]
+            classifications = []
+            for evidence in evidence_records:
+                payment_record = payment_by_proposal.get(evidence.proposal_id)
+                classifications.append(
+                    classify_deal(
+                        evidence,
+                        payment=(
+                            payment_record[0]
+                            if payment_record is not None
+                            else None
+                        ),
+                        mocked=(
+                            payment_record[1]
+                            if payment_record is not None
+                            else False
+                        ),
+                        fulfillment=fulfillment_by_proposal.get(
+                            evidence.proposal_id
+                        ),
+                    )
+                )
+            deal_metrics = aggregate_deal_metrics(classifications)
+            classified_proposal_ids = {
+                item.evidence.proposal_id for item in classifications
+            }
+            unclassified_confirmed = [
+                payment
+                for payment, _mocked in confirmed
+                if payment.proposal_id not in classified_proposal_ids
+            ]
+            classification_complete = not unclassified_confirmed
 
             seller_query = (
                 "SELECT seller_id FROM commerce_sellers"
@@ -2432,13 +2729,64 @@ class SQLiteRepository:
                 "negotiatedPriceChangeUsdc": usdc_text(
                     abs(negotiated_total)
                 ),
-                "paidTasks": None,
+                "dealEvidenceCount": deal_metrics["dealEvidenceCount"],
+                "usersAcquired": deal_metrics["usersAcquired"],
+                "payingUsers": (
+                    deal_metrics["payingUsers"]
+                    if classification_complete
+                    else None
+                ),
+                "acceptedExternalFulfillments": deal_metrics[
+                    "acceptedExternalFulfillments"
+                ],
+                "paidTasks": (
+                    deal_metrics["paidTasks"]
+                    if classification_complete
+                    else None
+                ),
+                "paidExternalTasks": (
+                    deal_metrics["paidExternalTasks"]
+                    if classification_complete
+                    else None
+                ),
+                "acceptedPaidExternalTasks": (
+                    deal_metrics["acceptedPaidExternalTasks"]
+                    if classification_complete
+                    else None
+                ),
                 "paidTasksStatus": (
-                    "requires_external_customer_classification"
+                    "classified_confirmed_settlements"
+                    if classification_complete
+                    else "requires_external_customer_classification"
                 ),
                 "confirmedLivePayments": len(live),
                 "mockedPaymentCount": len(mocked_payments),
-                "usdcRevenue": None,
+                "unsupportedPaymentCount": len(unsupported),
+                "unclassifiedConfirmedPayments": len(unclassified_confirmed),
+                "grossExternalRevenueUsdc": (
+                    deal_metrics["grossExternalRevenueUsdc"]
+                    if classification_complete
+                    else None
+                ),
+                "refundsUsdc": (
+                    deal_metrics["refundsUsdc"]
+                    if classification_complete
+                    else None
+                ),
+                "netExternalRevenueUsdc": (
+                    deal_metrics["netExternalRevenueUsdc"]
+                    if classification_complete
+                    else None
+                ),
+                "variableCostsUsdc": deal_metrics["variableCostsUsdc"],
+                "excludedPilotSpendUsdc": deal_metrics[
+                    "excludedPilotSpendUsdc"
+                ],
+                "usdcRevenue": (
+                    deal_metrics["netExternalRevenueUsdc"]
+                    if classification_complete
+                    else None
+                ),
                 "liveSettlementVolumeUsdc": usdc_text(
                     sum(
                         (payment.amount_usdc for payment in live),
@@ -2454,15 +2802,27 @@ class SQLiteRepository:
                         Decimal("0"),
                     )
                 ),
+                "unsupportedPaymentVolumeUsdc": usdc_text(
+                    sum(
+                        (payment.amount_usdc for payment in unsupported),
+                        Decimal("0"),
+                    )
+                ),
                 "successfulFulfillment": len(successful),
                 "medianDeliverySeconds": (
                     float(median(delivery_seconds))
                     if delivery_seconds
                     else None
                 ),
-                "repeatPurchaseRate": None,
+                "repeatPurchaseRate": (
+                    deal_metrics["repeatPurchaseRate"]
+                    if classification_complete
+                    else None
+                ),
                 "repeatPurchaseRateStatus": (
-                    "requires_external_customer_classification"
+                    "classified_external_customer_purchases"
+                    if classification_complete
+                    else "requires_external_customer_classification"
                 ),
                 "paymentFailures": sum(
                     1
@@ -2479,12 +2839,25 @@ class SQLiteRepository:
                 "duplicatePaymentCount": self._counter(
                     connection, "duplicate_payment_attempts"
                 ),
-                "grossMarginUsdc": None,
+                "grossMarginUsdc": (
+                    deal_metrics["grossMarginUsdc"]
+                    if classification_complete
+                    else None
+                ),
+                "grossMarginPercent": (
+                    deal_metrics["grossMarginPercent"]
+                    if classification_complete
+                    else None
+                ),
                 "grossMarginStatus": (
-                    "requires_measured_variable_costs"
+                    "classified_measured_variable_costs"
+                    if classification_complete
+                    else "requires_measured_variable_costs"
                 ),
                 "revenueClassification": (
-                    "unmeasured_external_customer_status"
+                    "complete_external_customer_classification"
+                    if classification_complete
+                    else "unmeasured_external_customer_status"
                 ),
             }
 

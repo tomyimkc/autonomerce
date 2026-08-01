@@ -20,6 +20,11 @@ import {
 import { readProtectedJson } from "../lib/request-guards";
 
 const TOKEN = "server-only-test-token";
+const CUSTOMER_ID = `customer_${"a".repeat(24)}`;
+const USER_ID = `user_${"b".repeat(24)}`;
+const CONSENT_REFERENCE = `consent_${"c".repeat(24)}`;
+const EVIDENCE_REFERENCE = `evidence_${"d".repeat(24)}`;
+const VERIFIER_REFERENCE = `verification_${"e".repeat(24)}`;
 
 function json(value: unknown, status = 200): Response {
   return new Response(JSON.stringify(value), {
@@ -344,6 +349,257 @@ test("health without explicit movesFunds fails closed", async () => {
   assert.match(status.reason ?? "", /movesFunds/);
 });
 
+test("deal evidence posts only owner-attested facts and parses derived classification", async () => {
+  let observedBody: Record<string, unknown> | null = null;
+  const client = new BackendClient(
+    {
+      baseUrl: "https://private-api.example",
+      bearerToken: TOKEN,
+      iamAuth: { enabled: false },
+    },
+    async (input, init) => {
+      const url = new URL(String(input));
+      assert.equal(
+        new Headers(init?.headers).get("authorization"),
+        `Bearer ${TOKEN}`,
+      );
+      if (url.pathname === "/health") {
+        return json({
+          status: "ok",
+          service: "autonomerce-api",
+          storage: "sqlite",
+          paymentMode: "testnet",
+          movesFunds: true,
+        });
+      }
+      assert.equal(
+        url.pathname,
+        "/proposals/proposal_owner_001/deal-evidence",
+      );
+      assert.equal(init?.method, "POST");
+      observedBody = JSON.parse(
+        String(init?.body),
+      ) as Record<string, unknown>;
+      return json({
+        evidence: {
+          evidenceId: "deal_evidence_owner_001",
+          proposalId: "proposal_owner_001",
+          ownerId: "owner_001",
+          customerId: CUSTOMER_ID,
+          userId: USER_ID,
+          customerRelationship: "arms_length",
+          fundingSource: "founder_sponsored",
+          consentReference: CONSENT_REFERENCE,
+          evidenceReference: EVIDENCE_REFERENCE,
+          relationshipVerified: true,
+          verifierReference: VERIFIER_REFERENCE,
+          refundsUsdc: "0",
+          refundWindowClosed: true,
+          refundWindowClosedAt: "2026-08-01T00:00:01Z",
+          variableCosts: {
+            networkFeesUsdc: "0.01",
+            infrastructureUsdc: "0.02",
+            fulfillmentUsdc: "0.01",
+            otherUsdc: "0",
+            totalUsdc: "0.04",
+          },
+          costsMeasured: true,
+          measuredAt: "2026-08-01T00:00:02Z",
+          recordedAt: "2026-08-01T12:00:00Z",
+        },
+        idempotentReplay: false,
+        settlementClass: "testnet",
+        paymentConfirmed: true,
+        acceptedFulfillment: true,
+        externalCustomer: true,
+        countsAsRevenue: false,
+        userAcquired: true,
+        paidUser: false,
+        paidTask: true,
+        paidExternalTask: false,
+        acceptedPaidExternalTask: false,
+        paymentAmountUsdc: "0.1",
+        grossExternalRevenueUsdc: "0",
+        refundsUsdc: "0",
+        netExternalRevenueUsdc: "0",
+        variableCostsUsdc: "0",
+        excludedPilotSpendUsdc: "0.04",
+        grossMarginUsdc: "0",
+      }, 201);
+    },
+  );
+
+  const result = await new AutonomerceService(
+    client,
+    false,
+  ).recordDealEvidence("proposal_owner_001", {
+    customerId: CUSTOMER_ID,
+    userId: USER_ID,
+    customerRelationship: "arms_length",
+    fundingSource: "founder_sponsored",
+    consentReference: CONSENT_REFERENCE,
+    refundsUsdc: "0",
+    refundWindowClosed: true,
+    variableCosts: {
+      networkFeesUsdc: "0.01",
+      infrastructureUsdc: "0.02",
+      fulfillmentUsdc: "0.01",
+      otherUsdc: "0",
+    },
+    costsMeasured: true,
+    measuredAt: "2026-08-01T00:00:02Z",
+    evidenceReference: EVIDENCE_REFERENCE,
+  });
+
+  assert.deepEqual(observedBody, {
+    customerId: CUSTOMER_ID,
+    userId: USER_ID,
+    customerRelationship: "arms_length",
+    fundingSource: "founder_sponsored",
+    consentReference: CONSENT_REFERENCE,
+    refundsUsdc: "0",
+    refundWindowClosed: true,
+    variableCosts: {
+      networkFeesUsdc: "0.01",
+      infrastructureUsdc: "0.02",
+      fulfillmentUsdc: "0.01",
+      otherUsdc: "0",
+    },
+    costsMeasured: true,
+    measuredAt: "2026-08-01T00:00:02Z",
+    evidenceReference: EVIDENCE_REFERENCE,
+  });
+  assert.equal("settlementClass" in observedBody!, false);
+  assert.equal("acceptedFulfillment" in observedBody!, false);
+  assert.equal("countsAsRevenue" in observedBody!, false);
+  assert.equal(result.evidence.proposalId, "proposal_owner_001");
+  assert.equal(result.evidence.ownerId, "owner_001");
+  assert.equal(result.idempotentReplay, false);
+  assert.equal(result.settlementClass, "testnet");
+  assert.equal(result.acceptedFulfillment, true);
+  assert.equal(result.countsAsRevenue, false);
+  assert.equal(result.paidUser, false);
+  assert.equal(result.userAcquired, true);
+  assert.equal(result.variableCostsUsdc, "0");
+  assert.equal(result.excludedPilotSpendUsdc, "0.04");
+});
+
+test("deal evidence fails closed on rebound or inconsistent derived fields", async () => {
+  const inputCosts = {
+    networkFeesUsdc: "0",
+    infrastructureUsdc: "0",
+    fulfillmentUsdc: "0",
+    otherUsdc: "0",
+  };
+  const valid = {
+    evidence: {
+      evidenceId: "deal_evidence_owner_001",
+      proposalId: "proposal_owner_001",
+      ownerId: "owner_001",
+      customerId: CUSTOMER_ID,
+      userId: USER_ID,
+      customerRelationship: "arms_length",
+      fundingSource: "customer_funded",
+      consentReference: CONSENT_REFERENCE,
+      evidenceReference: EVIDENCE_REFERENCE,
+      relationshipVerified: true,
+      verifierReference: VERIFIER_REFERENCE,
+      refundsUsdc: "0",
+      refundWindowClosed: true,
+      refundWindowClosedAt: "2026-08-01T00:00:01Z",
+      variableCosts: {
+        ...inputCosts,
+        totalUsdc: "0",
+      },
+      costsMeasured: true,
+      measuredAt: "2026-08-01T00:00:02Z",
+      recordedAt: "2026-08-01T12:00:00Z",
+    },
+    idempotentReplay: false,
+    settlementClass: "mainnet",
+    paymentConfirmed: true,
+    acceptedFulfillment: true,
+    externalCustomer: true,
+    countsAsRevenue: true,
+    userAcquired: true,
+    paidUser: true,
+    paidTask: true,
+    paidExternalTask: true,
+    acceptedPaidExternalTask: true,
+    paymentAmountUsdc: "1",
+    grossExternalRevenueUsdc: "1",
+    refundsUsdc: "0",
+    netExternalRevenueUsdc: "1",
+    variableCostsUsdc: "0",
+    excludedPilotSpendUsdc: "0",
+    grossMarginUsdc: "1",
+  };
+  const invalidResponses = [
+    {
+      ...valid,
+      evidence: { ...valid.evidence, proposalId: "proposal_other" },
+    },
+    {
+      ...valid,
+      evidence: { ...valid.evidence, fundingSource: "reimbursed" },
+    },
+    {
+      ...valid,
+      evidence: { ...valid.evidence, relationshipVerified: false },
+    },
+    { ...valid, settlementClass: "testnet" },
+    { ...valid, countsAsRevenue: false, paidUser: true },
+    {
+      ...valid,
+      acceptedFulfillment: false,
+      acceptedPaidExternalTask: true,
+    },
+    { ...valid, paymentConfirmed: false, paidTask: true },
+  ];
+
+  for (const response of invalidResponses) {
+    const client = new BackendClient(
+      {
+        baseUrl: "https://private-api.example",
+        bearerToken: TOKEN,
+        iamAuth: { enabled: false },
+      },
+      async (input) => {
+        const url = new URL(String(input));
+        if (url.pathname === "/health") {
+          return json({
+            status: "ok",
+            paymentMode: "mainnet",
+            movesFunds: false,
+          });
+        }
+        return json(response, 201);
+      },
+    );
+    await assert.rejects(
+      new AutonomerceService(client, false).recordDealEvidence(
+        "proposal_owner_001",
+        {
+          customerId: CUSTOMER_ID,
+          userId: USER_ID,
+          customerRelationship: "arms_length",
+          fundingSource: "customer_funded",
+          consentReference: CONSENT_REFERENCE,
+          refundsUsdc: "0",
+          refundWindowClosed: true,
+          variableCosts: inputCosts,
+          costsMeasured: true,
+          measuredAt: "2026-08-01T00:00:02Z",
+          evidenceReference: EVIDENCE_REFERENCE,
+        },
+      ),
+      (error: unknown) =>
+        error instanceof BackendRequestError &&
+        error.code === "backend_contract_invalid",
+    );
+  }
+});
+
 test("same-origin JSON guard rejects cross-origin mutations", async () => {
   const request = new Request("https://web.example/api/autonomerce/onboarding", {
     method: "POST",
@@ -554,13 +810,17 @@ test("mocked backend workflow returns backend receipt and metrics IDs", async ()
           proposalAcceptanceRate: "1",
           negotiatedPriceChangeUsdc: "0.1",
           paidTasks: null,
+          paidExternalTasks: null,
+          acceptedPaidExternalTasks: null,
           paidTasksStatus: "requires_external_customer_classification",
           confirmedLivePayments: 0,
           mockedPaymentCount: 1,
+          unsupportedPaymentCount: 0,
           successfulFulfillment: 0,
           usdcRevenue: null,
           liveSettlementVolumeUsdc: "0",
           mockedPaymentVolumeUsdc: "0.9",
+          unsupportedPaymentVolumeUsdc: "0",
           medianDeliverySeconds: 1,
           paymentFailures: 0,
           policyDenials: 0,
@@ -568,6 +828,20 @@ test("mocked backend workflow returns backend receipt and metrics IDs", async ()
           grossMarginUsdc: null,
           grossMarginStatus: "requires_measured_variable_costs",
           revenueClassification: "unmeasured_external_customer_status",
+          dealEvidenceCount: 1,
+          usersAcquired: 1,
+          payingUsers: 0,
+          acceptedExternalFulfillments: 1,
+          unclassifiedConfirmedPayments: 0,
+          grossExternalRevenueUsdc: "0",
+          refundsUsdc: "0",
+          netExternalRevenueUsdc: "0",
+          variableCostsUsdc: "0.04",
+          excludedPilotSpendUsdc: "0.04",
+          grossMarginPercent: null,
+          repeatPurchaseRate: null,
+          repeatPurchaseRateStatus:
+            "classified_external_customer_purchases",
         });
       }
       return json({ detail: "not found" }, 404);
@@ -599,6 +873,21 @@ test("mocked backend workflow returns backend receipt and metrics IDs", async ()
 
   assert.equal(result.receipt.receiptId, "receipt_backend_001");
   assert.equal(result.metrics.metricsId, "metrics_backend_001");
+  assert.equal(result.metrics.dealEvidenceCount, 1);
+  assert.equal(result.metrics.usersAcquired, 1);
+  assert.equal(result.metrics.payingUsers, 0);
+  assert.equal(result.metrics.acceptedExternalFulfillments, 1);
+  assert.equal(result.metrics.unclassifiedConfirmedPayments, 0);
+  assert.equal(result.metrics.grossExternalRevenueUsdc, "0");
+  assert.equal(result.metrics.refundsUsdc, "0");
+  assert.equal(result.metrics.netExternalRevenueUsdc, "0");
+  assert.equal(result.metrics.variableCostsUsdc, "0.04");
+  assert.equal(result.metrics.grossMarginPercent, null);
+  assert.equal(result.metrics.repeatPurchaseRate, null);
+  assert.equal(
+    result.metrics.repeatPurchaseRateStatus,
+    "classified_external_customer_purchases",
+  );
   assert.equal(result.payment.paymentId, "payment_backend_001");
   assert.equal(result.proposal.state, "failed");
   assert.equal(result.fulfillment.accepted, false);

@@ -87,9 +87,19 @@ requires another representation.
 | Duplicate payment attempts | Replayed/conflicting attempts blocked before duplicate settlement | attempts, not duplicate settled transfers |
 | Duplicate settled payments | More than one confirmed settlement for one accepted proposal/idempotency contract | zero-tolerance metric |
 
-The current API deliberately returns `paidTasks: null` until external-customer
-classification exists. Technical payment counts are reported separately as
-`confirmedLivePayments` and `mockedPaymentCount`.
+The current API deliberately returns `paidTasks: null` until every confirmed
+payment in scope has a verified, complete deal-evidence record. Once coverage
+is complete:
+
+- `paidTasks` counts all classified confirmed settlements;
+- `paidExternalTasks` counts qualifying external customer-funded mainnet orders;
+- `acceptedPaidExternalTasks` counts qualifying external orders whose delivery
+  validator accepted fulfillment.
+
+Technical settlement telemetry remains separate:
+`confirmedLivePayments`, `mockedPaymentCount`, `unsupportedPaymentCount`,
+`liveSettlementVolumeUsdc`, `mockedPaymentVolumeUsdc`, and
+`unsupportedPaymentVolumeUsdc`.
 
 ## 5. Fulfillment and reliability metrics
 
@@ -159,8 +169,14 @@ gross_margin_percent
 
 If net revenue is zero, `grossMarginPercent` is `null`.
 
-The current API returns `grossMarginUsdc: null` because it does not yet ingest
-variable costs. `grossMarginStatus` records the missing measurement.
+The current API returns `grossMarginUsdc: null` while any confirmed payment lacks
+verified complete deal evidence. For complete qualifying external orders it
+subtracts only the measured variable costs attributable to that qualifying
+revenue cohort. Measured testnet, founder-sponsored, related-party, mocked, and
+unsupported-network spend is reported separately as
+`excludedPilotSpendUsdc`; it is not mixed into qualifying gross margin.
+`grossMarginStatus` records whether the measurement/classification gate is
+complete.
 
 ## 8. Autonomy metrics
 
@@ -197,20 +213,25 @@ Publish the count, including zero:
 | `proposalsSent` | stored proposals in the current process |
 | `proposalAcceptanceRate` | accepted-ID marks divided by proposals |
 | `negotiatedPriceChangeUsdc` | sum of absolute revision deltas |
-| `paidTasks` | null until external-customer classification exists |
-| `confirmedLivePayments` | confirmed non-mock, non-testnet settlements; not automatically revenue |
-| `mockedPaymentCount` | confirmed mock/testnet technical payments |
-| `usdcRevenue` | null until an external-customer evidence record exists |
-| `liveSettlementVolumeUsdc` | non-mocked, non-testnet confirmed volume; not automatically revenue |
+| `paidTasks` | null until verified evidence covers all confirmed payments; then all classified confirmed settlements |
+| `paidExternalTasks` | verified qualifying external customer-funded mainnet orders |
+| `acceptedPaidExternalTasks` | qualifying external orders with validator-accepted fulfillment |
+| `confirmedLivePayments` | confirmed settlements on an explicit supported-mainnet allowlist; not automatically revenue |
+| `mockedPaymentCount` | confirmed offline-mock/testnet technical payments |
+| `unsupportedPaymentCount` | confirmed payments on unknown or unsupported networks; never revenue |
+| `usdcRevenue` | net qualifying external revenue, or null while classification coverage is incomplete |
+| `liveSettlementVolumeUsdc` | supported-mainnet confirmed volume; not automatically revenue |
 | `mockedPaymentVolumeUsdc` | simulated/testnet-classified technical volume |
+| `unsupportedPaymentVolumeUsdc` | confirmed unsupported-network technical volume |
 | `successfulFulfillment` | accepted fulfillment receipts |
 | `medianDeliverySeconds` | measured payment-confirmed to accepted-delivery elapsed time |
-| `repeatPurchaseRate` | null until external-customer classification exists |
+| `repeatPurchaseRate` | repeat verified paying customers / verified paying customers; null with no paying customers |
 | `paymentFailures` | stored payment failure states |
 | `policyDenials` | process-local denial counter |
 | `duplicatePaymentCount` | blocked duplicate/conflict attempts |
-| `grossMarginUsdc` | null until measured variable costs exist |
-| `revenueClassification` | explicitly unmeasured external-customer status |
+| `grossMarginUsdc` | net qualifying revenue minus measured qualifying-order variable costs; null while coverage is incomplete |
+| `excludedPilotSpendUsdc` | measured cost of excluded testnet/founder/related/mock/unsupported deals |
+| `revenueClassification` | complete or explicitly unmeasured verified external-customer classification status |
 
 Use the public revenue schema for submission metrics rather than copying the API
 object without qualification.

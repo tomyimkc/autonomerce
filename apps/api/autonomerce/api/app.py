@@ -54,6 +54,13 @@ from .adapters import (
     load_optional_adapters,
 )
 from .auth import BearerAuthenticator, Principal, principal_from_request
+from .deal_classification import (
+    CustomerRelationship,
+    DealEvidence,
+    FundingSource,
+    VariableCosts,
+    classify_deal,
+)
 from .rate_limit import RateLimitExceeded, RequestLimiter
 from .reconciliation import PaymentReconciliationAPI
 from .repository import (
@@ -70,6 +77,7 @@ from .schemas import (
     APIModel,
     CapabilityCreate,
     CounterRequest,
+    DealEvidenceCreate,
     FulfillmentRequest,
     NegotiationRequest,
     PaymentRequest,
@@ -248,6 +256,33 @@ def _load_publication_consent_verifier(specification: str) -> Any:
     if not callable(verifier):
         raise RuntimeError(
             "publication consent verifier factory returned no callable verifier"
+        )
+    return verifier
+
+
+def _load_deal_evidence_verifier(specification: str) -> Any:
+    module_name, separator, attribute = specification.partition(":")
+    if (
+        separator != ":"
+        or not module_name.strip()
+        or not attribute.strip()
+    ):
+        raise RuntimeError(
+            "AUTONOMERCE_DEAL_EVIDENCE_VERIFIER_FACTORY must be "
+            "module:function"
+        )
+    try:
+        factory = getattr(import_module(module_name.strip()), attribute.strip())
+    except (ImportError, AttributeError) as exc:
+        raise RuntimeError(
+            "deal evidence verifier factory could not be imported"
+        ) from exc
+    if not callable(factory):
+        raise RuntimeError("deal evidence verifier factory is not callable")
+    verifier = factory()
+    if not callable(verifier):
+        raise RuntimeError(
+            "deal evidence verifier factory returned no callable verifier"
         )
     return verifier
 
@@ -1129,6 +1164,7 @@ def create_app(
     rate_limiter: RequestLimiter | None = None,
     transaction_verification_hooks: Iterable[TransactionEvidenceHook] = (),
     publication_consent_verifier: Any | None = None,
+    deal_evidence_verifier: Any | None = None,
 ) -> FastAPI:
     """Build an independently testable API with injectable integration lanes."""
 
@@ -1207,6 +1243,14 @@ def create_app(
         configured_publication_verifier = _load_publication_consent_verifier(
             verifier_factory
         )
+    configured_deal_evidence_verifier = deal_evidence_verifier
+    deal_verifier_factory = os.getenv(
+        "AUTONOMERCE_DEAL_EVIDENCE_VERIFIER_FACTORY", ""
+    ).strip()
+    if configured_deal_evidence_verifier is None and deal_verifier_factory:
+        configured_deal_evidence_verifier = _load_deal_evidence_verifier(
+            deal_verifier_factory
+        )
     payment_store = getattr(adapters.payment, "store", None)
     reconciliation_api = (
         PaymentReconciliationAPI(
@@ -1239,6 +1283,7 @@ def create_app(
     app.state.payment_reconciliation = reconciliation_api
     app.state.transaction_verification_hooks = configured_verification_hooks
     app.state.publication_consent_verifier = configured_publication_verifier
+    app.state.deal_evidence_verifier = configured_deal_evidence_verifier
     app.state.trusted_hosts = configured_trusted_hosts
     app.state.payment_lock = asyncio.Lock()
     app.state.fulfillment_lock = asyncio.Lock()
@@ -2344,6 +2389,177 @@ def create_app(
                 contract_hash=expected_contract_hash,
             )
             return _payment_dict(receipt, mocked=execution.mocked)
+
+    @app.post("/proposals/{proposal_id}/deal-evidence")
+    async def record_deal_evidence(
+        proposal_id: str,
+        request: DealEvidenceCreate,
+        http_request: Request,
+    ) -> dict[str, Any]:
+        """Record verified, complete deal facts and derive public claim fields."""
+
+        principal = _require_authenticated_owner(http_request)
+        proposal = _proposal_or_404(repository, proposal_id)
+        _require_owner(
+            principal,
+            repository.owner_for_proposal(proposal_id),
+            subject="proposal",
+        )
+        _reject_secret_fields(request.model_dump())
+        payment = repository.payment_for_proposal(proposal_id)
+        if payment is None or payment.state is not PaymentState.CONFIRMED:
+            raise HTTPException(
+                status_code=409,
+                detail="confirmed payment is required before deal evidence",
+            )
+        fulfillment = repository.fulfillment_for_proposal(proposal_id)
+        if fulfillment is None:
+            raise HTTPException(
+                status_code=409,
+                detail="fulfillment is required before deal evidence",
+            )
+        prospect = _prospect_for_proposal(repository, proposal)
+        if prospect is None:
+            raise HTTPException(
+                status_code=409,
+                detail="proposal buyer evidence is missing",
+            )
+        if request.consent_reference != prospect.consent_reference:
+            raise HTTPException(
+                status_code=409,
+                detail="deal evidence consent does not match the proposal buyer",
+            )
+        try:
+            measured_at = datetime.fromisoformat(
+                request.measured_at.replace("Z", "+00:00")
+            )
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=422,
+                detail="measuredAt must be ISO-8601",
+            ) from exc
+        if measured_at.tzinfo is None:
+            raise HTTPException(
+                status_code=422,
+                detail="measuredAt requires a UTC offset",
+            )
+        if measured_at.astimezone(timezone.utc) > datetime.now(timezone.utc):
+            raise HTTPException(
+                status_code=422,
+                detail="measuredAt cannot be in the future",
+            )
+
+        existing = repository.deal_evidence_for_proposal(proposal_id)
+        relationship_verified = (
+            existing.relationship_verified if existing is not None else False
+        )
+        verifier_reference = (
+            existing.verifier_reference if existing is not None else ""
+        )
+        refund_window_closed_at = (
+            existing.refund_window_closed_at if existing is not None else ""
+        )
+        if existing is None:
+            verifier = app.state.deal_evidence_verifier
+            if not callable(verifier):
+                raise HTTPException(
+                    status_code=503,
+                    detail=(
+                        "deal evidence requires a configured independent "
+                        "relationship verifier"
+                    ),
+                )
+            verdict = await _invoke_adapter(
+                verifier,
+                proposal=proposal,
+                prospect=prospect,
+                customer_id=request.customer_id,
+                user_id=request.user_id,
+                customer_relationship=request.customer_relationship,
+                funding_source=request.funding_source,
+                consent_reference=request.consent_reference,
+                evidence_reference=request.evidence_reference,
+                refunds_usdc=request.refunds_usdc,
+                refund_window_closed=request.refund_window_closed,
+                variable_costs=request.variable_costs.model_dump(),
+                costs_measured=request.costs_measured,
+                measured_at=request.measured_at,
+            )
+            if (
+                isinstance(verdict, Mapping)
+                and verdict.get("verified") is True
+                and isinstance(verdict.get("reference"), str)
+                and verdict["reference"].strip()
+                and isinstance(verdict.get("refundWindowClosedAt"), str)
+                and verdict["refundWindowClosedAt"].strip()
+            ):
+                relationship_verified = True
+                verifier_reference = verdict["reference"].strip()
+                refund_window_closed_at = verdict[
+                    "refundWindowClosedAt"
+                ].strip()
+            else:
+                raise HTTPException(
+                    status_code=409,
+                    detail="deal relationship evidence was not verified",
+                )
+
+        try:
+            evidence = DealEvidence(
+                evidence_id=stable_id("dealevidence", proposal_id),
+                proposal_id=proposal_id,
+                owner_id=principal.owner_id,
+                customer_relationship=CustomerRelationship(
+                    request.customer_relationship
+                ),
+                funding_source=FundingSource(request.funding_source),
+                customer_id=request.customer_id,
+                user_id=request.user_id,
+                consent_reference=request.consent_reference,
+                evidence_reference=request.evidence_reference,
+                relationship_verified=relationship_verified,
+                verifier_reference=verifier_reference,
+                refunds_usdc=request.refunds_usdc,
+                refund_window_closed=request.refund_window_closed,
+                refund_window_closed_at=refund_window_closed_at,
+                variable_costs=VariableCosts(
+                    network_fees_usdc=(
+                        request.variable_costs.network_fees_usdc
+                    ),
+                    infrastructure_usdc=(
+                        request.variable_costs.infrastructure_usdc
+                    ),
+                    fulfillment_usdc=(
+                        request.variable_costs.fulfillment_usdc
+                    ),
+                    other_usdc=request.variable_costs.other_usdc,
+                ),
+                costs_measured=request.costs_measured,
+                measured_at=request.measured_at,
+                recorded_at=(
+                    existing.recorded_at
+                    if existing is not None
+                    else _utc_now()
+                ),
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        try:
+            saved = repository.save_deal_evidence(evidence)
+        except ValueError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        classification = classify_deal(
+            saved,
+            payment=payment,
+            mocked=repository.is_mocked_payment(payment.payment_id),
+            fulfillment=fulfillment,
+        )
+        result = classification.to_dict()
+        result["idempotentReplay"] = bool(
+            existing is not None
+            or saved.recorded_at != evidence.recorded_at
+        )
+        return result
 
     @app.get("/payment-reconciliations/{idempotency_key}")
     async def get_payment_reconciliation(
