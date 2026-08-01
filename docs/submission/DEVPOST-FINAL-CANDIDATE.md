@@ -110,7 +110,7 @@ state, independent receipt verification, reconciliation, fulfillment
 validation, redaction, threat modeling, public-evidence schemas, and a
 credential-free deterministic demo.
 
-The clean release preflight passes 307 Python tests and 45 web tests, reproduces
+The clean release preflight passes 371 Python tests and 47 web tests, reproduces
 the offline demo byte-for-byte, scans the public tree for likely secrets,
 typechecks the web application, and builds the production bundle. These results
 prove the tested software and the specific deployed/testnet integrations
