@@ -263,6 +263,7 @@ def _write_new_private(path: Path, data: bytes) -> bool:
         try:
             path.unlink()
         except OSError:
+            # Preserve the original write failure if best-effort cleanup fails.
             pass
         raise
     return True
@@ -287,6 +288,7 @@ def _atomic_write_private(path: Path, data: bytes) -> None:
         try:
             temporary_path.unlink()
         except FileNotFoundError:
+            # A successful atomic replace already consumed the temporary path.
             pass
 
 
@@ -354,6 +356,12 @@ def init_workspace(root: str | os.PathLike[str]) -> dict[str, Any]:
     workspace = _normalize_root(root)
     manifest_path = workspace / ".okf-workspace.json"
 
+    if manifest_path.is_symlink() or (
+        manifest_path.exists() and not manifest_path.is_file()
+    ):
+        raise WorkspaceValidationError(
+            (f"{manifest_path}: manifest must be a regular non-symlink file",)
+        )
     if manifest_path.exists():
         manifest = _load_json(manifest_path)
         _validate_manifest_value(manifest, label=".okf-workspace.json")
@@ -670,12 +678,11 @@ def _validate_record(
             label=f"{label}: {field}",
             errors=errors,
         )
-    if "nextAction" in value:
-        _required_text(
-            value.get("nextAction"),
-            label=f"{label}: nextAction",
-            errors=errors,
-        )
+    _required_text(
+        value.get("nextAction"),
+        label=f"{label}: nextAction",
+        errors=errors,
+    )
 
     source_evidence = value.get("sourceEvidence")
     if not isinstance(source_evidence, list):
@@ -846,7 +853,7 @@ def validate_workspace(root: str | os.PathLike[str]) -> ValidatedWorkspace:
             label=records_directory.relative_to(workspace).as_posix(),
             errors=errors,
         )
-        wiki_ok = _validate_real_workspace_directory(
+        _validate_real_workspace_directory(
             wiki_directory,
             workspace=workspace,
             label=wiki_directory.relative_to(workspace).as_posix(),

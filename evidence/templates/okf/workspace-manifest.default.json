@@ -1,9 +1,21 @@
 {
-  "schemaVersion": "autonomerce.okf.workspace.v1",
-  "workspaceId": "autonomerce-contest-2026",
-  "private": true,
   "automaticSubmission": false,
   "movesFunds": false,
-  "recordsRoot": "records",
-  "wikiRoot": "wiki"
+  "private": true,
+  "recordKinds": [
+    "partners",
+    "consents",
+    "pilots",
+    "authorizations",
+    "proposals",
+    "payments",
+    "fulfillments",
+    "financial",
+    "evidence",
+    "videos",
+    "devpost",
+    "decisions",
+    "risks"
+  ],
+  "schemaVersion": "autonomerce.okf.workspace.v1"
 }

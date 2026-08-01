@@ -41,6 +41,7 @@ def _record(
         "claimBoundary": "This record is private evidence, not execution authority.",
         "sourceEvidence": ["evidence-local-001"],
         "links": links or [],
+        "nextAction": "Complete the next owner-reviewed record step.",
     }
     value.update(extra)
     return value
@@ -143,6 +144,60 @@ def test_manifest_is_fail_closed(tmp_path):
     manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
 
     with pytest.raises(okf.WorkspaceValidationError, match="movesFunds"):
+        okf.validate_workspace(root)
+
+
+def test_init_rejects_manifest_symlink_before_parsing(tmp_path):
+    root = tmp_path / "okf"
+    root.mkdir()
+    target = tmp_path / "manifest-target.json"
+    target.write_text("{not-json", encoding="utf-8")
+    (root / ".okf-workspace.json").symlink_to(target)
+
+    with pytest.raises(
+        okf.WorkspaceValidationError,
+        match="regular non-symlink file",
+    ):
+        okf.init_workspace(root)
+
+
+def test_init_rejects_manifest_directory_before_parsing(tmp_path):
+    root = tmp_path / "okf"
+    root.mkdir()
+    (root / ".okf-workspace.json").mkdir()
+
+    with pytest.raises(
+        okf.WorkspaceValidationError,
+        match="regular non-symlink file",
+    ):
+        okf.init_workspace(root)
+
+
+def test_default_manifest_template_matches_initialized_workspace(tmp_path):
+    root = _initialized(tmp_path)
+    generated = json.loads(
+        (root / ".okf-workspace.json").read_text(encoding="utf-8")
+    )
+    template = json.loads(
+        (
+            PROJECT_ROOT
+            / "evidence"
+            / "templates"
+            / "okf"
+            / "workspace-manifest.default.json"
+        ).read_text(encoding="utf-8")
+    )
+
+    assert template == generated
+
+
+def test_record_requires_next_action(tmp_path):
+    root = _initialized(tmp_path)
+    record = _record("decisions", "missing-next-action")
+    record.pop("nextAction")
+    _write_record(root, record)
+
+    with pytest.raises(okf.WorkspaceValidationError, match="nextAction"):
         okf.validate_workspace(root)
 
 
