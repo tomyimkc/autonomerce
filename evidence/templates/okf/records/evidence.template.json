@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "autonomerce.okf.record.v1",
+  "recordId": "evidence-replace-me",
+  "recordKind": "evidence",
+  "status": "draft",
+  "visibility": "private",
+  "createdAt": "2026-08-01T00:00:00Z",
+  "updatedAt": "2026-08-01T00:00:00Z",
+  "title": "Evidence artifact",
+  "llmSummary": "One source artifact and its provenance, classification, and digest.",
+  "claimBoundary": "The artifact supports only the explicitly linked narrow claim.",
+  "sourceEvidence": [],
+  "links": [],
+  "nextAction": "Verify the source, compute its digest, classify it, and decide whether a redacted projection is permitted.",
+  "evidenceClassification": "planned",
+  "artifactPath": "",
+  "artifactSha256": "",
+  "publiclyOpenable": false,
+  "publicationApproved": false
+}

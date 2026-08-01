@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "autonomerce.okf.record.v1",
+  "recordId": "proposal-replace-me",
+  "recordKind": "proposals",
+  "status": "draft",
+  "visibility": "private",
+  "createdAt": "2026-08-01T00:00:00Z",
+  "updatedAt": "2026-08-01T00:00:00Z",
+  "title": "Pilot proposal",
+  "llmSummary": "Machine-readable proposal bound to the approved pilot scope.",
+  "claimBoundary": "A proposal is not payment, delivery, customer acceptance, or revenue.",
+  "sourceEvidence": [],
+  "links": ["pilot-replace-me"],
+  "nextAction": "Generate the proposal deterministically from the approved pilot records.",
+  "proposalId": "",
+  "proposalRevision": 0,
+  "accepted": false,
+  "amountUsdc": "0.10",
+  "network": "ARC-TESTNET",
+  "token": "USDC"
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "autonomerce.okf.record.v1",
+  "recordId": "partner-replace-me",
+  "recordKind": "partners",
+  "status": "waiting_owner",
+  "visibility": "private",
+  "createdAt": "2026-08-01T00:00:00Z",
+  "updatedAt": "2026-08-01T00:00:00Z",
+  "title": "External design partner",
+  "llmSummary": "Replace with a bounded relationship summary without credentials.",
+  "claimBoundary": "A recruited design partner is not a paying customer or revenue.",
+  "sourceEvidence": [],
+  "links": [],
+  "nextAction": "Owner recruits the partner and records the private identity reference.",
+  "customerRecordId": "customer-private-replace-me",
+  "relationshipRecordId": "relationship-private-replace-me",
+  "relationshipClassification": "external_design_partner",
+  "armsLength": false,
+  "recruitmentStatus": "pending",
+  "identityVaultRef": "",
+  "buyerAgentUrl": ""
+}

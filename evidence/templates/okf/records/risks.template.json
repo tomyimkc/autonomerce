@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "autonomerce.okf.record.v1",
+  "recordId": "risk-replace-me",
+  "recordKind": "risks",
+  "status": "draft",
+  "visibility": "private",
+  "createdAt": "2026-08-01T00:00:00Z",
+  "updatedAt": "2026-08-01T00:00:00Z",
+  "title": "Open risk",
+  "llmSummary": "One contest, customer, financial, security, payment, or submission risk.",
+  "claimBoundary": "A mitigation plan does not prove that the risk is closed.",
+  "sourceEvidence": [],
+  "links": [],
+  "nextAction": "Assign an owner, mitigation, due date, and closure evidence.",
+  "severity": "medium",
+  "risk": "",
+  "mitigation": "",
+  "ownerRole": "",
+  "dueAt": "",
+  "closureEvidence": []
+}

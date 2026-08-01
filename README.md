@@ -230,8 +230,45 @@ examples/                        deterministic fixtures and offline demo
 security/                        controls and threat-model support
 tests/                           unit, integration, adversarial, persistence
 docs/submission/                 Devpost, video, evidence, and judge checklists
+wiki/                            tracked OKF record profile and index
+evidence/templates/okf/          private-workspace record templates
 infra/                           container, preflight, Cloud Run, Compute Engine
 ```
+
+## Private OKF record workspace
+
+Autonomerce keeps customer identity, consent, wallet bindings, pilot
+authorization, payment, fulfillment, financial, video, and Devpost working
+records in an ignored local workspace:
+
+```bash
+python3 scripts/manage_okf_records.py init \
+  --root evidence/private/okf
+
+python3 scripts/manage_okf_records.py validate \
+  --root evidence/private/okf
+
+python3 scripts/manage_okf_records.py build \
+  --root evidence/private/okf
+```
+
+The workspace uses canonical JSON records and deterministic Markdown
+OKF/LLM-Wiki projections. Generated pages contain summaries, provenance links,
+claim boundaries, and content digests without copying arbitrary private fields.
+
+See [`wiki/INDEX.md`](wiki/INDEX.md) and
+[`wiki/schema/autonomerce-record-profile.md`](wiki/schema/autonomerce-record-profile.md).
+
+The external design-partner pilot can be checked without execution:
+
+```bash
+python3 scripts/manage_okf_records.py pilot-readiness \
+  --root evidence/private/okf \
+  --pilot-id pilot-example
+```
+
+Readiness emits a dry-run command only. It never moves funds and always leaves
+execution blocked pending fresh, exact owner approval.
 
 ## Deployment
 

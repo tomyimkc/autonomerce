@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "autonomerce.okf.record.v1",
+  "recordId": "decision-replace-me",
+  "recordKind": "decisions",
+  "status": "draft",
+  "visibility": "private",
+  "createdAt": "2026-08-01T00:00:00Z",
+  "updatedAt": "2026-08-01T00:00:00Z",
+  "title": "Owner decision",
+  "llmSummary": "Durable decision with rationale, alternatives, and reversal conditions.",
+  "claimBoundary": "A decision record is not evidence that the selected action succeeded.",
+  "sourceEvidence": [],
+  "links": [],
+  "nextAction": "Record the owner decision and the exact condition that would reverse it.",
+  "decision": "",
+  "rationale": "",
+  "alternativesRejected": [],
+  "reversalCondition": ""
+}

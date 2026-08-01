@@ -1,0 +1,21 @@
+{
+  "automaticSubmission": false,
+  "movesFunds": false,
+  "private": true,
+  "recordKinds": [
+    "partners",
+    "consents",
+    "pilots",
+    "authorizations",
+    "proposals",
+    "payments",
+    "fulfillments",
+    "financial",
+    "evidence",
+    "videos",
+    "devpost",
+    "decisions",
+    "risks"
+  ],
+  "schemaVersion": "autonomerce.okf.workspace.v1"
+}

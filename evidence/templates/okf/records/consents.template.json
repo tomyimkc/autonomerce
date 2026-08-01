@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "autonomerce.okf.record.v1",
+  "recordId": "consent-replace-me",
+  "recordKind": "consents",
+  "status": "waiting_owner",
+  "visibility": "private",
+  "createdAt": "2026-08-01T00:00:00Z",
+  "updatedAt": "2026-08-01T00:00:00Z",
+  "title": "Partner pilot and publication consent",
+  "llmSummary": "Separate participation, transaction, prompt, artifact, and publication permissions.",
+  "claimBoundary": "Consent does not prove payment, delivery, revenue, or acceptance.",
+  "sourceEvidence": [],
+  "links": ["partner-replace-me"],
+  "nextAction": "Owner obtains explicit participant selections and retains the signed private source.",
+  "partnerRecordId": "partner-replace-me",
+  "consentRecordId": "consent-private-replace-me",
+  "consentStatus": "pending",
+  "designPartnerPilot": false,
+  "testnetMicrodeal": false,
+  "publishRedactedEvidence": false,
+  "publicAttribution": "none",
+  "signedSourceRef": ""
+}
