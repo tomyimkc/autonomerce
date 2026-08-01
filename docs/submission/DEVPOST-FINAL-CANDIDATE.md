@@ -116,9 +116,10 @@ credential-free deterministic demo.
 The public CI workflow passes 371 Python tests and 47 web tests, reproduces the
 offline demo byte-for-byte, scans the public tree for likely secrets, typechecks
 the web application, and builds the production bundle. Recheck the latest
-`main` run immediately before submission. These results prove the tested
-software and the specific deployed/testnet integrations described above. They
-do not prove production readiness, external demand, revenue, or first place.
+`main` run immediately before submission. CI verifies the tested source;
+separate deployment and Arc-testnet artifacts support the integrations
+described above. None of this proves production readiness, external demand,
+revenue, or first place.
 
 Autonomerce’s north star is simple: give an existing AI agent a
 policy-bounded path from capability to offer, settlement, independently judged

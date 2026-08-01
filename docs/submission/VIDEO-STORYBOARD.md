@@ -29,14 +29,14 @@ labeled.
 | Time | Visual | Narration | On-screen proof |
 |---:|---|---|---|
 | 0–8s | Fast montage: capable agent, empty storefront, then Autonomerce rail | “AI agents can do valuable work, but most still cannot package, sell, settle, and prove that work without a human operator.” | Product name and tagline |
-| 8–23s | Public app and status response | “Autonomerce gives an existing agent a policy-controlled commercial layer. This public app is live, while funds movement remains disabled.” | Public URL; `mode=offline`; `movesFunds=false`; private-API boundary |
-| 23–48s | Owner-authenticated deployed Gemini productization of the synthetic source-verification seller | “In the deployed trace, Gemini turns a declared capability into a structured SKU. The model proposes product framing; deterministic policy clamps price, capacity, scope, and acceptance criteria.” | `gemini-2.5-flash`, Cloud Run revision, UTC timestamp, latency, SKU ID, `provider=google`; persistent `SYNTHETIC SELLER` label |
+| 8–23s | Public app and status response | “Autonomerce gives an existing agent a policy-controlled commercial layer. This public app is live, while funds movement remains disabled.” | Public URL; `runtimeMode=gemini`; `paymentMode=offline`; `movesFunds=false`; private-API boundary |
+| 23–48s | Owner-authenticated deployed Gemini productization of the synthetic source-verification seller | “In the deployed trace, Gemini turns a declared capability into a structured SKU. The model proposes product framing; deterministic policy clamps price, capacity, scope, and acceptance criteria.” | `requestedModelId=gemini-2.5-flash`, Cloud Run revision, UTC timestamp, latency, SKU ID, `provider=google`; persistent `SYNTHETIC SELLER` label; served-model ID unavailable |
 | 48–65s | Commercial authority and wallet policy evidence | “Adaptive reasoning is not financial authority. Code controls the allowed action set, token, network, payer, payee, exact amount, caps, and idempotency.” | Authority fields from Gemini evidence; redacted wallet policy; no credentials |
 | 65–92s | Separate Circle Agent Wallet history and Arc explorer trace | “Separately, a founder-owned Agent Wallet transferred exactly 0.10 USDC on Arc testnet under standing application policy. Circle history, balance delta, replay, and independent RPC verification agree. This is testnet integration evidence, not customer revenue and not the deployed Gemini order.” | Persistent `SEPARATE ARC TESTNET TRACE — FOUNDER-OWNED — NOT REVENUE`; network, amount, tx hash, explorer, replay IDs |
 | 92–116s | Deployed synthetic workflow reaches mocked payment and deterministic acceptance | “Back in the deployed workflow, mocked payment and deterministic fulfillment exercise the commercial state machine. Payment confirmation and delivery acceptance remain separate, and receipt publication remains off.” | Persistent `MOCKED PAYMENT / SYNTHETIC WORKFLOW`; proposal, mocked payment, accepted fulfillment, `published=false` |
-| 116–140s | Side-by-side proof matrix: Gemini trace, Circle trace, and missing linkage | “These two traces prove different boundaries. They do not prove one Gemini-to-Circle-to-fulfillment customer order. The missing linked order, customer consent, and video proof remain explicit blockers.” | Product Evidence pages 1–2 and 5–8; `linked order: BLOCKING`; `external customer: BLOCKING` |
+| 116–140s | Side-by-side proof matrix: Gemini trace, Circle trace, and missing linkage | “These two traces prove different boundaries. They do not prove one Gemini-to-Circle-to-fulfillment customer order. The missing linked order, customer consent, and video proof remain explicit blockers.” | `EVIDENCE-INDEX.md` and `evidence/public/*.json`; `linked order: BLOCKING`; `external customer: BLOCKING` |
 | 140–150s | Current business-evidence snapshot | “No external customer, delivered paid task, mainnet revenue, or gross-margin result is currently evidenced.” | Evidence window, exclusions, and `not evidenced` labels |
-| 150–155s | Logo and public links | “Autonomerce: give every AI agent a sales department.” | App, repo, Product Evidence PDF |
+| 150–155s | Logo and public links | “Autonomerce: give every AI agent a sales department.” | App, repo, evidence index |
 
 ## Narration script
 
@@ -113,7 +113,8 @@ Do not submit the offline cut as proof of Circle prize eligibility.
 
 - [ ] Runtime is below 2:59 after upload/transcoding.
 - [ ] Product name and category are understandable in the first 15 seconds.
-- [ ] Gemini model identity and actual operational output are visible.
+- [ ] Requested Gemini model ID and actual operational output are visible; do
+      not infer a served-model ID.
 - [ ] Owner policy and deterministic boundary are visible.
 - [ ] Buyer opt-in/consent is visible without exposing identity.
 - [ ] No per-transaction approval interruption occurs.
