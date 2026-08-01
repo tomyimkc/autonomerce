@@ -756,6 +756,7 @@ def _secure_store_files(path: Path) -> None:
         try:
             os.chmod(candidate, 0o600)
         except FileNotFoundError:
+            # SQLite sidecar files are optional until WAL/SHM creation.
             pass
 
 
@@ -801,6 +802,7 @@ def _atomic_write_json(path: Path, payload: Mapping[str, Any]) -> None:
         try:
             temporary.unlink()
         except FileNotFoundError:
+            # A successful os.replace already moved the temporary path.
             pass
 
 
@@ -1083,9 +1085,9 @@ def _public_evidence(
             "External design-partner testnet evidence only.",
             "Founder-sponsored testnet funding; countedAsRevenue=false.",
             "The external design partner did not fund this transfer and is not "
-            "classified as a paying customer.",
+            + "classified as a paying customer.",
             "Customer identity, claims, source URLs, source excerpts, wallets, "
-            "credentials, and the internal idempotency key are omitted.",
+            + "credentials, and the internal idempotency key are omitted.",
             "Delivery and acceptance reflect deterministic contract validation.",
         ],
     }

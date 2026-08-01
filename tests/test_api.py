@@ -220,7 +220,7 @@ def test_complete_offline_commerce_flow_and_public_receipt_redaction():
         assert metrics["proposalsSent"] == 1
         assert metrics["paidTasks"] is None
         assert metrics["paidTasksStatus"] == (
-            "requires_external_customer_classification"
+            "requires_complete_deal_evidence_coverage"
         )
         assert metrics["confirmedLivePayments"] == 0
         assert metrics["mockedPaymentCount"] == 1
@@ -230,9 +230,11 @@ def test_complete_offline_commerce_flow_and_public_receipt_redaction():
         assert metrics["mockedPaymentVolumeUsdc"] == "0.9"
         assert metrics["medianDeliverySeconds"] is not None
         assert metrics["grossMarginUsdc"] is None
-        assert metrics["grossMarginStatus"] == "requires_measured_variable_costs"
+        assert metrics["grossMarginStatus"] == (
+            "requires_complete_deal_evidence_coverage"
+        )
         assert metrics["revenueClassification"] == (
-            "unmeasured_external_customer_status"
+            "incomplete_deal_evidence_coverage"
         )
 
 

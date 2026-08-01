@@ -2603,14 +2603,17 @@ class SQLiteRepository:
                 evidence_query += " WHERE owner_id = ?"
                 evidence_parameters = (owner_id,)
             evidence_query += " ORDER BY rowid"
-            evidence_records = [
-                _deal_evidence_from_payload(_json_load(row["payload_json"]))
+            evidence_payloads = [
+                _json_load(row["payload_json"])
                 for row in connection.execute(
                     evidence_query,
                     evidence_parameters,
                 ).fetchall()
-                if _json_load(row["payload_json"])["proposal_id"]
-                in proposal_ids
+            ]
+            evidence_records = [
+                _deal_evidence_from_payload(payload)
+                for payload in evidence_payloads
+                if payload["proposal_id"] in proposal_ids
             ]
             classifications = []
             for evidence in evidence_records:
@@ -2757,7 +2760,7 @@ class SQLiteRepository:
                 "paidTasksStatus": (
                     "classified_confirmed_settlements"
                     if classification_complete
-                    else "requires_external_customer_classification"
+                    else "requires_complete_deal_evidence_coverage"
                 ),
                 "confirmedLivePayments": len(live),
                 "mockedPaymentCount": len(mocked_payments),
@@ -2822,7 +2825,7 @@ class SQLiteRepository:
                 "repeatPurchaseRateStatus": (
                     "classified_external_customer_purchases"
                     if classification_complete
-                    else "requires_external_customer_classification"
+                    else "requires_complete_deal_evidence_coverage"
                 ),
                 "paymentFailures": sum(
                     1
@@ -2852,12 +2855,12 @@ class SQLiteRepository:
                 "grossMarginStatus": (
                     "classified_measured_variable_costs"
                     if classification_complete
-                    else "requires_measured_variable_costs"
+                    else "requires_complete_deal_evidence_coverage"
                 ),
                 "revenueClassification": (
                     "complete_external_customer_classification"
                     if classification_complete
-                    else "unmeasured_external_customer_status"
+                    else "incomplete_deal_evidence_coverage"
                 ),
             }
 

@@ -1012,7 +1012,7 @@ class InMemoryRepository:
                 "paidTasksStatus": (
                     "classified_confirmed_settlements"
                     if classification_complete
-                    else "requires_external_customer_classification"
+                    else "requires_complete_deal_evidence_coverage"
                 ),
                 "confirmedLivePayments": len(live),
                 "mockedPaymentCount": len(mocked),
@@ -1066,7 +1066,7 @@ class InMemoryRepository:
                 "repeatPurchaseRateStatus": (
                     "classified_external_customer_purchases"
                     if classification_complete
-                    else "requires_external_customer_classification"
+                    else "requires_complete_deal_evidence_coverage"
                 ),
                 "paymentFailures": sum(
                     1
@@ -1090,11 +1090,11 @@ class InMemoryRepository:
                 "grossMarginStatus": (
                     "classified_measured_variable_costs"
                     if classification_complete
-                    else "requires_measured_variable_costs"
+                    else "requires_complete_deal_evidence_coverage"
                 ),
                 "revenueClassification": (
                     "complete_external_customer_classification"
                     if classification_complete
-                    else "unmeasured_external_customer_status"
+                    else "incomplete_deal_evidence_coverage"
                 ),
             }
