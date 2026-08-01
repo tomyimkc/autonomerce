@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "autonomerce.okf.record.v1",
+  "recordId": "fulfillment-replace-me",
+  "recordKind": "fulfillments",
+  "status": "draft",
+  "visibility": "private",
+  "createdAt": "2026-08-01T00:00:00Z",
+  "updatedAt": "2026-08-01T00:00:00Z",
+  "title": "Pilot fulfillment",
+  "llmSummary": "Deterministic contract-validation record for the delivered evidence pack.",
+  "claimBoundary": "Payment confirmation does not imply accepted delivery.",
+  "sourceEvidence": [],
+  "links": ["payment-replace-me", "proposal-replace-me"],
+  "nextAction": "Record artifact hash, validator, per-criterion results, and participant feedback.",
+  "fulfillmentId": "",
+  "artifactHash": "",
+  "validator": "",
+  "accepted": false,
+  "acceptanceVerdict": "pending",
+  "deliveredAt": ""
+}

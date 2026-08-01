@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "autonomerce.external_customer.private.v1",
+  "customerRecordId": "customer-private-replace-me",
+  "relationship": {
+    "relationshipRecordId": "relationship-private-replace-me",
+    "classification": "external_design_partner"
+  },
+  "consent": {
+    "consentRecordId": "consent-private-replace-me",
+    "status": "granted",
+    "designPartnerPilot": true,
+    "testnetMicrodeal": true,
+    "publishRedactedEvidence": true
+  },
+  "buyerAgentUrl": "https://buyer.example/a2a",
+  "claims": [
+    {
+      "claim": "Replace with one bounded buyer-supplied launch claim.",
+      "sources": [
+        {
+          "sourceId": "source-1",
+          "url": "https://evidence.example/report",
+          "title": "Buyer-supplied source title",
+          "excerpt": "Buyer-supplied source excerpt.",
+          "stance": "support"
+        }
+      ]
+    }
+  ]
+}

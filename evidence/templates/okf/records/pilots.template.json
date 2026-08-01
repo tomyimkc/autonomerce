@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "autonomerce.okf.record.v1",
+  "recordId": "pilot-replace-me",
+  "recordKind": "pilots",
+  "status": "waiting_owner",
+  "visibility": "private",
+  "createdAt": "2026-08-01T00:00:00Z",
+  "updatedAt": "2026-08-01T00:00:00Z",
+  "title": "Source-verification Arc testnet pilot",
+  "llmSummary": "One bounded evidence-pack pilot for an external design partner.",
+  "claimBoundary": "Founder-sponsored testnet activity is not revenue or a paying-customer event.",
+  "sourceEvidence": [],
+  "links": [
+    "partner-replace-me",
+    "consent-replace-me",
+    "authorization-replace-me"
+  ],
+  "nextAction": "Complete linked partner, consent, and authorization records, then run pilot-readiness.",
+  "microdealId": "replace-me",
+  "partnerRecordId": "partner-replace-me",
+  "consentRecordId": "consent-replace-me",
+  "authorizationRecordId": "authorization-replace-me",
+  "sellerAgentUrl": "https://autonomerce.example/a2a",
+  "objective": "Verify one to five buyer-supplied launch claims against buyer-supplied sources.",
+  "network": "ARC-TESTNET",
+  "token": "USDC",
+  "amountUsdc": "0.10",
+  "fundingSource": "founder_sponsored_testnet",
+  "countedAsRevenue": false,
+  "payingCustomer": false
+}

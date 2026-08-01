@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "autonomerce.okf.record.v1",
+  "recordId": "video-replace-me",
+  "recordKind": "videos",
+  "status": "blocked",
+  "visibility": "private",
+  "createdAt": "2026-08-01T00:00:00Z",
+  "updatedAt": "2026-08-01T00:00:00Z",
+  "title": "Contest video",
+  "llmSummary": "Under-three-minute evidence-safe judged cut.",
+  "claimBoundary": "Video production is deferred and no URL or final demonstration exists yet.",
+  "sourceEvidence": [],
+  "links": [],
+  "nextAction": "Record after the linked pilot and financial evidence are finalized.",
+  "videoUrl": "",
+  "durationSeconds": null,
+  "videoSha256": "",
+  "loggedOutVerified": false
+}

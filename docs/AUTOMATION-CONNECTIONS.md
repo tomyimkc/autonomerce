@@ -1,11 +1,16 @@
 # Automation connection plan
 
-## Current state
+## Current state — August 1, 2026
 
-No Google, Circle, or Devpost MCP resource is connected in this session.
+- Google Cloud authentication is complete for project
+  `gen-lang-client-0791755511`.
+- Circle testnet login is complete.
+- The official Devpost MCP endpoint is configured, but the current Codex process
+  has no `DEVPOST_MCP_TOKEN` environment variable and exposes no Devpost tools.
 
-The product can be built and tested offline without them. Live automation begins after the
-owner completes authentication.
+The product can still be built and tested offline. Devpost mutations remain
+blocked until a fresh bearer token is injected into a newly started Codex
+process.
 
 Repository-side automation is already present for the private API, web owner
 session, and deployment preflight. The browser owner session is separate from
@@ -14,17 +19,66 @@ the Autonomerce web proxy but does not complete any external provider login.
 
 ## Devpost
 
-No official public submission API was found in the current Devpost help material.
+Official MCP endpoint:
 
-Recommended automation:
+```text
+https://devpost.com/mcp
+```
 
-1. owner signs in to Devpost in Chrome;
-2. connect the signed-in Chrome/browser tool;
-3. agent fills the draft submission, uploads text/assets, and checks links;
-4. owner reviews legal attestations;
-5. owner performs the final submit action.
+Advertised bearer scopes:
 
-Do not share a Devpost password in chat or an environment file.
+```text
+mcp:tools
+mcp:read
+mcp:write
+```
+
+The bearer token previously pasted into chat must be revoked. Create a fresh
+token and inject it without placing it in chat or the repository:
+
+```zsh
+read -s "DEVPOST_MCP_TOKEN?Fresh Devpost MCP token: "
+echo
+export DEVPOST_MCP_TOKEN
+
+codex mcp remove devpost
+codex mcp add devpost \
+  --url https://devpost.com/mcp \
+  --bearer-token-env-var DEVPOST_MCP_TOKEN
+
+codex mcp list
+codex
+```
+
+The Codex process must start from the same shell so it inherits the token. After
+the session ends:
+
+```zsh
+unset DEVPOST_MCP_TOKEN
+```
+
+Target draft:
+
+```text
+project ID: 1368519
+slug: autonomerce
+```
+
+Old draft IDs requested for deletion:
+
+```text
+1367683
+1367682
+1363845
+```
+
+After authentication, enumerate the MCP tool list before mutation. Use only
+tools exposed by the official server and restrict all edits to project
+`1368519`. Draft deletion, binary uploads, or legal submission may remain
+unsupported and require the UI.
+
+The owner must still review residence/eligibility, legal attestations, and
+perform the final submit action.
 
 ## Google Cloud and Gemini
 

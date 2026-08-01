@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "autonomerce.okf.record.v1",
+  "recordId": "financial-replace-me",
+  "recordKind": "financial",
+  "status": "draft",
+  "visibility": "private",
+  "createdAt": "2026-08-01T00:00:00Z",
+  "updatedAt": "2026-08-01T00:00:00Z",
+  "title": "Contest financial snapshot",
+  "llmSummary": "Evidence-bound contest-period revenue, expenses, refunds, and concentration.",
+  "claimBoundary": "Unknown expenses remain null; testnet and founder-sponsored activity remain excluded from revenue.",
+  "sourceEvidence": [],
+  "links": [],
+  "nextAction": "Complete dated expenses and regenerate the owner-reviewed Devpost financial payload.",
+  "observedThrough": "2026-08-01T00:00:00Z",
+  "recognizedRevenueUsd": "0.00",
+  "totalExpensesUsd": null,
+  "grossMarginUsd": null,
+  "usersAcquired": 0,
+  "payingUsers": 0,
+  "largestCustomerSharePercent": null
+}

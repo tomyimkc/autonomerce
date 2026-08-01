@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "autonomerce.okf.workspace.v1",
+  "workspaceId": "autonomerce-contest-2026",
+  "private": true,
+  "automaticSubmission": false,
+  "movesFunds": false,
+  "recordsRoot": "records",
+  "wikiRoot": "wiki"
+}

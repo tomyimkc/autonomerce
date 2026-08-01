@@ -4,6 +4,27 @@ This checklist separates owner-only account actions from publishable proof. Stor
 raw account screenshots, CLI output, billing details, and consent records in a
 private untracked location. Publish only redacted evidence.
 
+## 0. Private OKF record workspace
+
+- [ ] initialize `evidence/private/okf/`;
+- [ ] copy and rename the partner, consent, pilot, and authorization templates;
+- [ ] store participant identity only through the private identity-vault
+      reference;
+- [ ] store the microdeal customer input outside tracked files;
+- [ ] run `manage_okf_records.py validate`;
+- [ ] run `manage_okf_records.py build`;
+- [ ] inspect the generated private Home/index pages;
+- [ ] keep SQLite under `runtime/sqlite/`;
+- [ ] keep full private evidence under `runtime/private-evidence/`;
+- [ ] stage the redacted artifact under `publication-staging/`;
+- [ ] verify no runtime/staging path is a symlink or tracked project path;
+- [ ] bind one authorization to exactly one active pilot;
+- [ ] run `pilot-readiness` and retain the no-funds receipt;
+- [ ] confirm `readyForExecution` remains false pending fresh owner approval;
+- [ ] publish only separately generated `public_redacted` projections.
+
+See [`../../wiki/INDEX.md`](../../wiki/INDEX.md).
+
 ## 1. Devpost
 
 Owner-only:
@@ -130,6 +151,9 @@ unrestricted API credentials.
 
 ## 6. Testnet payment proof
 
+This section records the existing founder-owned Circle integration trace. It is
+not the external design-partner pilot and is not customer evidence.
+
 - [x] accepted proposal exists;
 - [x] exact amount, chain, token, payer, and payee are authorized;
 - [x] durable idempotency store is active for the testnet runner;
@@ -140,6 +164,22 @@ unrestricted API credentials.
 - [ ] delivery validation is separate;
 - [x] public record says `testnet`;
 - [x] counted-as-revenue is false.
+
+### 6A. External design-partner Arc testnet pilot
+
+- [ ] owner records one arms-length external design partner;
+- [ ] participant grants separate pilot, testnet, and publication consent;
+- [ ] private customer input contains one to five buyer-supplied claims and
+      cited buyer-supplied sources;
+- [ ] exact 0.10 USDC Arc testnet authorization record is complete;
+- [ ] payer, payee, Circle CLI, interpreter, hashes, and paths are pinned;
+- [ ] OKF validation passes;
+- [ ] pilot readiness passes without moving funds;
+- [ ] owner provides fresh session-specific execution approval;
+- [ ] transaction independently confirms;
+- [ ] fulfillment is validated separately;
+- [ ] public redacted microdeal schema validates;
+- [ ] record remains `countedAsRevenue=false` and `payingCustomer=false`.
 
 ## 7. External mainnet payment proof
 
