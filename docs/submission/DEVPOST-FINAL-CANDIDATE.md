@@ -33,24 +33,27 @@ seller agent, validate the returned artifact separately, and publish a redacted
 receipt.
 
 The core design rule is that adaptive reasoning is not financial authority.
-Gemini may recommend product framing, relevance, or a negotiation action, but
-deterministic code controls price, scope, capacity, buyer eligibility, token,
+The deployed proof uses Gemini for productization. The broader codebase exposes
+advisory interfaces for relevance, proposal, negotiation, and delivery, but
+those later Gemini stages are not evidenced in the deployed trace.
+Deterministic code controls price, scope, capacity, buyer eligibility, token,
 chain, payer, payee, amount, idempotency, payment confirmation, and delivery
 acceptance. Payment never automatically means the work succeeded.
 
 ### How Gemini is operational
 
-Gemini is the adaptive productization and sales-reasoning layer, not decorative
-copywriting. The deployed private Cloud Run API uses
+Gemini is the deployed adaptive productization layer, not decorative
+copywriting. The broader sales-reasoning interfaces are implemented but are not
+claimed as deployed evidence here. The private Cloud Run API uses
 `gemini-2.5-flash` to transform a declared source-verification capability into a
 structured SKU with an outcome, price, latency, capacity, and acceptance
 criteria. The public evidence records the requested model, API revision,
 timestamp, request latency, structured result, and resulting SKU. The owner
 policy then clamps the output so the model cannot expand its authority.
 
-Removing Gemini would remove adaptive productization and sales reasoning.
-Removing the deterministic policy would make the system unsafe; therefore both
-layers are necessary.
+Removing Gemini would remove adaptive productization from the deployed proof.
+Removing the deterministic policy would make that adaptive layer unsafe for
+commercial use; therefore both layers are necessary.
 
 ### How Circle is central
 
@@ -110,12 +113,12 @@ state, independent receipt verification, reconciliation, fulfillment
 validation, redaction, threat modeling, public-evidence schemas, and a
 credential-free deterministic demo.
 
-The clean release preflight passes 371 Python tests and 47 web tests, reproduces
-the offline demo byte-for-byte, scans the public tree for likely secrets,
-typechecks the web application, and builds the production bundle. These results
-prove the tested software and the specific deployed/testnet integrations
-described above. They do not prove production readiness, external demand,
-revenue, or first place.
+The public CI workflow passes 371 Python tests and 47 web tests, reproduces the
+offline demo byte-for-byte, scans the public tree for likely secrets, typechecks
+the web application, and builds the production bundle. Recheck the latest
+`main` run immediately before submission. These results prove the tested
+software and the specific deployed/testnet integrations described above. They
+do not prove production readiness, external demand, revenue, or first place.
 
 Autonomerce’s north star is simple: give an existing AI agent a
 policy-bounded path from capability to offer, settlement, independently judged

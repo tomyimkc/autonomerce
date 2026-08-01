@@ -2,14 +2,17 @@
 
 `target runtime: 2:35` · `hard maximum: 2:59` · `final evidence not yet present`
 
-The final judged cut must show a real deployed Gemini-in-the-loop workflow and,
-for the Circle prize, a real verifiable USDC transaction using the required
-Circle wallet surface. The current local UI and offline demo are useful for
-rehearsal only and must be labeled **SYNTHETIC / NO FUNDS MOVED**.
+The judged cut must show the strongest public evidence without editing separate
+runs into one apparent order. The current evidence supports a deployed
+Gemini-productization trace and a separate founder-owned Arc testnet Agent
+Wallet transfer. The deployed workflow still uses mocked payment. Every
+synthetic, offline, founder-owned, and testnet segment must remain visibly
+labeled.
 
 ## Recording rules
 
-- Record one coherent order. Do not splice unrelated transactions into one story.
+- Never splice unrelated traces into one apparent order. Until a linked order
+  exists, show the Gemini and Circle evidence as explicitly separate runs.
 - Keep the network label visible whenever a wallet or transaction appears.
 - Blur secrets, customer identity, prompts, browser account details, and private
   wallet/session material before publication.
@@ -21,60 +24,67 @@ rehearsal only and must be labeled **SYNTHETIC / NO FUNDS MOVED**.
 - If a required live proof is unavailable, say so plainly; do not substitute
   synthetic numbers.
 
-## Final judged cut — 155 seconds
+## Current evidence-safe judged cut — 155 seconds
 
 | Time | Visual | Narration | On-screen proof |
 |---:|---|---|---|
 | 0–8s | Fast montage: capable agent, empty storefront, then Autonomerce rail | “AI agents can do valuable work, but most still cannot package, sell, settle, and prove that work without a human operator.” | Product name and tagline |
-| 8–20s | Seller onboarding with one real capability manifest | “Autonomerce gives an existing agent a sales department. I connect a capability; the owner sets the boundaries once.” | Agent URL/manifest type; no secrets |
-| 20–38s | Live Gemini productization response becomes an SKU | “Gemini turns the declared capability into a sellable outcome and acceptance contract. The model recommends; code clamps price, capacity, and scope to policy.” | Requested model ID, timestamp, SKU, `provider=google`; redact prompt content if needed |
-| 38–55s | Policy editor: price floor/ceiling, allowed buyer, chain, token, capacity, unattended switch | “The owner authorizes a commercial and wallet envelope—not each checkout. Gemini cannot raise these limits or choose a new destination wallet.” | Policy ID, wallet policy screenshot, caps |
-| 55–72s | Opted-in buyer need appears; proposal is generated | “An opted-in buyer publishes a need. Autonomerce matches it to the SKU and creates a machine-readable proposal.” | Consent reference, buyer pseudonym, proposal ID |
-| 72–89s | Buyer counter; deterministic gate accepts/counters/declines | “The buyer counters. Gemini recommends an action from the safe action set; deterministic code enforces discount, scope, expiry, buyer, and capacity bounds.” | Revision diff and policy decision code |
-| 89–112s | Accepted proposal triggers Circle payment; no approval dialog; explorer opens | “Inside policy, the transaction proceeds without a per-payment human prompt. Circle settles exactly the accepted amount to the bound seller wallet.” | Agent Wallet address, network, amount, tx hash, explorer confirmation |
-| 112–132s | Seller agent fulfills; contract validator evaluates artifact | “Payment does not mean success. The seller agent delivers the work, and a separate validator checks the accepted schema and criteria.” | Artifact hash, validator name, PASS/FAIL criteria |
-| 132–145s | Public redacted receipt links proposal, payment, and delivery | “The public receipt links one proposal, one settlement, and one delivery verdict without exposing the customer prompt or private artifact.” | Order ID, proposal ID, payment ID, fulfillment ID |
-| 145–152s | Public evidence snapshot | “In this measurement window: [VERIFIED CUSTOMERS], [VERIFIED DELIVERED PAID TASKS], [VERIFIED MAINNET USDC REVENUE], and [VERIFIED GROSS MARGIN].” | Evidence JSON with UTC window and exclusions |
-| 152–155s | Logo and public links | “Autonomerce: give every AI agent a sales department.” | App, repo, evidence links |
+| 8–23s | Public app and status response | “Autonomerce gives an existing agent a policy-controlled commercial layer. This public app is live, while funds movement remains disabled.” | Public URL; `mode=offline`; `movesFunds=false`; private-API boundary |
+| 23–48s | Owner-authenticated deployed Gemini productization of the synthetic source-verification seller | “In the deployed trace, Gemini turns a declared capability into a structured SKU. The model proposes product framing; deterministic policy clamps price, capacity, scope, and acceptance criteria.” | `gemini-2.5-flash`, Cloud Run revision, UTC timestamp, latency, SKU ID, `provider=google`; persistent `SYNTHETIC SELLER` label |
+| 48–65s | Commercial authority and wallet policy evidence | “Adaptive reasoning is not financial authority. Code controls the allowed action set, token, network, payer, payee, exact amount, caps, and idempotency.” | Authority fields from Gemini evidence; redacted wallet policy; no credentials |
+| 65–92s | Separate Circle Agent Wallet history and Arc explorer trace | “Separately, a founder-owned Agent Wallet transferred exactly 0.10 USDC on Arc testnet under standing application policy. Circle history, balance delta, replay, and independent RPC verification agree. This is testnet integration evidence, not customer revenue and not the deployed Gemini order.” | Persistent `SEPARATE ARC TESTNET TRACE — FOUNDER-OWNED — NOT REVENUE`; network, amount, tx hash, explorer, replay IDs |
+| 92–116s | Deployed synthetic workflow reaches mocked payment and deterministic acceptance | “Back in the deployed workflow, mocked payment and deterministic fulfillment exercise the commercial state machine. Payment confirmation and delivery acceptance remain separate, and receipt publication remains off.” | Persistent `MOCKED PAYMENT / SYNTHETIC WORKFLOW`; proposal, mocked payment, accepted fulfillment, `published=false` |
+| 116–140s | Side-by-side proof matrix: Gemini trace, Circle trace, and missing linkage | “These two traces prove different boundaries. They do not prove one Gemini-to-Circle-to-fulfillment customer order. The missing linked order, customer consent, and video proof remain explicit blockers.” | Product Evidence pages 1–2 and 5–8; `linked order: BLOCKING`; `external customer: BLOCKING` |
+| 140–150s | Current business-evidence snapshot | “No external customer, delivered paid task, mainnet revenue, or gross-margin result is currently evidenced.” | Evidence window, exclusions, and `not evidenced` labels |
+| 150–155s | Logo and public links | “Autonomerce: give every AI agent a sales department.” | App, repo, Product Evidence PDF |
 
 ## Narration script
 
 > AI agents can do valuable work, but most still cannot package, sell, settle,
 > and prove that work without a human operator.
 >
-> Autonomerce gives an existing agent a sales department. I connect a
-> capability; the owner sets the boundaries once.
+> Autonomerce gives an existing agent a policy-controlled commercial layer.
+> This public app is live, while funds movement remains disabled.
 >
-> Gemini turns the declared capability into a sellable outcome and acceptance
-> contract. The model recommends; code clamps price, capacity, and scope to
-> policy.
+> In the deployed trace, Gemini turns a declared capability into a structured
+> SKU. The model proposes product framing; deterministic policy clamps price,
+> capacity, scope, and acceptance criteria.
 >
-> The owner authorizes a commercial and wallet envelope—not each checkout.
-> Gemini cannot raise these limits or choose a new destination wallet.
+> Adaptive reasoning is not financial authority. Code controls the allowed
+> action set, token, network, payer, payee, exact amount, caps, and idempotency.
 >
-> An opted-in buyer publishes a need. Autonomerce matches it to the SKU and
-> creates a machine-readable proposal.
+> Separately, a founder-owned Agent Wallet transferred exactly zero point one
+> USDC on Arc testnet under standing application policy. Circle history, balance
+> delta, replay, and independent RPC verification agree.
 >
-> The buyer counters. Gemini recommends an action from the safe action set;
-> deterministic code enforces discount, scope, expiry, buyer, and capacity
-> bounds.
+> This is testnet integration evidence, not customer revenue and not the
+> deployed Gemini order.
 >
-> Inside policy, the transaction proceeds without a per-payment human prompt.
-> Circle settles exactly the accepted amount to the bound seller wallet.
+> Back in the deployed workflow, mocked payment and deterministic fulfillment
+> exercise the commercial state machine.
 >
-> Payment does not mean success. The seller agent delivers the work, and a
-> separate validator checks the accepted schema and criteria.
+> Payment confirmation and delivery acceptance remain separate, and receipt
+> publication remains off.
 >
-> The public receipt links one proposal, one settlement, and one delivery
-> verdict without exposing the customer prompt or private artifact.
+> These two traces prove different boundaries. They do not prove one
+> Gemini-to-Circle-to-fulfillment customer order.
 >
-> In this measurement window: [VERIFIED CUSTOMERS], [VERIFIED DELIVERED PAID
-> TASKS], [VERIFIED MAINNET USDC REVENUE], and [VERIFIED GROSS MARGIN].
+> The missing linked order, customer consent, and final video proof remain
+> explicit blockers. No external customer, delivered paid task, mainnet
+> revenue, or gross-margin result is currently evidenced.
 >
 > Autonomerce: give every AI agent a sales department.
 
-At a calm 125–135 words per minute, the script leaves room for natural pauses
-and visual proof. Time the actual narration; do not trust the table alone.
+At a calm pace, the script leaves room for readable identifiers and evidence
+labels. Time the actual narration; do not trust the table alone.
+
+## Upgrade rule after a linked external pilot
+
+Replace the evidence-safe cut only after one public record links the Gemini SKU,
+proposal, Circle settlement, accepted fulfillment, and publication consent.
+Never reuse the current founder-owned testnet transfer as if it were that
+external order. Recompute the business sentence from the approved financial
+evidence instead of manually inserting optimistic counts.
 
 ## Current offline rehearsal cut
 

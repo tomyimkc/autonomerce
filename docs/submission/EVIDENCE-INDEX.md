@@ -1,6 +1,6 @@
 # Autonomerce / OfferRail — evidence index
 
-`draft snapshot: 2026-07-31` · `candidateOnly: true` · `canClaimAGI: false`
+`draft snapshot: 2026-08-01` · `candidateOnly: true` · `canClaimAGI: false`
 
 This index maps each judge-facing statement to the narrowest public artifact
 that can support it. A file path proves that implementation or a reproducible
@@ -31,7 +31,6 @@ production claim.
 |---|---|
 | `AVAILABLE` | public repository artifact exists and directly supports the narrow implementation/documentation claim |
 | `REPRODUCIBLE` | a judge can run the documented credential-free verification route; attach a public run receipt before claiming the submission revision passed |
-| `PLACEHOLDER` | real evidence is required and no approved public artifact is present |
 | `BLOCKING` | the absent artifact blocks the associated eligibility or outcome claim |
 
 Evidence classifications remain separate:
@@ -57,18 +56,18 @@ Evidence classifications remain separate:
 The final judged order should use one stable `orderId` and link every artifact
 below. Do not assemble one apparent order from unrelated runs.
 
-| Step | Required public fields | Current artifact | Final evidence placeholder |
+| Step | Required public fields | Current artifact | Final evidence status |
 |---|---|---|---|
 | Build identity | repository commit, deployed revision, UTC timestamp, public app URL | [`../../evidence/public/build-identity.json`](../../evidence/public/build-identity.json) | available |
-| Seller capability | manifest/card type, capability ID, safe public fields | [`../../examples/fixtures/seller-agent-card.json`](../../examples/fixtures/seller-agent-card.json) is synthetic | `[REDACTED_REAL_SELLER_CAPABILITY_URL]` |
-| Gemini decision | operation, requested model, served model if available, config version, UTC time, latency, token/cost record, structured output hash, resulting SKU/proposal ID | [`../../evidence/public/gemini-call.redacted.json`](../../evidence/public/gemini-call.redacted.json); served model and token/cost fields remain unavailable | available with stated gaps |
-| Owner policy | policy ID/version, price/capacity bounds, network/token, wallet/recipient constraints, unattended setting | policy implementation listed in O-03 and C-02 | `[PUBLIC_COMMERCIAL_AND_WALLET_POLICY_URL]` |
-| Buyer opt-in | anonymized buyer/need ID, active consent reference, scope, UTC time | synthetic fixture and enforcement code listed in S-01 through S-03 | `[PUBLIC_OPT_IN_EVIDENCE_URL]` |
-| Proposal/negotiation | proposal ID, revisions, exact amount/scope, expiry, deterministic reason code | OfferRail and sales artifacts listed below | `[PUBLIC_PROPOSAL_EVIDENCE_URL]` |
+| Seller capability | manifest/card type, capability ID, safe public fields | [`../../examples/fixtures/seller-agent-card.json`](../../examples/fixtures/seller-agent-card.json) is synthetic | Not available — `BLOCKING` for an external-seller claim as of 2026-08-01 |
+| Gemini decision | operation, requested model, UTC time, latency, structured output hash, resulting SKU ID | [`../../evidence/public/gemini-call.redacted.json`](../../evidence/public/gemini-call.redacted.json); served-model, token/cost, and SKU-to-order linkage remain unavailable | available with stated gaps |
+| Owner policy | price/capacity authority and wallet/network/token/cap controls | [`../../evidence/public/gemini-call.redacted.json`](../../evidence/public/gemini-call.redacted.json) and [`../../evidence/public/wallet-policy.redacted.json`](../../evidence/public/wallet-policy.redacted.json) | available for the separate deployed-Gemini and Arc-testnet traces; one linked policy/order record is not available |
+| Buyer opt-in | anonymized buyer/need ID, active consent reference, scope, UTC time | synthetic fixture and enforcement code listed in S-01 through S-03 | Not available — `BLOCKING` for an external-buyer claim as of 2026-08-01 |
+| Proposal/negotiation | proposal ID, revisions, exact amount/scope, expiry, deterministic reason code | OfferRail and sales artifacts listed below; public transaction records are not SKU-linked | Not available — `BLOCKING` for one linked judged order as of 2026-08-01 |
 | Circle settlement | Agent Wallet address, network, canonical USDC, exact amount, payer/payee, transaction hash, explorer URL, confirmation time, idempotency result | [`../../evidence/public/circle-arc-testnet-transaction.public.json`](../../evidence/public/circle-arc-testnet-transaction.public.json) and [`../../evidence/public/wallet-policy.redacted.json`](../../evidence/public/wallet-policy.redacted.json) | testnet settlement available; deployed-order linkage pending |
-| Fulfillment | seller endpoint class, payment ID, artifact hash, validator, per-criterion results, delivery time | implementation and tests listed in F-01 through F-04 | `[PUBLIC_FULFILLMENT_EVIDENCE_URL]` |
-| Receipt publication | order/proposal/payment/fulfillment IDs, evidence classification, redacted fields, publication consent reference | implementation listed in R-01 through R-05 | `[PUBLIC_REDACTED_RECEIPT_URL]` |
-| Business snapshot | fixed UTC window, external-customer classification, exclusions, refunds, costs, revenue, margin, repeat denominator | templates and definitions listed in B-01 through B-05 | `[PUBLIC_REVENUE_AND_UNIT_ECONOMICS_URL]` |
+| Fulfillment | seller endpoint class, payment ID, artifact hash, validator, per-criterion results, delivery time | implementation and tests listed in F-01 through F-04 | Not available — `BLOCKING` for accepted external delivery as of 2026-08-01 |
+| Receipt publication | order/proposal/payment/fulfillment IDs, evidence classification, redacted fields, publication consent reference | implementation listed in R-01 through R-05 | Not available — `BLOCKING` for a published linked-order receipt as of 2026-08-01 |
+| Business snapshot | fixed UTC window, external-customer classification, exclusions, refunds, costs, revenue, margin, repeat denominator | templates and definitions listed in B-01 through B-05 | Not available — `BLOCKING` for revenue or margin claims as of 2026-08-01 |
 
 ## Rubric-to-proof map
 
@@ -76,11 +75,11 @@ below. Do not assemble one apparent order from unrelated runs.
 
 | Claim or judge question | Current proof | Classification | Missing proof |
 |---|---|---|---|
-| Is there a workable business model? | fee/revenue-share model and order-level cost formula in [`DEVPOST-DRAFT.md`](DEVPOST-DRAFT.md) and [`METRICS-DEFINITIONS.md`](METRICS-DEFINITIONS.md) | `planned` economics | `[MEASURED_ORDER_LEVEL_COSTS_URL]` |
-| Are customers and revenue real? | schemas deliberately exclude synthetic/testnet/self/founder/affiliate/reimbursed/circular activity | no approved business result | `[QUALIFYING_EXTERNAL_CUSTOMER_RECORDS_URL]` and `[EXTERNAL_MAINNET_TRANSACTION_INDEX_URL]` |
-| Was paid work delivered? | separate fulfillment contract and receipt code | offline fixtures only | `[ORDER_LINKED_ACCEPTED_DELIVERY_URL]` |
-| Is margin measured? | reproducible formula and zero/null rules | no measured variable costs | `[PUBLIC_MARGIN_SNAPSHOT_URL]` |
-| Are all expenses and customer-acquisition costs disclosed? | metric definitions and zero/null rules exist | no approved expense statement | `[PUBLIC_P_AND_L_URL]` with hosting, Gemini, Circle/network, external service, contractor, marketing, and acquisition spend |
+| Is there a workable business model? | fee/revenue-share model and order-level cost formula in [`DEVPOST-DRAFT.md`](DEVPOST-DRAFT.md) and [`METRICS-DEFINITIONS.md`](METRICS-DEFINITIONS.md) | `planned` economics | Not available — measured order-level costs are `BLOCKING` as of 2026-08-01 |
+| Are customers and revenue real? | schemas deliberately exclude synthetic/testnet/self/founder/affiliate/reimbursed/circular activity | no approved business result | Not available — qualifying external-customer records and a qualifying mainnet transaction index are `BLOCKING` as of 2026-08-01 |
+| Was paid work delivered? | separate fulfillment contract and receipt code | offline fixtures only | Not available — order-linked accepted external delivery is `BLOCKING` as of 2026-08-01 |
+| Is margin measured? | reproducible formula and zero/null rules | no measured variable costs | Not available — a public margin snapshot is `BLOCKING` as of 2026-08-01 |
+| Are all expenses and customer-acquisition costs disclosed? | metric definitions and zero/null rules exist | no approved expense statement | Not available — a complete P&L covering hosting, Gemini, Circle/network, external services, contractors, marketing, and acquisition spend is `BLOCKING` as of 2026-08-01 |
 | Is the model sustainable? | adapter boundaries, deployment docs, SQLite single-host topology, fail-closed preflight, and explicit limitations | feasibility documentation | public deployment, measured reliability, repeat behavior, design-partner evidence, and an honest scale plan beyond the single-host topology |
 
 ### Build with Gemini — AI-Native Operations
@@ -88,21 +87,21 @@ below. Do not assemble one apparent order from unrelated runs.
 | Claim or judge question | Current proof | Classification | Missing proof |
 |---|---|---|---|
 | Is Gemini part of operational logic? | deployed productization call plus `GeminiDecisionProvider`, productizer, fit, proposal, negotiation, and delivery decision boundaries | `live_verified` for productization only | broader deployed-order evidence for other decision stages |
-| Is the output structured? | typed request/response models and provider tests | code/test target | `[REDACTED_LIVE_STRUCTURED_OUTPUT_URL]` |
-| Is Gemini materially used? | the deployed call produced the SKU used by the recorded synthetic order | productization is live; settlement remains offline | external-customer proof and broader decision-stage evidence |
-| Can the model authorize money or broaden scope? | deterministic clamps and security tests | reproducible offline | `[PUBLIC_CI_RUN_URL]` for final revision |
-| Is model identity known? | provider supports configured model metadata | no approved live receipt | requested/served model, timestamp, latency, config, usage, and cost record |
+| Is the output structured? | [`../../evidence/public/gemini-call.redacted.json`](../../evidence/public/gemini-call.redacted.json) records the structured result and output hash | `live_verified` for productization only | served-model, usage, cost, and SKU-to-order linkage remain unavailable |
+| Is Gemini materially used? | the deployed call returned a structured SKU for the synthetic source-verification seller | productization is live; no public SKU-to-order linkage; settlement remains offline | external-customer proof and broader deployed decision-stage evidence |
+| Can the model authorize money or broaden scope? | deterministic clamps, security tests, and the public [`CI` workflow](https://github.com/tomyimkc/autonomerce/actions/workflows/ci.yml) | reproducible; latest `main` run must be rechecked before submission | no evidence permits Gemini to authorize funds |
+| Is model identity known? | [`../../evidence/public/gemini-call.redacted.json`](../../evidence/public/gemini-call.redacted.json) records the requested model, timestamp, revision, latency, structured result, and hash | `live_verified` with gaps | served-model identifier, token usage, and cost remain unavailable and are not inferred |
 
 ### Build with Gemini — Category Impact: Entrepreneurship & Job Creation
 
 | Claim or judge question | Current proof | Classification | Missing proof |
 |---|---|---|---|
-| Is the customer problem concrete? | first seller wedge and commercial lifecycle in [`../../README.md`](../../README.md); interview method in [`CUSTOMER-INTERVIEW-TEMPLATE.md`](CUSTOMER-INTERVIEW-TEMPLATE.md) | `planned` for external demand | `[CONSENTED_EXTERNAL_INTERVIEW_INDEX_URL]` |
-| Can an existing agent become a seller? | A2A/manifest ingestion, SKU, policy, proposal, payment, fulfillment, and receipt path | offline implementation | `[EXTERNAL_SELLER_ONBOARDING_URL]` |
-| Is seller activation measurable? | definition in [`METRICS-DEFINITIONS.md`](METRICS-DEFINITIONS.md) | metric defined, not measured externally | `[SELLER_ACTIVATION_SNAPSHOT_URL]` |
-| Is the impact broader than one fixture? | portable OfferRail contracts and adapter boundaries | architectural portability only | `[EXTERNAL_DESIGN_PARTNER_URLS]` and proportionate adoption statement |
+| Is the customer problem concrete? | first seller wedge and commercial lifecycle in [`../../README.md`](../../README.md); interview method in [`CUSTOMER-INTERVIEW-TEMPLATE.md`](CUSTOMER-INTERVIEW-TEMPLATE.md) | `planned` for external demand | Not available — a consented external-interview index is `BLOCKING` as of 2026-08-01 |
+| Can an existing agent become a seller? | A2A/manifest ingestion, SKU, policy, proposal, payment, fulfillment, and receipt path | offline implementation | Not available — external-seller onboarding evidence is `BLOCKING` as of 2026-08-01 |
+| Is seller activation measurable? | definition in [`METRICS-DEFINITIONS.md`](METRICS-DEFINITIONS.md) | metric defined, not measured externally | Not available — an external seller-activation snapshot is `BLOCKING` as of 2026-08-01 |
+| Is the impact broader than one fixture? | portable OfferRail contracts and adapter boundaries | architectural portability only | Not available — external design-partner evidence is `BLOCKING` as of 2026-08-01 |
 | Does this create economic opportunity? | product thesis and fee/revenue-share model | path-to-impact claim only | external seller/customer/orders and measured economics; do not substitute projected or unsupported job counts |
-| Is the experience useful to a non-developer? | synthetic Next.js replay and owner workflow code | synthetic/offline only | deployed connected flow and `[EXTERNAL_USER_FEEDBACK_URL]` |
+| Is the experience useful to a non-developer? | synthetic Next.js replay and owner workflow code | synthetic/offline only | deployed connected flow exists; external user feedback is not available as of 2026-08-01 |
 
 ### Circle Agentic Economy Prize
 
@@ -111,10 +110,10 @@ section. Implementation alone is not a substitute.
 
 | Criterion | Current proof | Blocking live proof |
 |---|---|---|
-| Required Gemini usage | provider and decision integration code | `[LIVE_GEMINI_CALL_EVIDENCE_URL]` |
+| Required Gemini usage | [`../../evidence/public/gemini-call.redacted.json`](../../evidence/public/gemini-call.redacted.json) records a deployed productization call | broader linked-order usage is not available |
 | Required Circle Agent Stack / Agent Wallet usage | guarded lane plus redacted wallet/policy evidence | final video/product-surface confirmation |
 | Agent autonomously makes or receives real USDC | operator-triggered bounded runner completed one testnet transfer with no Circle approval prompt | final uninterrupted recorded order and official eligibility recheck |
-| Public repository | project export tooling and disclosure documents exist | `[PUBLIC_REPOSITORY_URL]` |
+| Public repository | [`https://github.com/tomyimkc/autonomerce`](https://github.com/tomyimkc/autonomerce) | final contest tag pending |
 | Creativeness & Innovation | OfferRail binds proposal, settlement, delivery, and receipt | working public flow and accurately scoped comparison |
 | Centrality to Business | settlement authorization is bound to the accepted proposal | one demonstrated commercial order whose loop depends on the Circle settlement |
 | Technical Depth & Autonomy | policy, durable idempotency, verification, reconciliation, x402 parser, separate delivery state | live wallet policy, confirmed transaction, idempotent replay, and failure behavior |
@@ -140,12 +139,12 @@ four bonus-prize criteria above without published weights.
 
 | ID | Narrow claim | Artifact | Verification | Status |
 |---|---|---|---|---|
-| G-01 | A Gemini structured-decision provider is implemented. | [`../../apps/api/autonomerce/agents/providers.py`](../../apps/api/autonomerce/agents/providers.py) | `tests/test_agents.py` | `AVAILABLE`; live use `PLACEHOLDER` |
+| G-01 | A Gemini structured-decision provider is implemented. | [`../../apps/api/autonomerce/agents/providers.py`](../../apps/api/autonomerce/agents/providers.py) | `tests/test_agents.py` | `AVAILABLE`; deployed use `AVAILABLE` for productization only |
 | G-02 | Productization cannot widen owner-declared authority. | [`../../apps/api/autonomerce/agents/productizer.py`](../../apps/api/autonomerce/agents/productizer.py) | `tests/test_productizer_security.py`, `tests/test_agents.py` | `REPRODUCIBLE` |
 | G-03 | Buyer fit requires opt-in and policy compatibility. | [`../../apps/api/autonomerce/agents/prospects.py`](../../apps/api/autonomerce/agents/prospects.py) | `tests/test_agents.py` | `REPRODUCIBLE` |
 | G-04 | Proposal and negotiation recommendations remain advisory. | [`../../apps/api/autonomerce/agents/proposals.py`](../../apps/api/autonomerce/agents/proposals.py), [`../../apps/api/autonomerce/agents/negotiation.py`](../../apps/api/autonomerce/agents/negotiation.py) | `tests/test_agents.py` | `REPRODUCIBLE` |
 | G-05 | Delivery summaries cannot self-approve an artifact. | [`../../apps/api/autonomerce/agents/delivery.py`](../../apps/api/autonomerce/agents/delivery.py) | `tests/test_agents.py` | `REPRODUCIBLE` |
-| G-LIVE | A deployed Gemini call productized the SKU used by the recorded synthetic order. | [`../../evidence/public/gemini-call.redacted.json`](../../evidence/public/gemini-call.redacted.json) | Cloud Run revision, request latency, output hash, and SKU/order linkage inspection | `AVAILABLE`; productization only |
+| G-LIVE | A deployed Gemini call returned a structured SKU for the synthetic source-verification seller. | [`../../evidence/public/gemini-call.redacted.json`](../../evidence/public/gemini-call.redacted.json) | Cloud Run revision, request latency, structured result, output hash, and SKU ID inspection | `AVAILABLE`; productization only; no public SKU-to-order linkage |
 
 ### S — Opted-in sales workflow
 
@@ -200,26 +199,26 @@ four bonus-prize criteria above without published weights.
 | B-02 | Public transaction fields and classifications are schema constrained. | [`../../evidence/templates/transaction.public.schema.json`](../../evidence/templates/transaction.public.schema.json) | `AVAILABLE` |
 | B-03 | Revenue, costs, margin, and exclusions are schema constrained. | [`../../evidence/templates/revenue.public.schema.json`](../../evidence/templates/revenue.public.schema.json) | `AVAILABLE` |
 | B-04 | Example records are visibly synthetic and zero-revenue. | [`../../evidence/templates/transaction.public.synthetic.example.json`](../../evidence/templates/transaction.public.synthetic.example.json), [`../../evidence/templates/revenue.public.synthetic.example.json`](../../evidence/templates/revenue.public.synthetic.example.json) | `AVAILABLE`; not business evidence |
-| B-05 | Customer publication permissions are separated by field/use. | [`CUSTOMER-CONSENT-TEMPLATE.md`](CUSTOMER-CONSENT-TEMPLATE.md) | template `AVAILABLE`; signed records `PLACEHOLDER` |
+| B-05 | Customer publication permissions are separated by field/use. | [`CUSTOMER-CONSENT-TEMPLATE.md`](CUSTOMER-CONSENT-TEMPLATE.md) | template `AVAILABLE`; signed records not available and `BLOCKING` for customer publication |
 
 ## Required live evidence register
 
-These placeholders must be replaced with public, judge-openable artifacts or the
-associated claim must be removed.
+These blocking items must be replaced with public, judge-openable artifacts or
+the associated claim must be removed.
 
 | ID | Artifact | Minimum contents | Claim unlocked | Status |
 |---|---|---|---|---|
 | L-01 | `https://github.com/tomyimkc/autonomerce` | final tagged commit, license, disclosure, setup, security, limitations | public-source eligibility and reproducibility | `AVAILABLE`; final contest tag pending |
 | L-02 | `https://autonomerce-web-6dnob6ekdq-uc.a.run.app` | clean-session access, HTTPS, health/status, matching deployed revision | deployed-demo claim | `AVAILABLE` |
-| L-03 | [`../../evidence/public/gemini-call.redacted.json`](../../evidence/public/gemini-call.redacted.json) | model/config/time/latency, structured output hash, resulting SKU/order linkage | Gemini used operationally for productization | `AVAILABLE`; served-model and usage/cost fields unavailable |
+| L-03 | [`../../evidence/public/gemini-call.redacted.json`](../../evidence/public/gemini-call.redacted.json) | requested model, revision, time, latency, structured result, output hash, and resulting SKU ID | Gemini used operationally for productization | `AVAILABLE`; served-model, usage/cost, and SKU-to-order linkage unavailable |
 | L-04 | [`../../evidence/public/wallet-policy.redacted.json`](../../evidence/public/wallet-policy.redacted.json) | public addresses, network, wallet surface, safe caps/allowlists | Circle Agent Wallet testnet surface used | `AVAILABLE`; video pending |
 | L-05 | [`../../evidence/public/circle-arc-testnet-transaction.public.json`](../../evidence/public/circle-arc-testnet-transaction.public.json) | independently inspectable exact USDC transfer | Arc testnet transaction exists | `AVAILABLE` |
-| L-06 | `[REDACTED_ORDER_TRANSACTION_DELIVERY_RECORD_URL]` | one deployed-order linkage across Gemini, proposal, payment, fulfillment, and verdict | Circle is central to the full commercial loop | `BLOCKING`; settlement-only proof is available |
-| L-07 | `[NO_PER_PAYMENT_APPROVAL_VIDEO_TIMESTAMP]` | policy configured before checkout; uninterrupted autonomous settlement | autonomy within standing policy | `BLOCKING` |
-| L-08 | `[CUSTOMER_CONSENT_AND_CLASSIFICATION_URL]` | anonymized external relationship, selected publication permissions | customer/quote/transaction publication | `BLOCKING` for customer claims |
-| L-09 | `[REVENUE_AND_UNIT_ECONOMICS_SNAPSHOT_URL]` | UTC window, qualifying transactions, exclusions, refunds, all variable costs, margin | measured revenue/margin | `BLOCKING` for business results |
-| L-10 | [`../../evidence/public/ci-and-security.json`](../../evidence/public/ci-and-security.json) | final commit, tests, secret scan, typecheck, production build, lock checks, and deterministic demo hash | final-revision verification claim | `AVAILABLE` |
-| L-11 | `[UNDER_3_MINUTE_VIDEO_URL]` | complete linked story with readable evidence and accurate labels | submitted demonstration | `BLOCKING` |
+| L-06 | Not available as of 2026-08-01 | one deployed-order linkage across Gemini, proposal, payment, fulfillment, and verdict | Circle is central to the full commercial loop | `BLOCKING`; settlement-only proof is available |
+| L-07 | Not available as of 2026-08-01 | policy configured before checkout; uninterrupted autonomous settlement | autonomy within standing policy | `BLOCKING` |
+| L-08 | Not available as of 2026-08-01 | anonymized external relationship, selected publication permissions | customer/quote/transaction publication | `BLOCKING` for customer claims |
+| L-09 | Not available as of 2026-08-01 | UTC window, qualifying transactions, exclusions, refunds, all variable costs, margin | measured revenue/margin | `BLOCKING` for business results |
+| L-10 | [`../../evidence/public/ci-and-security.json`](../../evidence/public/ci-and-security.json) and public [`CI` workflow](https://github.com/tomyimkc/autonomerce/actions/workflows/ci.yml) | tests, secret scan, typecheck, production build, lock checks, and deterministic demo hash | verified release checks | deployed-source receipt is `AVAILABLE`; verify the latest `main` run immediately before submission |
+| L-11 | Not available as of 2026-08-01 | complete linked story with readable evidence and accurate labels | submitted demonstration | `BLOCKING` |
 
 ## Final artifact naming suggestion
 
