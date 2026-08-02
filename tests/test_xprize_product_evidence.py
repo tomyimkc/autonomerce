@@ -163,6 +163,52 @@ def test_archive_verifier_rejects_case_insensitive_duplicate_paths(tmp_path):
         builder.verify_archive(archive_path)
 
 
+def test_archive_verifier_rejects_oversized_member_before_read(
+    tmp_path,
+    monkeypatch,
+):
+    archive_path = tmp_path / "oversized.zip"
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        archive.writestr(
+            builder._zip_info("Product_Evidence/oversized.txt"),
+            b"x" * (builder.MAX_FILE_BYTES + 1),
+        )
+
+    def fail_if_read(*_args, **_kwargs):
+        raise AssertionError("oversized ZIP member was decompressed")
+
+    monkeypatch.setattr(builder.zipfile.ZipFile, "read", fail_if_read)
+    with pytest.raises(
+        builder.ArchiveValidationError,
+        match="file exceeds public archive limit",
+    ):
+        builder.verify_archive(archive_path)
+
+
+def test_archive_verifier_rejects_unsorted_manifest_paths(tmp_path):
+    original = tmp_path / "original.zip"
+    unsorted = tmp_path / "unsorted-manifest.zip"
+    builder.build_archive(output_path=original)
+
+    with (
+        zipfile.ZipFile(original, "r") as source,
+        zipfile.ZipFile(unsorted, "w") as destination,
+    ):
+        for info in source.infolist():
+            data = source.read(info)
+            if info.filename == builder.MANIFEST_PATH:
+                manifest = json.loads(data)
+                manifest["files"].reverse()
+                data = builder._canonical_json_bytes(manifest)
+            destination.writestr(info, data)
+
+    with pytest.raises(
+        builder.ArchiveValidationError,
+        match="manifest files must be sorted",
+    ):
+        builder.verify_archive(unsorted)
+
+
 @pytest.mark.parametrize(
     ("source", "archive", "message"),
     [
@@ -361,6 +407,39 @@ def test_financial_truth_rejects_testnet_revenue_and_inferred_expense_zero():
             builder._canonical_json_bytes(inferred_zero),
             label="financial",
         )
+
+
+def test_financial_truth_rejects_unexpected_nested_properties():
+    financial = _load(FINANCIAL_PATH)
+    cases = [
+        ("eligibilityWindow", lambda value: value["eligibilityWindow"]),
+        ("profitAndLoss", lambda value: value["profitAndLoss"]),
+        ("userCounts", lambda value: value["userCounts"]),
+        (
+            r"excludedTechnicalEvidence\[0\]",
+            lambda value: value["excludedTechnicalEvidence"][0],
+        ),
+        (
+            r"monthlyBreakdown\[0\]",
+            lambda value: value["monthlyBreakdown"][0],
+        ),
+        (
+            r"monthlyBreakdown\[0\]\.testnetEvidence",
+            lambda value: value["monthlyBreakdown"][0]["testnetEvidence"],
+        ),
+    ]
+
+    for label, nested_object in cases:
+        unexpected = deepcopy(financial)
+        nested_object(unexpected)["unreviewedField"] = "value"
+        with pytest.raises(
+            builder.ArchiveValidationError,
+            match=rf"{label}: unexpected properties",
+        ):
+            builder._validate_financial_truth(
+                builder._canonical_json_bytes(unexpected),
+                label="financial",
+            )
 
 
 @pytest.mark.parametrize("invalid_net", [None, {}, "not-money"])
