@@ -174,13 +174,47 @@ def test_archive_verifier_rejects_oversized_member_before_read(
             b"x" * (builder.MAX_FILE_BYTES + 1),
         )
 
-    def fail_if_read(*_args, **_kwargs):
-        raise AssertionError("oversized ZIP member was decompressed")
+    def fail_if_opened(*_args, **_kwargs):
+        raise AssertionError("oversized ZIP member was opened")
 
-    monkeypatch.setattr(builder.zipfile.ZipFile, "read", fail_if_read)
+    monkeypatch.setattr(builder.zipfile.ZipFile, "open", fail_if_opened)
     with pytest.raises(
         builder.ArchiveValidationError,
         match="file exceeds public archive limit",
+    ):
+        builder.verify_archive(archive_path)
+
+
+def test_archive_verifier_bounds_every_decompressed_member(tmp_path, monkeypatch):
+    archive_path = tmp_path / "bounded-read.zip"
+    builder.build_archive(output_path=archive_path)
+    original_read = builder.zipfile.ZipExtFile.read
+    requested_sizes = []
+
+    def record_bounded_read(member, size=-1):
+        requested_sizes.append(size)
+        return original_read(member, size)
+
+    monkeypatch.setattr(builder.zipfile.ZipExtFile, "read", record_bounded_read)
+    builder.verify_archive(archive_path)
+
+    assert requested_sizes
+    assert all(
+        0 < requested_size <= builder.MAX_FILE_BYTES + 1
+        for requested_size in requested_sizes
+    )
+
+
+def test_archive_verifier_rejects_unsupported_compression(tmp_path):
+    archive_path = tmp_path / "stored.zip"
+    info = builder._zip_info("Product_Evidence/stored.txt")
+    info.compress_type = zipfile.ZIP_STORED
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        archive.writestr(info, b"safe but non-deterministic compression\n")
+
+    with pytest.raises(
+        builder.ArchiveValidationError,
+        match="unsupported ZIP compression",
     ):
         builder.verify_archive(archive_path)
 
