@@ -579,6 +579,10 @@ def verify_archive(archive_path: Path) -> dict[str, Any]:
                     raise ArchiveValidationError(
                         f"{info.filename}: encrypted ZIP entries are not allowed"
                     )
+                if info.compress_type != zipfile.ZIP_DEFLATED:
+                    raise ArchiveValidationError(
+                        f"{info.filename}: unsupported ZIP compression"
+                    )
                 mode = info.external_attr >> 16
                 if not stat.S_ISREG(mode):
                     raise ArchiveValidationError(
@@ -588,7 +592,12 @@ def verify_archive(archive_path: Path) -> dict[str, Any]:
                     raise ArchiveValidationError(
                         f"{info.filename}: file exceeds public archive limit"
                     )
-                data = archive.read(info)
+                with archive.open(info, "r") as member:
+                    data = member.read(MAX_FILE_BYTES + 1)
+                if len(data) > MAX_FILE_BYTES:
+                    raise ArchiveValidationError(
+                        f"{info.filename}: file exceeds public archive limit"
+                    )
                 _scan_public_text(data, label=info.filename)
                 payloads[info.filename] = data
     except zipfile.BadZipFile as exc:
