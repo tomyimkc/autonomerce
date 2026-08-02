@@ -430,6 +430,8 @@ deployed Gemini trace and separate Arc testnet trace must remain separate.
 ### `27423` — related-party revenue
 
 - **Exact label:** `Related-Party Revenue. Any revenue earned during the Hackathon period from team members, family, related entities, or pre-existing customer relationships, in USD (even if $0)..`
+- **Source note:** the trailing double period is present in the live Devpost
+  label and is retained here for exact field matching.
 - **Type:** required textarea, USD
 - **Proposed answer:** `$0.00. The founder-owned Arc-testnet transfer is technical test activity and is not recorded as revenue.`
 - **Readiness:** `ready_for_owner_review`
