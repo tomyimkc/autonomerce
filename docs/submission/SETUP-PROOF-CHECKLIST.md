@@ -27,6 +27,19 @@ See [`../../wiki/INDEX.md`](../../wiki/INDEX.md).
 
 ## 1. Devpost
 
+Read-only official Devpost MCP state captured on August 2, 2026:
+
+- project `1368519` / `autonomerce` is published;
+- the project is associated with the `xprize` hackathon;
+- the association reports `submitted_at: null`;
+- the MCP does not expose an XPRIZE submission ID, saved custom answers,
+  uploaded evidence files, or opt-in-prize selections;
+- the live form requires 28 custom answers, a demo video, and a ZIP
+  deliverable; a separate website deliverable is not required;
+- use [`DEVPOST-LIVE-FORM-WORKBOOK.md`](DEVPOST-LIVE-FORM-WORKBOOK.md) for the
+  exact live field IDs, draft values, evidence sources, blockers, and owner-only
+  actions.
+
 Owner-only:
 
 - [ ] legal entrant profile created;
@@ -37,6 +50,22 @@ Owner-only:
 - [ ] main category selected as Entrepreneurship & Job Creation;
 - [ ] final legal attestations reviewed;
 - [ ] final submit performed before the official deadline.
+
+Current blocking draft inputs:
+
+- [ ] owner confirms the project start date entered in field `27415`;
+- [ ] all live-form answers are compared against any values already saved in
+      the Devpost UI;
+- [ ] the under-three-minute public video is uploaded and linked;
+- [ ] the final Product Evidence ZIP is regenerated from the submitted commit
+      and uploaded;
+- [ ] product, Gemini-observability, and Cloud-billing evidence is
+      owner-reviewed and uploaded;
+- [ ] actual May-August expenses are reconciled before any expense answer is
+      treated as final;
+- [ ] the optional Circle fields `28108` through `28111` are reviewed against
+      the final sponsor-eligibility evidence;
+- [ ] final submission and legal confirmation remain owner-performed.
 
 Private proof:
 

@@ -22,8 +22,10 @@ replay. The deployed Gemini order still uses offline payment, and the testnet
 settlement is not an external customer, revenue, accepted delivery, mainnet, or
 production result.
 
-Official criteria were reviewed on 2026-07-31. Recheck immediately before
-recording and again before submission:
+Official rules and sponsor criteria were reviewed on 2026-07-31, and the live
+submission-field requirements were read through the official Devpost MCP on
+2026-08-02. Recheck the rules immediately before recording and again before
+submission:
 
 - `https://xprize.devpost.com/rules`
 - `https://www.geminixprize.com/agentic-payments/`
@@ -342,11 +344,13 @@ These are implementation statements. The final submission revision should link
 
 The approved public evidence does not yet contain:
 
-1. Circle Agent Wallet product/policy proof;
-2. a real, independently verifiable USDC transaction;
-3. footage proving no per-payment approval inside standing policy;
-4. an external customer, paid delivery, customer quote, revenue, repeat
-   purchase, measured variable costs, or margin;
+1. one deployed order linking Gemini, the accepted proposal, Circle settlement,
+   fulfillment, and a delivery verdict;
+2. footage proving the complete product path and no per-payment approval inside
+   the standing policy;
+3. an external customer, paid accepted delivery, customer quote, revenue,
+   repeat purchase, or measured margin;
+4. a complete May-August expense reconciliation and actual P&L;
 5. an external security audit or broad production-scale proof.
 
 See [`KNOWN-LIMITATIONS.md`](KNOWN-LIMITATIONS.md). These are blocking evidence
@@ -391,19 +395,23 @@ to validated delivery to measured cost.
 
 ## What is next
 
-1. deploy the reviewed revision and record build identity;
-2. run a Gemini-backed productization/proposal decision used by the recorded
-   order;
-3. connect an owner-policy-bound Circle Agent Wallet;
-4. retain the completed testnet proof, then consider a tightly capped mainnet
-   proof only with fresh owner approval;
-5. onboard external design partners and one arms-length buyer;
-6. publish consented, redacted order/transaction/delivery evidence;
-7. measure all variable costs and generate the public revenue snapshot;
+1. preserve the deployed Gemini productization and Arc-testnet receipts while
+   building one coherent order trace, or state clearly that the linkage remains
+   missing;
+2. capture owner-reviewed Cloud billing and Gemini observability evidence;
+3. onboard external design partners and one arms-length buyer;
+4. consider a tightly capped mainnet proof only with fresh owner approval and
+   a qualifying external order;
+5. publish consented, redacted order, transaction, delivery, and customer
+   evidence;
+6. reconcile all eligible expenses, measure variable costs, and regenerate the
+   revenue and P&L evidence;
+7. regenerate the final Product Evidence ZIP from the submitted commit;
 8. record the final sub-three-minute video;
 9. run final tests, secret scan, claim lint, schema validation, and logged-out
    link checks;
-10. remove every unreplaced placeholder and unsupported claim.
+10. remove every unreplaced placeholder and unsupported claim before the owner
+    performs final submission.
 
 ## Built with
 

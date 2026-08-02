@@ -1,6 +1,6 @@
 # Autonomerce submission and evidence lane
 
-`snapshot: 2026-07-31` · `candidateOnly: true` · `canClaimAGI: false`
+`snapshot: 2026-08-02` · `candidateOnly: true` · `canClaimAGI: false`
 
 This directory prepares the Build with Gemini and Circle Agentic Economy
 submission without converting fixtures, testnet activity, founder activity, or
@@ -13,14 +13,15 @@ plans into business evidence.
 3. [`../../Product_Evidence/README.md`](../../Product_Evidence/README.md)
 4. [`DEVPOST-DRAFT.md`](DEVPOST-DRAFT.md)
 5. [`DEVPOST-FINAL-CANDIDATE.md`](DEVPOST-FINAL-CANDIDATE.md)
-6. [`VIDEO-STORYBOARD.md`](VIDEO-STORYBOARD.md)
-7. [`DEMO-RUNBOOK.md`](DEMO-RUNBOOK.md)
-8. [`SETUP-PROOF-CHECKLIST.md`](SETUP-PROOF-CHECKLIST.md)
-9. [`METRICS-DEFINITIONS.md`](METRICS-DEFINITIONS.md)
-10. [`JUDGE-CHECKLIST.md`](JUDGE-CHECKLIST.md)
-11. [`KNOWN-LIMITATIONS.md`](KNOWN-LIMITATIONS.md)
-12. [`CUSTOMER-INTERVIEW-TEMPLATE.md`](CUSTOMER-INTERVIEW-TEMPLATE.md)
-13. [`CUSTOMER-CONSENT-TEMPLATE.md`](CUSTOMER-CONSENT-TEMPLATE.md)
+6. [`DEVPOST-LIVE-FORM-WORKBOOK.md`](DEVPOST-LIVE-FORM-WORKBOOK.md)
+7. [`VIDEO-STORYBOARD.md`](VIDEO-STORYBOARD.md)
+8. [`DEMO-RUNBOOK.md`](DEMO-RUNBOOK.md)
+9. [`SETUP-PROOF-CHECKLIST.md`](SETUP-PROOF-CHECKLIST.md)
+10. [`METRICS-DEFINITIONS.md`](METRICS-DEFINITIONS.md)
+11. [`JUDGE-CHECKLIST.md`](JUDGE-CHECKLIST.md)
+12. [`KNOWN-LIMITATIONS.md`](KNOWN-LIMITATIONS.md)
+13. [`CUSTOMER-INTERVIEW-TEMPLATE.md`](CUSTOMER-INTERVIEW-TEMPLATE.md)
+14. [`CUSTOMER-CONSENT-TEMPLATE.md`](CUSTOMER-CONSENT-TEMPLATE.md)
 
 Machine-readable public evidence templates are under
 [`../../evidence/templates/`](../../evidence/templates/).
@@ -31,6 +32,13 @@ The deterministic contest archive is sourced from
 placeholders rather than fabricated captures, and its financial summary keeps
 actual expenses and net profit/loss unknown while the expense ledger is
 incomplete.
+
+The live-form workbook is based on a read-only official Devpost MCP snapshot
+captured on August 2, 2026. That snapshot exposes the current question IDs and
+deliverable requirements, but not saved custom answers or uploaded files.
+Treat every proposed value in the workbook as an owner-review draft. The MCP
+does not provide a safe partial-answer save operation, and the owner must retain
+control of legal attestations and final submission.
 
 ## Evidence-state vocabulary
 
