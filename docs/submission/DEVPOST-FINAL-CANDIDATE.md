@@ -113,7 +113,7 @@ state, independent receipt verification, reconciliation, fulfillment
 validation, redaction, threat modeling, public-evidence schemas, and a
 credential-free deterministic demo.
 
-The public CI workflow passes 371 Python tests and 47 web tests, reproduces the
+The public CI workflow passes 460 Python tests and 47 web tests, reproduces the
 offline demo byte-for-byte, scans the public tree for likely secrets, typechecks
 the web application, and builds the production bundle. Recheck the latest
 `main` run immediately before submission. CI verifies the tested source;
