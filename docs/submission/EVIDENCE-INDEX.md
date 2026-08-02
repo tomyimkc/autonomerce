@@ -1,6 +1,6 @@
 # Autonomerce / OfferRail — evidence index
 
-`draft snapshot: 2026-08-01` · `candidateOnly: true` · `canClaimAGI: false`
+`draft snapshot: 2026-08-02` · `candidateOnly: true` · `canClaimAGI: false`
 
 This index maps each judge-facing statement to the narrowest public artifact
 that can support it. A file path proves that implementation or a reproducible
@@ -15,6 +15,7 @@ passed, that an external service was used, or that a business result occurred.
 | Gemini | deployed Vertex AI productization call recorded on the private Cloud Run API | “One deployed `gemini-2.5-flash` call productized the synthetic source-verification seller; payment remained offline.” |
 | Circle | one bounded Circle Agent Wallet Arc testnet transfer independently verified; deployed Gemini order still uses offline payment | “0.10 USDC Arc testnet integration and idempotent replay verified; not revenue or a deployed end-to-end order.” |
 | Web/API | public Cloud Run LIVE BFF connected to a private IAM-protected API | “Public application is deployed; funds movement is disabled.” |
+| Devpost | project is published and associated with `xprize`; official MCP reports `submitted_at: null` and does not expose saved answers/uploads | “Public project page exists; final XPRIZE submission is not confirmed.” |
 | Customers and revenue | no approved public evidence | “Not yet evidenced.” |
 | Product Evidence package | deterministic allowlist, manifest hashes, provider index, financial zero/unknown boundaries, and screenshot placeholders | “The package is reproducible; it does not establish a positive business result or replace owner-supplied screenshots.” |
 | Circle prize eligibility | wallet and transaction proof available; testnet sufficiency is not assumed; final video and deployed order linkage incomplete | “Targeting the prize with testnet evidence; final eligibility proof is still pending.” |
@@ -45,6 +46,7 @@ Evidence classifications remain separate:
 | J-01 | 30-second product and evidence orientation | [`JUDGE-QUICKSTART.md`](JUDGE-QUICKSTART.md) | `AVAILABLE` |
 | J-02 | Full submission source library and replacement rules | [`DEVPOST-DRAFT.md`](DEVPOST-DRAFT.md) | `AVAILABLE` |
 | J-02A | Paste-ready 500–1000 word narrative candidate | [`DEVPOST-FINAL-CANDIDATE.md`](DEVPOST-FINAL-CANDIDATE.md) | `AVAILABLE`; owner review required |
+| J-02B | Live Devpost field IDs, draft values, evidence, blockers, and owner-only actions | [`DEVPOST-LIVE-FORM-WORKBOOK.md`](DEVPOST-LIVE-FORM-WORKBOOK.md) | `AVAILABLE` after owner review; saved UI answers/uploads are not MCP-readable |
 | J-03 | Final live/offline operating sequence | [`DEMO-RUNBOOK.md`](DEMO-RUNBOOK.md) | `AVAILABLE` |
 | J-04 | Detailed three-minute shot plan | [`VIDEO-STORYBOARD.md`](VIDEO-STORYBOARD.md) | `AVAILABLE` |
 | J-05 | Current gaps and non-goals | [`KNOWN-LIMITATIONS.md`](KNOWN-LIMITATIONS.md) | `AVAILABLE` |

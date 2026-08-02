@@ -15,6 +15,14 @@ retrieved on `2026-08-01T00:00:00Z`, revision
 They are preserved as `owner_verified_draft_values_not_official_public_ids`.
 The payload sets `fieldIdsOfficialPublicVerified: false`.
 
+A complete official MCP requirements snapshot generated at
+`2026-07-31T23:31:12Z` returned fields `27463` and `27464` as optional. The
+August 2 readback summarized the 28 required fields and did not re-enumerate
+ordinary optional fields such as `27426`, `27463`, `27464`, or `27470`.
+Therefore `27463` and `27464` are **unverified-current, not confirmed legacy**.
+Do not include either field in a Devpost submission payload without a fresh
+complete requirements read and owner comparison with the live UI.
+
 | Field ID | Owner-verified label |
 |---:|---|
 | `27418` | `Total Revenue` |
