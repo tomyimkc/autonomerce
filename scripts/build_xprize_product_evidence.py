@@ -108,6 +108,19 @@ def _json_object(data: bytes, *, label: str) -> dict[str, Any]:
     return value
 
 
+def _exact_object(
+    value: Any,
+    *,
+    keys: set[str],
+    label: str,
+) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise ArchiveValidationError(f"{label}: expected an object")
+    if set(value) != keys:
+        raise ArchiveValidationError(f"{label}: unexpected properties")
+    return value
+
+
 def _relative_posix(value: Any, *, label: str) -> PurePosixPath:
     if not isinstance(value, str) or not value:
         raise ArchiveValidationError(f"{label}: path must be a non-empty string")
@@ -279,9 +292,53 @@ def _validate_financial_truth(data: bytes, *, label: str) -> None:
     if value["currency"] != "USD":
         raise ArchiveValidationError(f"{label}: currency must be USD")
 
-    profit_and_loss = value["profitAndLoss"]
-    if not isinstance(profit_and_loss, dict):
-        raise ArchiveValidationError(f"{label}: profitAndLoss must be an object")
+    _exact_object(
+        value["eligibilityWindow"],
+        keys={"start", "end"},
+        label=f"{label}.eligibilityWindow",
+    )
+    profit_and_loss = _exact_object(
+        value["profitAndLoss"],
+        keys={
+            "actualNetProfitLossUsd",
+            "actualTotalExpensesUsd",
+            "expenseCompleteness",
+            "grossRecognizedRevenueUsd",
+            "verifiedExpenseRecordsUsd",
+        },
+        label=f"{label}.profitAndLoss",
+    )
+    _exact_object(
+        value["userCounts"],
+        keys={
+            "verifiedExternalCustomers",
+            "verifiedExternalDesignPartners",
+            "verifiedExternalUsers",
+            "verifiedPayingCustomers",
+            "verifiedPayingUsers",
+        },
+        label=f"{label}.userCounts",
+    )
+    excluded_technical = value["excludedTechnicalEvidence"]
+    if not isinstance(excluded_technical, list):
+        raise ArchiveValidationError(
+            f"{label}.excludedTechnicalEvidence: expected a list"
+        )
+    for index, item in enumerate(excluded_technical):
+        _exact_object(
+            item,
+            keys={
+                "amountUsdc",
+                "classification",
+                "countedAsRevenue",
+                "customerRelationship",
+                "externalCustomer",
+                "network",
+                "occurredAt",
+                "source",
+            },
+            label=f"{label}.excludedTechnicalEvidence[{index}]",
+        )
     gross_revenue = _money(
         profit_and_loss.get("grossRecognizedRevenueUsd"),
         label=f"{label}.profitAndLoss.grossRecognizedRevenueUsd",
@@ -326,6 +383,21 @@ def _validate_financial_truth(data: bytes, *, label: str) -> None:
     monthly_verified_expenses = Decimal("0")
     for index, month in enumerate(months):
         month_label = f"{label}.monthlyBreakdown[{index}]"
+        month = _exact_object(
+            month,
+            keys={
+                "actualTotalExpensesUsd",
+                "expenseCompleteness",
+                "month",
+                "periodStatus",
+                "qualifyingRecognizedRevenueUsd",
+                "testnetEvidence",
+                "verifiedExpenseRecordsUsd",
+                "verifiedExternalUsers",
+                "verifiedPayingUsers",
+            },
+            label=month_label,
+        )
         monthly_revenue += _money(
             month.get("qualifyingRecognizedRevenueUsd"),
             label=f"{month_label}.qualifyingRecognizedRevenueUsd",
@@ -339,9 +411,15 @@ def _validate_financial_truth(data: bytes, *, label: str) -> None:
                 raise ArchiveValidationError(
                     f"{month_label}: unknown expenses cannot be rendered as actual zero"
                 )
-        testnet = month.get("testnetEvidence")
-        if not isinstance(testnet, dict):
-            raise ArchiveValidationError(f"{month_label}: missing testnetEvidence")
+        testnet = _exact_object(
+            month.get("testnetEvidence"),
+            keys={
+                "countedAsRevenue",
+                "transferCount",
+                "transferVolumeUsdc",
+            },
+            label=f"{month_label}.testnetEvidence",
+        )
         count = testnet.get("transferCount")
         if not isinstance(count, int) or isinstance(count, bool) or count < 0:
             raise ArchiveValidationError(
@@ -506,6 +584,10 @@ def verify_archive(archive_path: Path) -> dict[str, Any]:
                     raise ArchiveValidationError(
                         f"{info.filename}: non-regular ZIP member"
                     )
+                if info.file_size > MAX_FILE_BYTES:
+                    raise ArchiveValidationError(
+                        f"{info.filename}: file exceeds public archive limit"
+                    )
                 data = archive.read(info)
                 _scan_public_text(data, label=info.filename)
                 payloads[info.filename] = data
@@ -536,6 +618,7 @@ def verify_archive(archive_path: Path) -> dict[str, Any]:
         raise ArchiveValidationError("archive manifest files must be a list")
 
     expected_paths: set[str] = set()
+    manifest_paths: list[str] = []
     for index, item in enumerate(manifest["files"]):
         label = f"archive manifest files[{index}]"
         if not isinstance(item, dict) or set(item) != {
@@ -548,11 +631,14 @@ def verify_archive(archive_path: Path) -> dict[str, Any]:
         if not isinstance(path, str) or path in expected_paths:
             raise ArchiveValidationError(f"{label}: duplicate or invalid path")
         expected_paths.add(path)
+        manifest_paths.append(path)
         if path not in payloads:
             raise ArchiveValidationError(f"{label}: payload is missing")
         data = payloads[path]
         if item["sha256"] != _sha256(data) or item["sizeBytes"] != len(data):
             raise ArchiveValidationError(f"{path}: manifest hash/size mismatch")
+    if manifest_paths != sorted(manifest_paths):
+        raise ArchiveValidationError("archive manifest files must be sorted")
     if expected_paths != set(payloads):
         raise ArchiveValidationError("archive contains unmanifested payloads")
 
